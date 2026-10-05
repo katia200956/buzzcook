@@ -3,6 +3,7 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { View } from 'react-native';
+import { Paywall } from '../components/Premium';
 import { StoreProvider } from '../components/store';
 import { useTheme } from '../theme';
 
@@ -28,7 +29,9 @@ function Root() {
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: t.bg[1] } }}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="cook/[id]" options={{ presentation: 'fullScreenModal', animation: 'slide_from_bottom' }} />
+        <Stack.Screen name="login" options={{ animation: 'fade', gestureEnabled: false }} />
       </Stack>
+      <Paywall />
     </>
   );
 }

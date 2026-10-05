@@ -16,7 +16,7 @@ export function Menu({ open, onClose }: { open: boolean; onClose: () => void }) 
   const k = useScale();
   const t = useTheme();
   const { themeMode, setThemeMode } = useStore();
-  const go = (href: '/' | '/process' | '/cart' | '/profile') => {
+  const go = (href: '/' | '/plan' | '/process' | '/cart' | '/profile') => {
     onClose();
     router.navigate(href);
   };
@@ -24,8 +24,9 @@ export function Menu({ open, onClose }: { open: boolean; onClose: () => void }) 
   const row = { paddingHorizontal: 16 * k, paddingVertical: 12 * k, flexDirection: 'row' as const, justifyContent: 'space-between' as const };
   const txt = { fontFamily: font, fontSize: 22 * k, color: t.text };
   const sep = { height: StyleSheet.hairlineWidth, backgroundColor: t.textSoft, marginLeft: 16 * k, opacity: 0.5 };
-  const items: [string, '/' | '/process' | '/cart' | '/profile'][] = [
+  const items: [string, '/' | '/plan' | '/process' | '/cart' | '/profile'][] = [
     ['стрічка страв', '/'],
+    ['план тижня', '/plan'],
     ['етапи готовки', '/process'],
     ['список покупок', '/cart'],
     ['профіль', '/profile'],

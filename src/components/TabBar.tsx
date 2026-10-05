@@ -10,12 +10,13 @@ import { useScale } from './scale';
 
 const icons: Record<string, number> = {
   index: require('../../assets/figma/home.svg'),
+  plan: require('../../assets/icons/table.svg'),
   process: require('../../assets/figma/clipboard.svg'),
   cart: require('../../assets/figma/cart.svg'),
   profile: require('../../assets/figma/user.svg'),
 };
-const labels: Record<string, string> = { index: 'стрічка', process: 'етапи', cart: 'покупки', profile: 'профіль' };
-const MAIN = ['index', 'process', 'cart'];
+const labels: Record<string, string> = { index: 'стрічка', plan: 'план', process: 'етапи', cart: 'покупки', profile: 'профіль' };
+const MAIN = ['index', 'plan', 'process', 'cart'];
 
 type TabBarProps = Parameters<NonNullable<ComponentProps<typeof Tabs>['tabBar']>>[0];
 
@@ -29,7 +30,7 @@ export function TabBar({ state, navigation }: TabBarProps) {
   const active = icons[focused] ? focused : 'index';
   const routeOf = (name: string) => state.routes.find((r) => r.name === name)!;
 
-  const barW = 266 * k;
+  const barW = 296 * k;
   const slot = (barW - 12 * k) / MAIN.length;
   const idx = Math.max(0, MAIN.indexOf(active));
   const [pill] = useState(() => new Animated.Value(idx));

@@ -2,16 +2,16 @@ import { Pressable, Text, View } from 'react-native';
 import { Page } from '../../components/Page';
 import { useScale } from '../../components/scale';
 import { useStore } from '../../components/store';
-import { byId, plan } from '../../data';
+import { byId, sortPlan } from '../../data';
 import { font, fontMedium, useTheme } from '../../theme';
 
 // Shopping list for the week's plan; ticks are remembered per dish.
 export default function Cart() {
   const k = useScale();
   const t = useTheme();
-  const { checked, toggleChecked } = useStore();
+  const { checked, toggleChecked, plan } = useStore();
   const txt = { fontFamily: font, fontSize: 20 * k, lineHeight: 26 * k, color: t.text };
-  const ids = Array.from(new Set(plan.map((p) => p.recipe)));
+  const ids = Array.from(new Set(sortPlan(plan).map((p) => p.recipe)));
 
   return (
     <Page>

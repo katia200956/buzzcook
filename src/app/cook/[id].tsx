@@ -1,19 +1,24 @@
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useRef, useState } from 'react';
+import * as Speech from 'expo-speech';
+import { useEffect, useRef, useState } from 'react';
 import { Animated, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Glass } from '../../components/Glass';
 import { Plate } from '../../components/Plate';
+import { Lock } from '../../components/Premium';
 import { Screen } from '../../components/Screen';
 import { useScale } from '../../components/scale';
 import { useStore } from '../../components/store';
+import { StageScene } from '../../components/StageScene';
 import { StepVideo } from '../../components/StepVideo';
 import { byId, img, nextInPlan, stepClip, stepCutout } from '../../data';
+import { stepScene } from '../../data/scenes';
 import { font, fontMedium, ForceDark, useTheme } from '../../theme';
 
 // Step-by-step cooking. Steps page vertically (swipe up for the next one); each step shows
-// a background-free cutout on the left and its text on the right. "готово" records the step
+// an animated scene of background-free cutouts on the left (or a single cutout when the
+// recipe has no scenes) and its text on the right. "готово" records the step
 // for the "етапи готовки" tab.
 // Cooking always runs on the black stage, whatever the app theme is.
 export default function CookScreen() {
@@ -30,7 +35,7 @@ function Cook() {
   const insets = useSafeAreaInsets();
   const k = useScale();
   const t = useTheme();
-  const { done, setDone } = useStore();
+  const { done, setDone, plan, premium, showPaywall } = useStore();
   const [y] = useState(() => new Animated.Value(0));
   const [pageH, setPageH] = useState(0);
   const pager = useRef<ScrollView>(null);
@@ -38,10 +43,18 @@ function Cook() {
   const startAt = Math.min(done[id] ?? 0, steps.length);
   const [page, setPage] = useState(startAt);
   const opened = useRef(false);
+  // Premium audio: reads the open step aloud, and the next one as you move on.
+  const [audio, setAudio] = useState(false);
+  const step = steps[page];
+  useEffect(() => {
+    Speech.stop();
+    if (audio && premium && step) Speech.speak(`${step.title}. ${step.txt.replace(/\*\*/g, '')}`, { language: 'uk-UA' });
+  }, [audio, premium, step]);
+  useEffect(() => () => void Speech.stop(), []);
 
   if (!r || !steps.length) return null;
   const txt = { fontFamily: font, fontSize: 20 * k, lineHeight: 24 * k, color: t.text };
-  const next = nextInPlan(r.id);
+  const next = nextInPlan(plan, r.id);
   const nextRecipe = next && byId(next.recipe);
 
   const go = (i: number) => {
@@ -66,7 +79,21 @@ function Cook() {
           <Text style={[txt, { fontSize: 22 * k, opacity: 0.7 }]}>
             {page < steps.length ? `крок ${page + 1} з ${steps.length}` : 'готово'}
           </Text>
-          <View style={{ width: 44 * k }} />
+          <Pressable
+            onPress={() => (premium ? setAudio((a) => !a) : showPaywall(true))}
+            accessibilityRole="switch"
+            accessibilityState={{ checked: audio }}
+            accessibilityLabel={premium ? 'Озвучувати кроки' : 'Озвучування кроків: доступно в premium'}
+          >
+            <Glass radius={100} strong={audio} style={{ width: 44 * k, height: 44 * k, alignItems: 'center', justifyContent: 'center' }}>
+              <Image source={require('../../../assets/icons/speaker.svg')} style={{ width: 22 * k, height: 22 * k, opacity: premium ? (audio ? 1 : 0.6) : 0.35 }} />
+              {!premium && (
+                <View pointerEvents="none" style={{ position: 'absolute', right: -2 * k, bottom: -2 * k, width: 20 * k, height: 20 * k, borderRadius: 10 * k, backgroundColor: '#18181B', alignItems: 'center', justifyContent: 'center' }}>
+                  <Lock size={11} color="#FFFFFF" />
+                </View>
+              )}
+            </Glass>
+          </Pressable>
         </View>
         <View style={[s.progress, { gap: 6 * k, paddingHorizontal: 18 * k }]}>
           {steps.map((_, i) => (
@@ -128,10 +155,16 @@ function Cook() {
               };
               const cut = stepCutout(r.id, i);
               const clip = stepClip(r.id, i);
+              const scene = stepScene(r.id, i);
               return (
                 <View key={i} style={{ height: pageH, flexDirection: 'row', alignItems: 'center', paddingBottom: 90 * k }}>
                   <Animated.View style={[{ width: 240 * k, height: 300 * k, marginLeft: -34 * k }, art]}>
-                    {clip ? (
+                    {scene ? (
+                      // The column hangs 34pt off the left edge; keep the whole scene on screen.
+                      <View style={{ position: 'absolute', left: 34 * k, top: 47 * k }}>
+                        <StageScene layers={scene} size={206 * k} active={page === i} />
+                      </View>
+                    ) : clip ? (
                       <StepVideo source={clip} active={page === i} style={{ position: 'absolute', left: 0, top: 30 * k, width: 240 * k, height: 240 * k }} />
                     ) : (
                       <Image

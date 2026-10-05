@@ -3,8 +3,10 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Recipe } from '../data';
 import { font, fontMedium } from '../theme';
 import { Plaque } from './Plaque';
+import { Lock } from './Premium';
 import { Plate } from './Plate';
 import { useScale } from './scale';
+import { useStore } from './store';
 
 export const ROW_H = 212;
 
@@ -16,6 +18,7 @@ const LEVELS: Record<string, number> = { легко: 1, середньо: 2, с�
 export function DishRow({ recipe }: { recipe: Recipe }) {
   const k = useScale();
   const level = LEVELS[recipe.diff.toLowerCase()] ?? 1;
+  const { premium } = useStore();
 
   return (
     <Pressable
@@ -52,7 +55,10 @@ export function DishRow({ recipe }: { recipe: Recipe }) {
               <Text style={[s.metaT, { fontSize: 17 * k }]}>{recipe.diff.toLowerCase()}</Text>
             </View>
           </View>
-          <Text style={[s.kcal, { fontSize: 16 * k, marginTop: 4 * k }]}>{recipe.kcal} ккал</Text>
+          {/* Calories are premium: a plain lock stands in for the number. */}
+          <View style={{ marginTop: 4 * k }}>
+            {premium ? <Text style={[s.kcal, { fontSize: 16 * k }]}>{recipe.kcal} ккал</Text> : <Lock label="ккал" size={13} color="rgba(255,255,255,0.6)" />}
+          </View>
         </View>
       </Plaque>
     </Pressable>

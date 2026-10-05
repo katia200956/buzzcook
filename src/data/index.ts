@@ -98,19 +98,21 @@ const tools: Record<string, string[]> = {
 };
 
 export const recipes = (raw.recipes as unknown as Recipe[]).map((r) => ({ ...r, tools: tools[r.id] ?? [] }));
-export const plan = raw.plan as PlanItem[];
+
+// The week grid: rows are days, columns are meals. A day may skip a meal, which leaves its cell empty.
+export const DAYS = ['Понеділок', 'Вівторок', 'Середа', 'Четвер', "П'ятниця", 'Субота', 'Неділя'];
+export const MEALS = ['Сніданок', 'Обід', 'Вечеря'];
+export const defaultPlan = raw.plan as PlanItem[];
 export const byId = (id: string) => recipes.find((r) => r.id === id);
 
-export const planSummary = () => {
-  const rs = plan.map((p) => byId(p.recipe)!).filter(Boolean);
-  const kcal = Math.round(rs.reduce((s, r) => s + r.kcal, 0) / rs.length);
-  const mins = rs.map((r) => r.total);
-  return { count: rs.length, kcal, min: Math.min(...mins), max: Math.max(...mins) };
-};
+// Plan entries in day order, then meal order.
+export const sortPlan = (plan: PlanItem[]) =>
+  [...plan].sort((a, b) => DAYS.indexOf(a.day) - DAYS.indexOf(b.day) || MEALS.indexOf(a.meal) - MEALS.indexOf(b.meal));
 
 // Next meal in the plan after the given recipe, used on the "Смачного" screen.
-export const nextInPlan = (id: string) => {
-  const i = plan.findIndex((p) => p.recipe === id);
+export const nextInPlan = (plan: PlanItem[], id: string) => {
+  const list = sortPlan(plan);
+  const i = list.findIndex((p) => p.recipe === id);
   if (i < 0) return undefined;
-  return plan[(i + 1) % plan.length];
+  return list[(i + 1) % list.length];
 };

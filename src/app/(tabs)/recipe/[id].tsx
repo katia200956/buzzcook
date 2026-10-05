@@ -6,6 +6,7 @@ import { Header } from '../../../components/Header';
 import { Menu } from '../../../components/Menu';
 import { Plaque } from '../../../components/Plaque';
 import { Plate } from '../../../components/Plate';
+import { Lock } from '../../../components/Premium';
 import { Screen } from '../../../components/Screen';
 import { useScale } from '../../../components/scale';
 import { useStore } from '../../../components/store';
@@ -19,7 +20,7 @@ export default function RecipeScreen() {
   const r = byId(id);
   const k = useScale();
   const [menu, setMenu] = useState(false);
-  const { saved, toggleSaved, done } = useStore();
+  const { saved, toggleSaved, done, premium } = useStore();
 
   if (!r) return null;
   const txt = { fontFamily: font, fontSize: 19 * k, lineHeight: 23 * k, color: '#FFFFFF' };
@@ -47,23 +48,32 @@ export default function RecipeScreen() {
 
         <Plaque radius={18 * k} style={{ marginTop: 10 * k, flex: 1 }}>
           <ScrollView contentContainerStyle={{ paddingHorizontal: 14 * k, paddingTop: 12 * k, paddingBottom: 18 * k }} showsVerticalScrollIndicator={false}>
-            {/* Calories and macros as small tiles, so the numbers read at a glance. */}
-            <Text style={[txt, { fontFamily: fontMedium, fontSize: 30 * k, lineHeight: 32 * k }]}>
-              {r.kcal}
-              <Text style={{ fontFamily: font, fontSize: 17 * k, color: 'rgba(255,255,255,0.65)' }}> ккал</Text>
-            </Text>
-            <View style={{ flexDirection: 'row', gap: 5 * k, marginTop: 8 * k }}>
-              {[
-                ['білки', r.p],
-                ['вуглев.', r.c],
-                ['жири', r.f],
-              ].map(([label, g]) => (
-                <View key={label} style={{ flex: 1, borderRadius: 10 * k, paddingVertical: 5 * k, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.1)' }}>
-                  <Text style={[txt, { fontFamily: fontMedium, fontSize: 18 * k, lineHeight: 20 * k }]}>{g}</Text>
-                  <Text style={{ fontFamily: font, fontSize: 13 * k, color: 'rgba(255,255,255,0.6)' }}>{label}</Text>
+            {/* Calories and macros as small tiles, so the numbers read at a glance. Premium only. */}
+            {premium ? (
+              <>
+                <Text style={[txt, { fontFamily: fontMedium, fontSize: 30 * k, lineHeight: 32 * k }]}>
+                  {r.kcal}
+                  <Text style={{ fontFamily: font, fontSize: 17 * k, color: 'rgba(255,255,255,0.65)' }}> ккал</Text>
+                </Text>
+                <View style={{ flexDirection: 'row', gap: 5 * k, marginTop: 8 * k }}>
+                  {[
+                    ['білки', r.p],
+                    ['вуглев.', r.c],
+                    ['жири', r.f],
+                  ].map(([label, g]) => (
+                    <View key={label} style={{ flex: 1, borderRadius: 10 * k, paddingVertical: 5 * k, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.1)' }}>
+                      <Text style={[txt, { fontFamily: fontMedium, fontSize: 18 * k, lineHeight: 20 * k }]}>{g}</Text>
+                      <Text style={{ fontFamily: font, fontSize: 13 * k, color: 'rgba(255,255,255,0.6)' }}>{label}</Text>
+                    </View>
+                  ))}
                 </View>
-              ))}
-            </View>
+              </>
+            ) : (
+              <View style={{ borderRadius: 12 * k, padding: 10 * k, backgroundColor: 'rgba(255,255,255,0.08)', gap: 4 * k }}>
+                <Lock label="калорії і бжу" size={15} color="#FFFFFF" />
+                <Text style={{ fontFamily: font, fontSize: 14 * k, lineHeight: 16 * k, color: 'rgba(255,255,255,0.6)' }}>доступно в premium</Text>
+              </View>
+            )}
 
             <Text style={head}>ІНГРЕДІЄНТИ</Text>
             {r.ing.map(([qty, name], i) => (

@@ -749,14 +749,24 @@
       "recipe": "salat"
     },
     {
-      "day": "Вівторок",
+      "day": "Понеділок",
       "meal": "Вечеря",
       "recipe": "teriyaki"
     },
     {
-      "day": "Середа",
+      "day": "Вівторок",
       "meal": "Сніданок",
       "recipe": "yogurt"
+    },
+    {
+      "day": "Вівторок",
+      "meal": "Вечеря",
+      "recipe": "bowl"
+    },
+    {
+      "day": "Середа",
+      "meal": "Сніданок",
+      "recipe": "omlet"
     },
     {
       "day": "Середа",
@@ -764,9 +774,19 @@
       "recipe": "soup"
     },
     {
-      "day": "Четвер",
+      "day": "Середа",
       "meal": "Вечеря",
-      "recipe": "bowl"
+      "recipe": "pasta"
+    },
+    {
+      "day": "Четвер",
+      "meal": "Сніданок",
+      "recipe": "tost"
+    },
+    {
+      "day": "Четвер",
+      "meal": "Обід",
+      "recipe": "nut"
     },
     {
       "day": "П'ятниця",
@@ -774,7 +794,32 @@
       "recipe": "omlet"
     },
     {
+      "day": "П'ятниця",
+      "meal": "Обід",
+      "recipe": "salat"
+    },
+    {
+      "day": "П'ятниця",
+      "meal": "Вечеря",
+      "recipe": "bowl"
+    },
+    {
       "day": "Субота",
+      "meal": "Обід",
+      "recipe": "soup"
+    },
+    {
+      "day": "Субота",
+      "meal": "Вечеря",
+      "recipe": "teriyaki"
+    },
+    {
+      "day": "Неділя",
+      "meal": "Сніданок",
+      "recipe": "yogurt"
+    },
+    {
+      "day": "Неділя",
       "meal": "Обід",
       "recipe": "nut"
     },

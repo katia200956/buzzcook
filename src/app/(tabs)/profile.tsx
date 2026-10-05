@@ -3,10 +3,11 @@ import { Pressable, Text, View } from 'react-native';
 import { Glass } from '../../components/Glass';
 import { Page } from '../../components/Page';
 import { Plate } from '../../components/Plate';
+import { Lock } from '../../components/Premium';
 import { useScale } from '../../components/scale';
 import { ThemeMode, useStore } from '../../components/store';
 import { byId } from '../../data';
-import { font, fontMedium, useTheme } from '../../theme';
+import { font, fontMedium, sage, useTheme } from '../../theme';
 
 const themes: [ThemeMode, string][] = [
   ['system', 'авто'],
@@ -17,13 +18,40 @@ const themes: [ThemeMode, string][] = [
 export default function Profile() {
   const k = useScale();
   const t = useTheme();
-  const { saved, themeMode, setThemeMode } = useStore();
+  const { saved, themeMode, setThemeMode, user, signOut, premium, showPaywall } = useStore();
   const txt = { fontFamily: font, fontSize: 20 * k, lineHeight: 24 * k, color: t.text };
   const list = saved.map(byId).filter((r) => !!r);
 
   return (
     <Page>
       <Text style={[txt, { fontFamily: fontMedium, fontSize: 28 * k, lineHeight: 32 * k }]}>профіль</Text>
+
+      <Text style={[txt, { opacity: 0.6, marginTop: 20 * k, marginBottom: 8 * k }]}>акаунт</Text>
+      <Text style={txt}>{user ? `увійшла через ${user.name}` : 'ти ще не увійшла'}</Text>
+      <Pressable
+        onPress={() => {
+          signOut();
+          router.replace('/login');
+        }}
+        accessibilityRole="button"
+        style={{ alignSelf: 'flex-start', marginTop: 8 * k }}
+      >
+        <Glass radius={100} style={{ paddingHorizontal: 16 * k, height: 34 * k, justifyContent: 'center' }}>
+          <Text style={txt}>{user ? 'вийти' : 'увійти'}</Text>
+        </Glass>
+      </Pressable>
+
+      <Text style={[txt, { opacity: 0.6, marginTop: 20 * k, marginBottom: 8 * k }]}>premium</Text>
+      <Pressable onPress={() => showPaywall(true)} accessibilityRole="button" style={{ flexDirection: 'row', alignItems: 'center', gap: 10 * k }}>
+        {premium ? (
+          <View style={{ backgroundColor: sage, borderRadius: 100, paddingHorizontal: 12 * k, height: 30 * k, justifyContent: 'center' }}>
+            <Text style={[txt, { color: '#FFFFFF' }]}>увімкнено</Text>
+          </View>
+        ) : (
+          <Lock size={16} color={t.text} />
+        )}
+        <Text style={[txt, { flex: 1 }]}>калорії та аудіо кроків</Text>
+      </Pressable>
 
       <Text style={[txt, { opacity: 0.6, marginTop: 20 * k, marginBottom: 8 * k }]}>тема</Text>
       <View style={{ flexDirection: 'row', gap: 8 * k }}>

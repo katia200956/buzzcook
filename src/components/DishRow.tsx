@@ -1,7 +1,8 @@
 import { router } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Recipe } from '../data';
-import { font, fontMedium } from '../theme';
+import { font, fontMedium, sage } from '../theme';
 import { Plaque } from './Plaque';
 import { Lock } from './Premium';
 import { Plate } from './Plate';
@@ -14,11 +15,17 @@ const LEVELS: Record<string, number> = { легко: 1, середньо: 2, с�
 
 // One dish: the plate rides the belt on the left and a frosted nameplate sits to its right,
 // where the Figma frame has its cards (Apple-style dark material: blur, hairline rim, soft
-// shadow). Shows the name, minutes, difficulty and calories.
-export function DishRow({ recipe }: { recipe: Recipe }) {
+// shadow). Shows the name, minutes, difficulty and calories. `picked` marks the dish the
+// spinning belt stopped on: the plate pops and the nameplate gets a sage rim.
+export function DishRow({ recipe, picked = false }: { recipe: Recipe; picked?: boolean }) {
   const k = useScale();
   const level = LEVELS[recipe.diff.toLowerCase()] ?? 1;
   const { premium } = useStore();
+  const [pop] = useState(() => new Animated.Value(0));
+  useEffect(() => {
+    Animated.spring(pop, { toValue: picked ? 1 : 0, useNativeDriver: true, damping: 9, stiffness: 180, mass: 0.7 }).start();
+  }, [picked, pop]);
+  const plateScale = pop.interpolate({ inputRange: [0, 1], outputRange: [1, 1.06] });
 
   return (
     <Pressable
@@ -26,12 +33,14 @@ export function DishRow({ recipe }: { recipe: Recipe }) {
       accessibilityLabel={`${recipe.name}, ${recipe.total} хвилин, ${recipe.diff.toLowerCase()}`}
       style={({ pressed }) => ({ height: ROW_H * k, transform: [{ scale: pressed ? 0.97 : 1 }] })}
     >
-      <View style={{ position: 'absolute', left: 30 * k, top: 0 }}>
+      <Animated.View style={{ position: 'absolute', left: 30 * k, top: 0, transform: [{ scale: plateScale }] }}>
         <Plate recipe={recipe} size={199 * k} />
-      </View>
+      </Animated.View>
 
       <Plaque radius={20 * k} style={{ position: 'absolute', left: 246 * k, top: 42 * k, width: 144 * k }}>
+        {picked && <View pointerEvents="none" style={[StyleSheet.absoluteFill, { borderRadius: 20 * k, borderWidth: 2, borderColor: sage, backgroundColor: 'rgba(91,107,69,0.22)' }]} />}
         <View style={{ paddingHorizontal: 14 * k, paddingTop: 11 * k, paddingBottom: 12 * k }}>
+          {picked && <Text style={[s.pick, { fontSize: 14 * k, marginBottom: 3 * k }]}>ТВІЙ ВИБІР</Text>}
           <Text style={[s.name, { fontSize: 24 * k, lineHeight: 25 * k }]} numberOfLines={3}>
             {recipe.name}
           </Text>
@@ -66,6 +75,7 @@ export function DishRow({ recipe }: { recipe: Recipe }) {
 }
 
 const s = StyleSheet.create({
+  pick: { fontFamily: fontMedium, color: '#C9D6B4', letterSpacing: 1.2 },
   name: { fontFamily: fontMedium, color: '#FFFFFF', letterSpacing: 0.2 },
   meta: { flexDirection: 'row', alignItems: 'center' },
   chip: { flexDirection: 'row', alignItems: 'center' },

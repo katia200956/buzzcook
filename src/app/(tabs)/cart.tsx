@@ -3,19 +3,19 @@ import { Page } from '../../components/Page';
 import { useScale } from '../../components/scale';
 import { useStore } from '../../components/store';
 import { byId, sortPlan } from '../../data';
-import { font, fontMedium, useTheme } from '../../theme';
+import { titleStyle, useTheme } from '../../theme';
 
 // Shopping list for the week's plan; ticks are remembered per dish.
 export default function Cart() {
   const k = useScale();
   const t = useTheme();
   const { checked, toggleChecked, plan } = useStore();
-  const txt = { fontFamily: font, fontSize: 20 * k, lineHeight: 26 * k, color: t.text };
+  const txt = { fontFamily: t.font, fontSize: 20 * k, lineHeight: 26 * k, color: t.text };
   const ids = Array.from(new Set(sortPlan(plan).map((p) => p.recipe)));
 
   return (
     <Page>
-      <Text style={[txt, { fontFamily: fontMedium, fontSize: 28 * k, lineHeight: 32 * k, marginBottom: 8 * k }]}>список покупок</Text>
+      <Text style={[titleStyle(t, 28 * k), { marginBottom: 8 * k }]}>список покупок</Text>
       {ids.map((id) => {
         const r = byId(id)!;
         const got = checked[id] ?? [];

@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { defaultPlan, PlanItem } from '../data';
 
-export type ThemeMode = 'system' | 'light' | 'dark';
+export type ThemeMode = 'system' | 'light' | 'dark' | 'poster';
 export type Provider = 'apple' | 'google' | 'email';
 export type Slot = { day: string; meal: string };
 

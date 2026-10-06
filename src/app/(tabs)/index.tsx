@@ -7,10 +7,11 @@ import { Menu } from '../../components/Menu';
 import { Screen } from '../../components/Screen';
 import { useScale } from '../../components/scale';
 import { recipes } from '../../data';
-import { font } from '../../theme';
+import { useTheme } from '../../theme';
 
 export default function Home() {
   const k = useScale();
+  const t = useTheme();
   const [q, setQ] = useState('');
   const [menu, setMenu] = useState(false);
   const [scrollY] = useState(() => new Animated.Value(0));
@@ -42,7 +43,7 @@ export default function Home() {
         ))}
         {rows.length === 0 && (
           <View style={{ marginLeft: 40 * k, width: 180 * k }}>
-            <Text style={{ fontFamily: font, fontSize: 22 * k, color: '#FFFFFF', textAlign: 'center' }}>нічого не знайшлося</Text>
+            <Text style={{ fontFamily: t.font, fontSize: 22 * k, color: '#FFFFFF', textAlign: 'center' }}>нічого не знайшлося</Text>
           </View>
         )}
       </Animated.ScrollView>

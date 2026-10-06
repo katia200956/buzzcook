@@ -4,7 +4,7 @@ import type { ComponentProps } from 'react';
 import { useEffect, useState } from 'react';
 import { Animated, Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { font } from '../theme';
+import { useTheme } from '../theme';
 import { Glass } from './Glass';
 import { useScale } from './scale';
 
@@ -25,6 +25,7 @@ type TabBarProps = Parameters<NonNullable<ComponentProps<typeof Tabs>['tabBar']>
 // separate round glass button for the profile, like Apple Music's search bubble.
 export function TabBar({ state, navigation }: TabBarProps) {
   const k = useScale();
+  const t = useTheme();
   const insets = useSafeAreaInsets();
   const focused = state.routes[state.index]?.name;
   const active = icons[focused] ? focused : 'index';
@@ -43,7 +44,7 @@ export function TabBar({ state, navigation }: TabBarProps) {
     const e = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
     if (!e.defaultPrevented && focused !== name) navigation.navigate(name);
   };
-  const tint = '#FFFFFF';
+  const tint = t.tabTint;
 
   return (
     <View
@@ -62,7 +63,7 @@ export function TabBar({ state, navigation }: TabBarProps) {
                 width: slot,
                 height: 52 * k,
                 borderRadius: 100,
-                backgroundColor: 'rgba(255,255,255,0.20)',
+                backgroundColor: t.poster ? t.cta : 'rgba(255,255,255,0.20)',
                 transform: [{ translateX: Animated.multiply(pill, slot) }],
               }}
             />
@@ -78,8 +79,8 @@ export function TabBar({ state, navigation }: TabBarProps) {
                 onPress={() => press(name)}
                 style={{ width: slot, height: 52 * k, alignItems: 'center', justifyContent: 'center', gap: 2 * k }}
               >
-                <Image source={icons[name]} style={{ width: 22 * k, height: 22 * k, opacity: on ? 1 : 0.55 }} />
-                <Text style={{ fontFamily: font, fontSize: 14 * k, lineHeight: 15 * k, color: tint, opacity: on ? 1 : 0.55 }}>
+                <Image source={icons[name]} tintColor={t.poster && on ? '#FFFFFF' : tint} style={{ width: 22 * k, height: 22 * k, opacity: on ? 1 : 0.55 }} />
+                <Text style={{ fontFamily: t.font, fontSize: 14 * k, lineHeight: 15 * k, color: t.poster && on ? '#FFFFFF' : tint, opacity: on ? 1 : 0.55 }}>
                   {labels[name]}
                 </Text>
               </Pressable>
@@ -89,7 +90,7 @@ export function TabBar({ state, navigation }: TabBarProps) {
 
         <Pressable accessibilityRole="tab" accessibilityState={{ selected: active === 'profile' }} accessibilityLabel={labels.profile} onPress={() => press('profile')}>
           <Glass radius={100} strong={active === 'profile'} style={{ width: 62 * k, height: 62 * k, alignItems: 'center', justifyContent: 'center' }}>
-            <Image source={icons.profile} style={{ width: 24 * k, height: 24 * k, opacity: active === 'profile' ? 1 : 0.55 }} />
+            <Image source={icons.profile} tintColor={tint} style={{ width: 24 * k, height: 24 * k, opacity: active === 'profile' ? 1 : 0.55 }} />
           </Glass>
         </Pressable>
       </View>

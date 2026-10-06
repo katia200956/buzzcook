@@ -1,4 +1,10 @@
-import { AlumniSansSC_400Regular, AlumniSansSC_500Medium } from '@expo-google-fonts/alumni-sans-sc';
+import {
+  AlumniSansSC_400Regular,
+  AlumniSansSC_500Medium,
+  AlumniSansSC_600SemiBold,
+  AlumniSansSC_800ExtraBold,
+} from '@expo-google-fonts/alumni-sans-sc';
+import { DelaGothicOne_400Regular } from '@expo-google-fonts/dela-gothic-one';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -11,6 +17,9 @@ export default function RootLayout() {
   const [loaded] = useFonts({
     AlumniSansSC_400Regular,
     AlumniSansSC_500Medium,
+    AlumniSansSC_600SemiBold,
+    AlumniSansSC_800ExtraBold,
+    DelaGothicOne_400Regular,
   });
   if (!loaded) return <View style={{ flex: 1, backgroundColor: '#232323' }} />;
 

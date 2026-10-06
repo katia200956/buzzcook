@@ -11,7 +11,7 @@ import { Sheet } from '../../components/Sheet';
 import { useScale } from '../../components/scale';
 import { Slot, useStore } from '../../components/store';
 import { byId, DAYS, MEALS, recipes } from '../../data';
-import { font, fontMedium, sage, useTheme } from '../../theme';
+import { titleStyle, useTheme } from '../../theme';
 
 const SHORT = ['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'нд'];
 const HEADS = ['сніданок', 'обід', 'вечеря'];
@@ -38,24 +38,24 @@ export default function Plan() {
     setSwapFrom(null);
   };
 
-  const txt = { fontFamily: font, color: '#FFFFFF' };
+  const txt = { fontFamily: t.font, color: '#FFFFFF' };
 
   return (
     <Screen>
       <ScrollView contentContainerStyle={{ paddingTop: 128 * k, paddingBottom: 150 * k, paddingHorizontal: 14 * k }} showsVerticalScrollIndicator={false}>
         <View style={{ paddingHorizontal: 6 * k, marginBottom: 12 * k }}>
-          <Text style={{ fontFamily: fontMedium, fontSize: 34 * k, lineHeight: 36 * k, color: t.text }}>план тижня</Text>
-          <Text style={{ fontFamily: font, fontSize: 18 * k, color: t.textSoft }}>натисни на страву, щоб змінити її</Text>
+          <Text style={titleStyle(t, 34 * k)}>план тижня</Text>
+          <Text style={{ fontFamily: t.font, fontSize: 18 * k, color: t.textSoft }}>натисни на страву, щоб змінити її</Text>
         </View>
 
         {swapFrom && (
-          <Plaque radius={16 * k} style={{ marginBottom: 10 * k, borderWidth: 1.5, borderColor: sage }}>
+          <Plaque radius={16 * k} style={{ marginBottom: 10 * k, borderWidth: 1.5, borderColor: t.cta }}>
             <View style={[s.row, { paddingHorizontal: 14 * k, paddingVertical: 10 * k, gap: 10 * k }]}>
               <Text style={[txt, { flex: 1, fontSize: 18 * k, lineHeight: 21 * k }]}>
                 обери клітинку, з якою поміняти «{fromRecipe?.name.toLowerCase()}»
               </Text>
               <Pressable onPress={() => setSwapFrom(null)} hitSlop={10} accessibilityRole="button">
-                <Text style={[txt, { fontFamily: fontMedium, fontSize: 18 * k, opacity: 0.8 }]}>скасувати</Text>
+                <Text style={[txt, { fontFamily: t.fontMedium, fontSize: 18 * k, opacity: 0.8 }]}>скасувати</Text>
               </Pressable>
             </View>
           </Plaque>
@@ -78,8 +78,8 @@ export default function Plan() {
             return (
               <View key={day} style={[s.row, d < DAYS.length - 1 && { borderBottomWidth: 1, borderColor: line }]}>
                 <View style={{ width: 50 * k, alignItems: 'center', justifyContent: 'center', gap: 4 * k, paddingVertical: 8 * k }}>
-                  <View style={{ paddingHorizontal: 7 * k, borderRadius: 100, backgroundColor: isToday ? sage : 'transparent' }}>
-                    <Text style={[txt, { fontFamily: fontMedium, fontSize: 22 * k, lineHeight: 26 * k }]}>{SHORT[d]}</Text>
+                  <View style={{ paddingHorizontal: 7 * k, borderRadius: 100, backgroundColor: isToday ? t.cta : 'transparent' }}>
+                    <Text style={[txt, { fontFamily: t.fontMedium, fontSize: 22 * k, lineHeight: 26 * k }]}>{SHORT[d]}</Text>
                   </View>
                   {premium ? (
                     <Text style={[txt, { fontSize: 13 * k, opacity: 0.6, textAlign: 'center' }]}>{kcal}{'\n'}ккал</Text>
@@ -127,7 +127,7 @@ export default function Plan() {
         </Plaque>
 
         <Pressable onPress={resetPlan} hitSlop={8} style={{ alignSelf: 'center', marginTop: 14 * k }} accessibilityRole="button">
-          <Text style={{ fontFamily: font, fontSize: 18 * k, color: t.textSoft }}>повернути план за замовчуванням</Text>
+          <Text style={{ fontFamily: t.font, fontSize: 18 * k, color: t.textSoft }}>повернути план за замовчуванням</Text>
         </Pressable>
       </ScrollView>
 
@@ -162,8 +162,8 @@ function CellSheet({ slot, onClose, onSwap }: { slot: Slot | null; onClose: () =
   const r = byId(plan.find((p) => p.day === cur.day && p.meal === cur.meal)?.recipe ?? '');
   const showPicker = picking || !r;
 
-  const txt = { fontFamily: font, fontSize: 21 * k, lineHeight: 25 * k, color: t.text };
-  const group = { backgroundColor: t.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.7)', borderRadius: 16 * k, overflow: 'hidden' as const };
+  const txt = { fontFamily: t.font, fontSize: 21 * k, lineHeight: 25 * k, color: t.text };
+  const group = { backgroundColor: t.group, borderRadius: 16 * k, overflow: 'hidden' as const };
   const sep = { height: StyleSheet.hairlineWidth, backgroundColor: t.textSoft, marginLeft: 16 * k, opacity: 0.5 };
   const rowS = { paddingHorizontal: 16 * k, paddingVertical: 12 * k, flexDirection: 'row' as const, alignItems: 'center' as const, gap: 12 * k };
 
@@ -194,7 +194,7 @@ function CellSheet({ slot, onClose, onSwap }: { slot: Slot | null; onClose: () =
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 * k, marginTop: 6 * k, marginBottom: 14 * k }}>
           <Plate recipe={r} size={64 * k} />
           <View style={{ flex: 1 }}>
-            <Text style={[txt, { fontFamily: fontMedium, fontSize: 26 * k, lineHeight: 28 * k }]}>{r.name}</Text>
+            <Text style={[txt, { fontFamily: t.fontMedium, fontSize: 26 * k, lineHeight: 28 * k }]}>{r.name}</Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 * k }}>
               <Text style={[txt, { color: t.textSoft, fontSize: 18 * k }]}>{r.total} хв ·</Text>
               {premium ? <Text style={[txt, { color: t.textSoft, fontSize: 18 * k }]}>{r.kcal} ккал</Text> : <Lock label="ккал" size={13} color={t.textSoft} />}
@@ -219,7 +219,7 @@ function CellSheet({ slot, onClose, onSwap }: { slot: Slot | null; onClose: () =
 
       {showPicker && (
         <>
-          <Text style={[txt, { fontFamily: fontMedium, fontSize: 28 * k, lineHeight: 32 * k, marginTop: 4 * k, marginBottom: 10 * k }]}>
+          <Text style={[txt, { fontFamily: t.fontMedium, fontSize: 28 * k, lineHeight: 32 * k, marginTop: 4 * k, marginBottom: 10 * k }]}>
             {r ? 'на що замінити?' : 'додати страву'}
           </Text>
           <ScrollView style={{ maxHeight: 380 * k }} showsVerticalScrollIndicator={false}>

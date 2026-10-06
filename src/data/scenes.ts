@@ -29,7 +29,7 @@ export type SceneLayer = {
 
 const cut = (src: number, w: number, h: number) => ({ src, aspect: h / w });
 
-const salatArt = {
+export const salatArt = {
   tomato: cut(require('../../assets/scenes/salat/tomato.png'), 367, 420),
   avocado: cut(require('../../assets/scenes/salat/avocado.png'), 397, 420),
   tomatoPile: cut(require('../../assets/scenes/salat/tomato-pile.png'), 460, 240),

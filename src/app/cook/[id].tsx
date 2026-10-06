@@ -1,9 +1,12 @@
+import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
+import { useKeepAwake } from 'expo-keep-awake';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as Speech from 'expo-speech';
 import { useEffect, useRef, useState } from 'react';
 import { Animated, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { BowlStage, type BowlItem, type Flight } from '../../components/BowlStage';
 import { Glass } from '../../components/Glass';
 import { Plate } from '../../components/Plate';
 import { Lock } from '../../components/Premium';
@@ -12,7 +15,9 @@ import { useScale } from '../../components/scale';
 import { useStore } from '../../components/store';
 import { StageScene } from '../../components/StageScene';
 import { StepVideo } from '../../components/StepVideo';
+import { useNarration } from '../../components/useNarration';
 import { byId, img, nextInPlan, stepClip, stepCutout } from '../../data';
+import { isAction, narratedScene, servedDish, stepLines } from '../../data/narration';
 import { stepScene } from '../../data/scenes';
 import { font, fontMedium, ForceDark, useTheme } from '../../theme';
 
@@ -20,6 +25,9 @@ import { font, fontMedium, ForceDark, useTheme } from '../../theme';
 // an animated scene of background-free cutouts on the left (or a single cutout when the
 // recipe has no scenes) and its text on the right. "готово" records the step
 // for the "етапи готовки" tab.
+// Recipes with narration (src/data/narration.ts) read each step a sentence at a time: the named
+// ingredient comes forward in the scene, hands-on sentences wait for "готово", and what they make
+// flies into a bowl under the scene that fills up over the whole recipe. The screen stays awake.
 // Cooking always runs on the black stage, whatever the app theme is.
 export default function CookScreen() {
   return (
@@ -46,11 +54,22 @@ function Cook() {
   // Premium audio: reads the open step aloud, and the next one as you move on.
   const [audio, setAudio] = useState(false);
   const step = steps[page];
+  const lines = stepLines(id, page);
   useEffect(() => {
     Speech.stop();
-    if (audio && premium && step) Speech.speak(`${step.title}. ${step.txt.replace(/\*\*/g, '')}`, { language: 'uk-UA' });
-  }, [audio, premium, step]);
+    if (audio && premium && step && !lines) Speech.speak(`${step.title}. ${step.txt.replace(/\*\*/g, '')}`, { language: 'uk-UA' });
+  }, [audio, premium, step, lines]);
   useEffect(() => () => void Speech.stop(), []);
+  useKeepAwake();
+
+  // Narration: which hands-on lines are done ("step.line" → when), across the whole recipe.
+  const [confirmed, setConfirmed] = useState<Record<string, number>>({});
+  const [flight, setFlight] = useState<Flight & { step: number }>();
+  const [stir, setStir] = useState(0);
+  const [fresh, setFresh] = useState(0);
+  // Without premium audio the lines still play, held for their reading time.
+  const narr = useNarration(lines, page, audio && premium, (li) => confirmed[`${page}.${li}`] !== undefined);
+  const pulse = usePulse(narr.waiting);
 
   if (!r || !steps.length) return null;
   const txt = { fontFamily: font, fontSize: 20 * k, lineHeight: 24 * k, color: t.text };
@@ -61,7 +80,35 @@ function Cook() {
     setPage(i);
     pager.current?.scrollTo({ y: i * pageH, animated: true });
   };
+  // Everything confirmed so far goes in the bowl; the last line swaps it for the real dish.
+  const bowl: BowlItem[] = [];
+  let served = false;
+  steps.forEach((_, si) =>
+    stepLines(r.id, si)?.forEach((l, li) => {
+      const born = confirmed[`${si}.${li}`];
+      if (born === undefined) return;
+      l.add?.forEach((bit, n) => bowl.push({ key: `${si}.${li}.${n}`, bit, born }));
+      if (l.serve) served = true;
+    }),
+  );
+  const dish = served ? servedDish(r.id) : undefined;
+
+  const confirm = (li: number) => {
+    const l = lines![li];
+    const key = fresh + 1;
+    setConfirmed((c) => ({ ...c, [`${page}.${li}`]: key }));
+    setFresh(key);
+    const bits = l.add?.filter((b) => b.src !== undefined) ?? [];
+    setFlight(bits.length && l.focus !== undefined ? { key, step: page, from: l.focus, bits } : undefined);
+    if (l.stir) setStir(key);
+    if (l.serve) Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+    else if (!bits.length || l.focus === undefined) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+    narr.jump(li + 1);
+  };
+  // "готово" first confirms the step's next hands-on line; once they are all done it finishes the step.
   const finishStep = () => {
+    const li = lines?.findIndex((l, j) => isAction(l) && confirmed[`${page}.${j}`] === undefined) ?? -1;
+    if (li >= 0) return confirm(li);
     setDone(r.id, Math.max(done[r.id] ?? 0, page + 1));
     go(page + 1);
   };
@@ -155,11 +202,26 @@ function Cook() {
               };
               const cut = stepCutout(r.id, i);
               const clip = stepClip(r.id, i);
-              const scene = stepScene(r.id, i);
+              const said = stepLines(r.id, i);
+              const scene = (said && narratedScene(r.id, i)) || stepScene(r.id, i);
               return (
                 <View key={i} style={{ height: pageH, flexDirection: 'row', alignItems: 'center', paddingBottom: 90 * k }}>
                   <Animated.View style={[{ width: 240 * k, height: 300 * k, marginLeft: -34 * k }, art]}>
-                    {scene ? (
+                    {scene && said ? (
+                      <View style={{ position: 'absolute', left: 42 * k, top: 0 }}>
+                        <BowlStage
+                          layers={scene}
+                          size={190 * k}
+                          active={page === i}
+                          focus={page === i ? narr.focus : undefined}
+                          items={bowl}
+                          fresh={fresh}
+                          flight={flight?.step === i ? flight : undefined}
+                          stir={stir}
+                          served={dish}
+                        />
+                      </View>
+                    ) : scene ? (
                       // The column hangs 34pt off the left edge; keep the whole scene on screen.
                       <View style={{ position: 'absolute', left: 34 * k, top: 47 * k }}>
                         <StageScene layers={scene} size={206 * k} active={page === i} />
@@ -184,7 +246,32 @@ function Cook() {
                     <Text style={[txt, { fontFamily: fontMedium, fontSize: 30 * k, lineHeight: 32 * k, marginBottom: 8 * k }]}>
                       {st.title.toLowerCase()}
                     </Text>
-                    <Text style={txt}>{st.txt.replace(/\*\*/g, '')}</Text>
+                    {said ? (
+                      <View style={{ gap: 6 * k }}>
+                        {said.map((l, li) => {
+                          const now = page === i && narr.idx === li;
+                          const ok = confirmed[`${i}.${li}`] !== undefined;
+                          return (
+                            <Pressable key={li} onPress={() => page === i && narr.jump(li, true)} accessibilityHint="Прочитати ще раз">
+                              <Text style={[txt, { opacity: now ? 1 : ok ? 0.4 : 0.65 }]}>
+                                {ok ? '✓ ' : ''}
+                                {l.text.split('**').map((part, n) =>
+                                  n % 2 ? (
+                                    <Text key={n} style={{ fontFamily: fontMedium }}>
+                                      {part}
+                                    </Text>
+                                  ) : (
+                                    part
+                                  ),
+                                )}
+                              </Text>
+                            </Pressable>
+                          );
+                        })}
+                      </View>
+                    ) : (
+                      <Text style={txt}>{st.txt.replace(/\*\*/g, '')}</Text>
+                    )}
                     <Text style={[txt, { opacity: 0.6, marginTop: 8 * k }]}>≈ {st.min} хв</Text>
                     <Text style={[txt, { opacity: 0.6 }]}>{st.uses.join(', ')}</Text>
                     <Text style={[txt, { opacity: 0.6, marginTop: 12 * k }]}>порада</Text>
@@ -220,13 +307,32 @@ function Cook() {
           </Glass>
         </Pressable>
         <Pressable onPress={page < steps.length ? finishStep : close} style={{ flex: 2 }}>
-          <Glass radius={100} strong style={s.btn}>
-            <Text style={[s.btnT, { fontSize: 28 * k }]}>{page < steps.length ? 'готово' : 'до рецепта'}</Text>
-          </Glass>
+          <Animated.View style={{ transform: [{ scale: pulse }] }}>
+            <Glass radius={100} strong style={s.btn}>
+              <Text style={[s.btnT, { fontSize: 28 * k }]}>{page < steps.length ? 'готово' : 'до рецепта'}</Text>
+            </Glass>
+          </Animated.View>
         </Pressable>
       </View>
     </Screen>
   );
+}
+
+// A gentle breathing on "готово" while the narration waits for the cook.
+function usePulse(on: boolean) {
+  const [v] = useState(() => new Animated.Value(0));
+  useEffect(() => {
+    if (!on) return v.setValue(0);
+    const a = Animated.loop(
+      Animated.sequence([
+        Animated.timing(v, { toValue: 1, duration: 650, useNativeDriver: true }),
+        Animated.timing(v, { toValue: 0, duration: 650, useNativeDriver: true }),
+      ]),
+    );
+    a.start();
+    return () => a.stop();
+  }, [on, v]);
+  return v.interpolate({ inputRange: [0, 1], outputRange: [1, 1.05] });
 }
 
 const s = StyleSheet.create({

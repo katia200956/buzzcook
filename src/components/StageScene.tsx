@@ -8,11 +8,12 @@ import type { SceneLayer } from '../data/scenes';
 // and steam on a square stage. Ported from the recipe-page demo (RecipeStageVisual), with the
 // CSS keyframes redone as Animated interpolations. The scene replays from the start each time
 // its step becomes active; with Reduce Motion on, every layer simply shows its final pose.
+// `focus` brings one layer forward (a little bigger) and dims the rest, for narrated steps.
 
 const native = Platform.OS !== 'web';
 const ease = Easing.bezier(0.33, 1, 0.68, 1);
 
-export function StageScene({ layers, size, active }: { layers: SceneLayer[]; size: number; active: boolean }) {
+export function StageScene({ layers, size, active, focus }: { layers: SceneLayer[]; size: number; active: boolean; focus?: number }) {
   // Each activation is a new "take": remounting the layers replays every entrance.
   const [run, setRun] = useState(0);
   const [wasActive, setWasActive] = useState(false);
@@ -27,22 +28,23 @@ export function StageScene({ layers, size, active }: { layers: SceneLayer[]; siz
     <View style={{ width: size, height: size }} pointerEvents="none">
       {run > 0 && (
         <Frame key={run} still={still}>
-          {layers.map((layer, i) =>
-            layer.fx === 'steam' ? (
+          {layers.map((layer, i) => {
+            const emph = focus === undefined ? 0 : focus === i ? 1 : -1;
+            return layer.fx === 'steam' ? (
               still ? null : <Steam key={i} layer={layer} size={size} />
             ) : layer.anim === 'cut' ? (
-              <Cut key={i} layer={layer} size={size} still={still} />
+              <Cut key={i} layer={layer} size={size} still={still} emph={emph} />
             ) : still && layer.anim === 'dropFade' ? null : (
-              <Plain key={i} layer={layer} size={size} still={still} />
-            ),
-          )}
+              <Plain key={i} layer={layer} size={size} still={still} emph={emph} />
+            );
+          })}
         </Frame>
       )}
     </View>
   );
 }
 
-function useReduceMotion() {
+export function useReduceMotion() {
   const [on, setOn] = useState(false);
   useEffect(() => {
     AccessibilityInfo.isReduceMotionEnabled().then(setOn);
@@ -87,6 +89,30 @@ function box(layer: SceneLayer, size: number) {
   };
 }
 
+// Focus for narrated steps: 1 brings the layer forward, -1 dims it, 0 leaves it as it is.
+function useEmphasis(emph: number, still: boolean) {
+  const [v] = useState(() => new Animated.Value(emph));
+  useEffect(() => {
+    const a = Animated.spring(v, { toValue: emph, friction: 7, tension: 60, useNativeDriver: native });
+    a.start();
+    return () => a.stop();
+  }, [v, emph]);
+  return {
+    opacity: v.interpolate({ inputRange: [-1, 0, 1], outputRange: [0.35, 1, 1] }),
+    scale: still ? 1 : v.interpolate({ inputRange: [-1, 0, 1], outputRange: [0.97, 1, 1.16] }),
+  };
+}
+
+// The layer's box, with the focus applied around its centre.
+function Emph({ style, emph, still, children }: { style: ReturnType<typeof box>['style']; emph: number; still: boolean; children: React.ReactNode }) {
+  const e = useEmphasis(emph, still);
+  return (
+    <Animated.View style={[style, { opacity: e.opacity, zIndex: emph > 0 ? 1 : 0, transform: [...style.transform, { scale: e.scale }] }]}>
+      {children}
+    </Animated.View>
+  );
+}
+
 const lerp = (t: Animated.Value, inputRange: number[], outputRange: number[] | string[]) =>
   t.interpolate({ inputRange, outputRange: outputRange as any, extrapolate: 'clamp' });
 
@@ -129,20 +155,20 @@ const timing: Record<string, [number, (v: number) => number]> = {
   zoomIn: [4500, Easing.bezier(0.16, 1, 0.3, 1)],
 };
 
-function Plain({ layer, size, still }: { layer: SceneLayer; size: number; still: boolean }) {
+function Plain({ layer, size, still, emph }: { layer: SceneLayer; size: number; still: boolean; emph: number }) {
   const { h, style } = box(layer, size);
   const anim = layer.anim ?? 'driftIn';
   const [duration, easing] = timing[anim] ?? timing.driftIn;
   const t = useProgress(duration, layer.delay ?? 0, still, easing);
   const bob = useFloat(!!layer.float && !still, h);
   return (
-    <View style={style}>
+    <Emph style={style} emph={emph} still={still}>
       <Animated.View style={[{ flex: 1 }, entrance(anim, t, h)]}>
         <Animated.View style={{ flex: 1, transform: [{ translateY: bob }] }}>
           <Image source={layer.src} style={{ flex: 1 }} contentFit="contain" />
         </Animated.View>
       </Animated.View>
-    </View>
+    </Emph>
   );
 }
 
@@ -180,7 +206,7 @@ function mix(hex: string, other: number, amount: number) {
 }
 
 // Cut in half: the halves lie together until a knife flash passes, then part; optional splash.
-function Cut({ layer, size, still }: { layer: SceneLayer; size: number; still: boolean }) {
+function Cut({ layer, size, still, emph }: { layer: SceneLayer; size: number; still: boolean; emph: number }) {
   const { w, h, style } = box(layer, size);
   const delay = layer.delay ?? 0;
   const t = useProgress(800, delay, still);
@@ -197,7 +223,7 @@ function Cut({ layer, size, still }: { layer: SceneLayer; size: number; still: b
   const knifeH = 1.24 * h;
 
   return (
-    <View style={style}>
+    <Emph style={style} emph={emph} still={still}>
       <Animated.View style={[{ flex: 1 }, entrance('driftIn', t, h)]}>
         <Animated.View style={half(-1)}>
           <View style={{ position: 'absolute', left: 0, top: 0, width: w / 2, height: h, overflow: 'hidden' }}>
@@ -270,7 +296,7 @@ function Cut({ layer, size, still }: { layer: SceneLayer; size: number; still: b
             })
           : null}
       </Animated.View>
-    </View>
+    </Emph>
   );
 }
 

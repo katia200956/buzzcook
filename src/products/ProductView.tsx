@@ -101,13 +101,14 @@ function Model({ url, finish, spin, autoRotate }: { url: string; finish: Finish;
 
 // How the surface reads: a clear coat over the scanned textures gives the wet, freshly washed
 // gloss of fruit and cut flesh; dry foods (bread, cheese) keep a soft satin look.
-const finishes: Record<Finish, { roughness: number; clearcoat: number; clearcoatRoughness: number }> = {
-  juicy: { roughness: 0.45, clearcoat: 0.8, clearcoatRoughness: 0.08 },
-  wet: { roughness: 0.35, clearcoat: 1, clearcoatRoughness: 0.04 },
+const finishes: Record<Exclude<Finish, 'natural'>, { roughness: number; clearcoat: number; clearcoatRoughness: number }> = {
+  juicy: { roughness: 0.32, clearcoat: 0.15, clearcoatRoughness: 0.1 },
+  wet: { roughness: 0.3, clearcoat: 0.35, clearcoatRoughness: 0.08 },
   satin: { roughness: 0.7, clearcoat: 0, clearcoatRoughness: 0.5 },
 };
 
 function applyFinish(root: THREE.Object3D, finish: Finish) {
+  if (finish === 'natural') return;
   const f = finishes[finish];
   root.traverse((node) => {
     const mesh = node as THREE.Mesh;

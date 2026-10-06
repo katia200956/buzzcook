@@ -5,8 +5,11 @@
 
 export type ProductCategory = 'bakery' | 'dairy' | 'eggs' | 'meat' | 'vegetables' | 'fruit';
 
-/** Surface look, see ProductView: juicy = glossy skin, wet = cut flesh, satin = dry foods. */
-export type Finish = 'juicy' | 'wet' | 'satin';
+/**
+ * Surface look, see ProductView. natural = the model's own scanned material (the default, closest
+ * to the real thing); juicy = a light gloss on skins; wet = cut flesh; satin = dry foods.
+ */
+export type Finish = 'natural' | 'juicy' | 'wet' | 'satin';
 
 /** How a product is prepared. A recipe asks for "tomato" + "half" and gets that model. */
 export type Form = 'whole' | 'half' | 'slice' | 'wedge' | 'cubes' | 'raw' | 'cooked';
@@ -63,9 +66,10 @@ export const products: Product[] = [
     name: { uk: 'Помідор', en: 'Tomato' },
     aliases: ['помідори', 'томат', 'томати', 'tomatoes'],
     category: 'vegetables',
-    model: cdn + '23cd1ed2-2e96-4944-ba00-dfc0631ee497.glb',
+    // Meshy 7: rounder and seamless compared with the Tripo version.
+    model: cdn + '4fc6a2be-1048-4cac-be66-612b6e608f63.glb',
     sizeCm: 7,
-    finish: 'juicy',
+    finish: 'natural',
     source: 'higgsfield-tripo',
   },
   {

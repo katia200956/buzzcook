@@ -18,6 +18,10 @@ const classic = {
   cta: sage,
   tabTint: '#FFFFFF',
   plaque: 'rgba(24,24,27,0.58)',
+  panel: '#FFF1DC',
+  panelText: '#3B1607',
+  titleShadow: '#3B1607',
+  swirl: 1,
 };
 
 // Palettes taken from the Figma frames "white homepage" and "black homepage".
@@ -77,9 +81,34 @@ const poster = {
   plaque: 'rgba(59,22,7,0.93)',
   sheet: '#FFF1DC',
   group: '#FFFFFF',
+  panel: '#FFF1DC', // the flyer's cream cards behind the dishes
+  panelText: '#3B1607',
+  titleShadow: '#3B1607',
+  swirl: 1, // opacity of the swirl-line texture
 };
 
-export type Palette = typeof light | typeof dark | typeof stage | typeof poster;
+// The same poster on black: the orange moves to the accents, the cream panels stay.
+const posterBlack = {
+  ...poster,
+  mode: 'dark' as const,
+  bg: ['#000000', '#151110', '#151110', '#000000'] as const,
+  text: '#FFF1DC',
+  textSoft: 'rgba(255,241,220,0.6)',
+  glass: '#1E1A18',
+  glassStrong: '#2C2622',
+  border: 'rgba(255,241,220,0.14)',
+  blurTint: 'dark' as const,
+  accent: '#FFF1DC',
+  cta: '#E4601A',
+  tabTint: '#FFF1DC',
+  plaque: 'rgba(38,32,29,0.96)',
+  sheet: '#171311',
+  group: '#26201D',
+  titleShadow: '#E4601A',
+  swirl: 0.35,
+};
+
+export type Palette = typeof light | typeof dark | typeof stage | typeof poster | typeof posterBlack;
 
 export const bgStops = [0, 0.13942, 0.86058, 1] as const;
 
@@ -96,14 +125,15 @@ export function useTheme(): Palette {
   const mode = themeMode === 'system' ? (system === 'dark' ? 'dark' : 'light') : themeMode;
   if (forced) return stage;
   if (mode === 'poster') return poster;
+  if (mode === 'posterBlack') return posterBlack;
   return mode === 'dark' ? dark : light;
 }
 
 // Screen title. The poster look sets it in the chunky display face, white with a hard brown
-// drop like the flyer's headline; on a cream sheet it stays brown.
+// drop like the flyer's headline (orange on the black poster); on a cream sheet it stays brown.
 export function titleStyle(t: Palette, size: number, onSheet = false) {
   if (!t.poster) return { fontFamily: t.fontMedium, fontSize: size, lineHeight: size * 1.12, color: t.text };
   const fs = size * t.displayK;
   if (onSheet) return { fontFamily: t.display, fontSize: fs, lineHeight: fs * 1.25, color: t.text };
-  return { fontFamily: t.display, fontSize: fs, lineHeight: fs * 1.25, color: '#FFFFFF', textShadow: '0px 3px 0px #3B1607' };
+  return { fontFamily: t.display, fontSize: fs, lineHeight: fs * 1.25, color: '#FFFFFF', textShadow: `0px 3px 0px ${t.titleShadow}` };
 }

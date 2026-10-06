@@ -10,6 +10,7 @@ const themes: [ThemeMode, string][] = [
   ['light', 'світла'],
   ['dark', 'темна'],
   ['poster', 'постер'],
+  ['posterBlack', 'чорний'],
 ];
 
 // Menu from the square header button, shown as an Apple-style sheet with grouped rows.

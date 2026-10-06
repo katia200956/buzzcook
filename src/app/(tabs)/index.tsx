@@ -8,7 +8,7 @@ import { PosterRow } from '../../components/PosterRow';
 import { Screen } from '../../components/Screen';
 import { useScale } from '../../components/scale';
 import { recipes } from '../../data';
-import { titleStyle, useTheme } from '../../theme';
+import { useTheme } from '../../theme';
 
 export default function Home() {
   const k = useScale();
@@ -17,8 +17,8 @@ export default function Home() {
   const [menu, setMenu] = useState(false);
   const [scrollY] = useState(() => new Animated.Value(0));
 
-  // Content offset of the first poster row: list padding plus the two-line headline above it.
-  const posterTop = (128 + 6 + 54 * 0.72 * 1.25 * 2) * k;
+  // Content offset of the first poster row (the list's top padding).
+  const posterTop = 128 * k;
 
   // The belt is a feed of every dish; a query narrows it.
   const rows = useMemo(() => {
@@ -42,8 +42,7 @@ export default function Home() {
         onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: true })}
         scrollEventThrottle={16}
       >
-        {/* The poster theme swaps the belt for the flyer's tilted cream panels, sides alternating. */}
-        {t.poster && <Text style={[titleStyle(t, 54 * k), { textAlign: 'center', marginTop: 6 * k }]}>{'страви\nтижня'}</Text>}
+        {/* The poster theme swaps the belt for the flyer's slanted cream cards, sides alternating. */}
         {rows.map((r, i) =>
           t.poster ? <PosterRow key={r.id} recipe={r} index={i} scrollY={scrollY} top={posterTop} /> : <DishRow key={r.id} recipe={r} />,
         )}

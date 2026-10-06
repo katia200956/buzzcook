@@ -14,6 +14,7 @@ const themes: [ThemeMode, string][] = [
   ['light', 'світла'],
   ['dark', 'темна'],
   ['poster', 'постер'],
+  ['posterBlack', 'чорний'],
 ];
 
 export default function Profile() {

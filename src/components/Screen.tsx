@@ -10,7 +10,7 @@ export function Screen({ children }: { children: ReactNode }) {
   return (
     <View style={{ flex: 1 }}>
       <LinearGradient colors={t.bg} locations={bgStops} style={StyleSheet.absoluteFill} />
-      {t.poster && <Image source={require('../../assets/poster/swirl.svg')} style={StyleSheet.absoluteFill} contentFit="cover" />}
+      {t.poster && <Image source={require('../../assets/poster/swirl.svg')} style={[StyleSheet.absoluteFill, { opacity: t.swirl }]} contentFit="cover" />}
       {children}
     </View>
   );

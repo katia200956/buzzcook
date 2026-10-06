@@ -6,7 +6,6 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-nati
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Belt } from '../components/Belt';
 import { Plate } from '../components/Plate';
-import { PosterPanel } from '../components/PosterRow';
 import { Screen } from '../components/Screen';
 import { useScale } from '../components/scale';
 import { Provider, useStore } from '../components/store';
@@ -40,11 +39,7 @@ export default function Login() {
 
   return (
     <Screen>
-      {t.poster ? (
-        <PosterPanel tilt={-4} style={{ left: 14 * k, top: insets.top + 136 * k, width: 236 * k, height: 128 * k, borderRadius: 26 * k }} />
-      ) : (
-        <Belt />
-      )}
+      <Belt />
       <View style={{ position: 'absolute', left: 31 * k, top: insets.top + 90 * k }}>
         <Plate recipe={hero} size={199 * k} />
       </View>

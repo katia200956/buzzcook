@@ -7,9 +7,10 @@ export type ProductCategory = 'bakery' | 'dairy' | 'eggs' | 'meat' | 'vegetables
 
 /**
  * Surface look, see ProductView. natural = the model's own scanned material (the default, closest
- * to the real thing); juicy = a light gloss on skins; wet = cut flesh; satin = dry foods.
+ * to the real thing); juicy = a light gloss on skins; wet = cut flesh; satin = dry foods;
+ * skin = whole fruit and vegetables, with procedural pores, colour drift and micro-bumps (skin.ts).
  */
-export type Finish = 'natural' | 'juicy' | 'wet' | 'satin';
+export type Finish = 'natural' | 'juicy' | 'wet' | 'satin' | 'skin';
 
 /** How a product is prepared. A recipe asks for "tomato" + "half" and gets that model. */
 export type Form = 'whole' | 'half' | 'slice' | 'wedge' | 'cubes' | 'raw' | 'cooked';
@@ -66,10 +67,10 @@ export const products: Product[] = [
     name: { uk: 'Помідор', en: 'Tomato' },
     aliases: ['помідори', 'томат', 'томати', 'tomatoes'],
     category: 'vegetables',
-    // Meshy 7: rounder and seamless compared with the Tripo version.
-    model: cdn + '4fc6a2be-1048-4cac-be66-612b6e608f63.glb',
-    sizeCm: 7,
-    finish: 'natural',
+    // Ribbed beefsteak tomato (Meshy 7), matched to a studio photo of real ones.
+    model: cdn + 'c87e4dca-dd2d-4c9b-b7bd-3fa384f304a3.glb',
+    sizeCm: 9,
+    finish: 'skin',
     source: 'higgsfield-tripo',
   },
   {

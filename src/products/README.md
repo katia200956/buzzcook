@@ -37,3 +37,15 @@ All products can be browsed at the `/products` route.
 
 Poly Haven (CC0) also has scanned produce that fits the library: apple, avocado, lemon, lime,
 kiwi, onion, ginger, sweet potato, pomegranate, bananas, croissant, burger buns.
+
+## Making it look real, not plastic
+
+Generated textures are flat and evenly coloured, which reads as a toy. What works (checked on the
+tomato against a studio photo of real beefsteak tomatoes):
+
+- Generate the source photo as the real variety (ribbed beefsteak, not a perfect ball), on white,
+  in soft daylight, satin skin with only a broad soft highlight. Meshy 7 keeps that shape best.
+- Use `finish: 'skin'` for whole fruit and vegetables. `skin.ts` adds colour drift, pores, uneven
+  shine and micro-bumps in shader, so every product gets it without new textures.
+- Preview on a light background with a soft overhead key and gentle contact shadow, the way food
+  is photographed; dark dramatic backdrops exaggerate gloss.

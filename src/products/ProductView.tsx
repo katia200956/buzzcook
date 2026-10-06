@@ -5,6 +5,7 @@ import { PanResponder, StyleProp, View, ViewStyle } from 'react-native';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { findProduct, Finish, Product } from './catalog';
+import { applySkin } from './skin';
 
 // A single library product rendered in 3D. It slowly turns on its own; dragging a finger
 // rotates it in any direction, and letting go hands it back to the slow spin.
@@ -75,10 +76,10 @@ function Model({ url, finish, spin, autoRotate }: { url: string; finish: Finish;
   // Center the model and scale its longest side to 1.6 units so every product fills the view alike.
   const scene = useMemo(() => {
     const obj = gltf.scene.clone(true);
-    applyFinish(obj, finish);
     const box = new THREE.Box3().setFromObject(obj);
     const center = box.getCenter(new THREE.Vector3());
     const size = box.getSize(new THREE.Vector3());
+    applyFinish(obj, finish, 1 / Math.max(size.x, size.y, size.z));
     obj.position.sub(center);
     const wrap = new THREE.Group();
     wrap.add(obj);
@@ -100,26 +101,35 @@ function Model({ url, finish, spin, autoRotate }: { url: string; finish: Finish;
 
 
 // How the surface reads: a clear coat over the scanned textures gives the wet, freshly washed
-// gloss of fruit and cut flesh; dry foods (bread, cheese) keep a soft satin look.
-const finishes: Record<Exclude<Finish, 'natural'>, { roughness: number; clearcoat: number; clearcoatRoughness: number }> = {
+// gloss of fruit and cut flesh; dry foods (bread, cheese) keep a soft satin look; skin is a
+// whole fruit or vegetable with the procedural skin from skin.ts and a soft satin sheen.
+const finishes: Record<
+  Exclude<Finish, 'natural'>,
+  { roughness: number; clearcoat: number; clearcoatRoughness: number; specularIntensity?: number; color?: string }
+> = {
   juicy: { roughness: 0.32, clearcoat: 0.15, clearcoatRoughness: 0.1 },
   wet: { roughness: 0.3, clearcoat: 0.35, clearcoatRoughness: 0.08 },
   satin: { roughness: 0.7, clearcoat: 0, clearcoatRoughness: 0.5 },
+  // Matched to a studio photo of real beefsteak tomatoes; color deepens the flat generated red.
+  skin: { roughness: 0.38, clearcoat: 0, clearcoatRoughness: 0.5, specularIntensity: 0.8, color: '#e6c2bc' },
 };
 
-function applyFinish(root: THREE.Object3D, finish: Finish) {
+function applyFinish(root: THREE.Object3D, finish: Finish, scale: number) {
   if (finish === 'natural') return;
-  const f = finishes[finish];
+  const { color, ...f } = finishes[finish];
   root.traverse((node) => {
     const mesh = node as THREE.Mesh;
     if (!mesh.isMesh) return;
     const src = mesh.material as THREE.MeshStandardMaterial;
-    mesh.material = new THREE.MeshPhysicalMaterial({
+    const material = new THREE.MeshPhysicalMaterial({
       map: src.map,
       normalMap: src.normalMap,
-      roughnessMap: src.roughnessMap,
+      roughnessMap: finish === 'skin' ? null : src.roughnessMap,
+      color: color ?? '#ffffff',
       metalness: 0,
       ...f,
     });
+    if (finish === 'skin') applySkin(material, scale);
+    mesh.material = material;
   });
 }

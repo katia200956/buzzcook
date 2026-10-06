@@ -11,7 +11,7 @@ import { Screen } from '../../../components/Screen';
 import { useScale } from '../../../components/scale';
 import { useStore } from '../../../components/store';
 import { byId } from '../../../data';
-import { font, fontMedium, sage } from '../../../theme';
+import { useTheme } from '../../../theme';
 
 // Figma "recipe going": the chosen plate on the belt, a tall info card and START.
 // v2: calories and macros up top as tiles, clearer section labels, a solid START.
@@ -19,12 +19,13 @@ export default function RecipeScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const r = byId(id);
   const k = useScale();
+  const t = useTheme();
   const [menu, setMenu] = useState(false);
   const { saved, toggleSaved, done, premium } = useStore();
 
   if (!r) return null;
-  const txt = { fontFamily: font, fontSize: 19 * k, lineHeight: 23 * k, color: '#FFFFFF' };
-  const head = { fontFamily: fontMedium, fontSize: 15 * k, letterSpacing: 1.2 * k, color: 'rgba(255,255,255,0.55)', marginTop: 16 * k, marginBottom: 4 * k };
+  const txt = { fontFamily: t.font, fontSize: 19 * k, lineHeight: 23 * k, color: '#FFFFFF' };
+  const head = { fontFamily: t.fontMedium, fontSize: 15 * k, letterSpacing: 1.2 * k, color: 'rgba(255,255,255,0.55)', marginTop: 16 * k, marginBottom: 4 * k };
   const canCook = !!r.steps?.length;
   const progress = done[r.id] ?? 0;
   const back = () => (router.canGoBack() ? router.back() : router.navigate('/'));
@@ -40,8 +41,8 @@ export default function RecipeScreen() {
       {/* v2: the info column sits on dark plaques with white text, a little wider than before. */}
       <View style={{ position: 'absolute', left: 246 * k, top: 140 * k, width: 144 * k, bottom: 170 * k }}>
         <Plaque radius={18 * k} style={{ paddingHorizontal: 14 * k, paddingVertical: 10 * k }}>
-          <Text style={{ fontFamily: fontMedium, fontSize: 24 * k, lineHeight: 25 * k, color: '#FFFFFF' }}>{r.name}</Text>
-          <Text style={{ fontFamily: font, fontSize: 16 * k, color: 'rgba(255,255,255,0.65)', marginTop: 4 * k }}>
+          <Text style={{ fontFamily: t.display, fontSize: (t.poster ? 15 : 24) * k, lineHeight: (t.poster ? 19 : 25) * k, color: '#FFFFFF' }}>{r.name}</Text>
+          <Text style={{ fontFamily: t.font, fontSize: 16 * k, color: 'rgba(255,255,255,0.65)', marginTop: 4 * k }}>
             {r.total} хв · {r.diff.toLowerCase()}
           </Text>
         </Plaque>
@@ -51,9 +52,9 @@ export default function RecipeScreen() {
             {/* Calories and macros as small tiles, so the numbers read at a glance. Premium only. */}
             {premium ? (
               <>
-                <Text style={[txt, { fontFamily: fontMedium, fontSize: 30 * k, lineHeight: 32 * k }]}>
+                <Text style={[txt, { fontFamily: t.fontMedium, fontSize: 30 * k, lineHeight: 32 * k }]}>
                   {r.kcal}
-                  <Text style={{ fontFamily: font, fontSize: 17 * k, color: 'rgba(255,255,255,0.65)' }}> ккал</Text>
+                  <Text style={{ fontFamily: t.font, fontSize: 17 * k, color: 'rgba(255,255,255,0.65)' }}> ккал</Text>
                 </Text>
                 <View style={{ flexDirection: 'row', gap: 5 * k, marginTop: 8 * k }}>
                   {[
@@ -62,8 +63,8 @@ export default function RecipeScreen() {
                     ['жири', r.f],
                   ].map(([label, g]) => (
                     <View key={label} style={{ flex: 1, borderRadius: 10 * k, paddingVertical: 5 * k, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.1)' }}>
-                      <Text style={[txt, { fontFamily: fontMedium, fontSize: 18 * k, lineHeight: 20 * k }]}>{g}</Text>
-                      <Text style={{ fontFamily: font, fontSize: 13 * k, color: 'rgba(255,255,255,0.6)' }}>{label}</Text>
+                      <Text style={[txt, { fontFamily: t.fontMedium, fontSize: 18 * k, lineHeight: 20 * k }]}>{g}</Text>
+                      <Text style={{ fontFamily: t.font, fontSize: 13 * k, color: 'rgba(255,255,255,0.6)' }}>{label}</Text>
                     </View>
                   ))}
                 </View>
@@ -71,16 +72,16 @@ export default function RecipeScreen() {
             ) : (
               <View style={{ borderRadius: 12 * k, padding: 10 * k, backgroundColor: 'rgba(255,255,255,0.08)', gap: 4 * k }}>
                 <Lock label="калорії і бжу" size={15} color="#FFFFFF" />
-                <Text style={{ fontFamily: font, fontSize: 14 * k, lineHeight: 16 * k, color: 'rgba(255,255,255,0.6)' }}>доступно в premium</Text>
+                <Text style={{ fontFamily: t.font, fontSize: 14 * k, lineHeight: 16 * k, color: 'rgba(255,255,255,0.6)' }}>доступно в premium</Text>
               </View>
             )}
 
             <Text style={head}>ІНГРЕДІЄНТИ</Text>
             {r.ing.map(([qty, name], i) => (
               <View key={i} style={{ flexDirection: 'row', gap: 6 * k, marginBottom: 3 * k }}>
-                <View style={{ width: 4 * k, height: 4 * k, borderRadius: 2 * k, marginTop: 9 * k, backgroundColor: sage, transform: [{ scale: 1.4 }] }} />
+                <View style={{ width: 4 * k, height: 4 * k, borderRadius: 2 * k, marginTop: 9 * k, backgroundColor: t.cta, transform: [{ scale: 1.4 }] }} />
                 <Text style={[txt, { flex: 1 }]}>
-                  {qty ? <Text style={{ fontFamily: fontMedium }}>{qty} </Text> : null}
+                  {qty ? <Text style={{ fontFamily: t.fontMedium }}>{qty} </Text> : null}
                   {name}
                 </Text>
               </View>
@@ -107,7 +108,7 @@ export default function RecipeScreen() {
         </Plaque>
       </View>
 
-      {/* v2: START is a solid sage pill, the one clear action on the screen. */}
+      {/* v2: START is a solid t.cta pill, the one clear action on the screen. */}
       <Pressable
         onPress={() => canCook && router.push(`/cook/${r.id}`)}
         disabled={!canCook}
@@ -122,13 +123,13 @@ export default function RecipeScreen() {
             borderRadius: 100,
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: canCook ? sage : 'rgba(24,24,27,0.7)',
+            backgroundColor: canCook ? t.cta : 'rgba(24,24,27,0.7)',
             borderWidth: 1,
             borderColor: 'rgba(255,255,255,0.3)',
             boxShadow: '0px 10px 24px rgba(0,0,0,0.4)',
           }}
         >
-          <Text style={{ fontFamily: fontMedium, fontSize: 38 * k, lineHeight: 46 * k, color: '#FFFFFF' }}>
+          <Text style={{ fontFamily: t.display, fontSize: 38 * k * t.displayK, lineHeight: 46 * k, color: '#FFFFFF' }}>
             {canCook ? (progress > 0 && progress < r.steps!.length ? 'далі' : 'старт') : 'скоро'}
           </Text>
         </View>

@@ -10,7 +10,7 @@ import { Screen } from '../components/Screen';
 import { useScale } from '../components/scale';
 import { Provider, useStore } from '../components/store';
 import { byId } from '../data';
-import { font, fontMedium, useTheme } from '../theme';
+import { titleStyle, useTheme } from '../theme';
 
 // Sign-in: Apple, Google or e-mail, or skip for now. Sign-in is a stub until real keys exist:
 // the button waits a beat and stores the chosen provider locally.
@@ -55,8 +55,8 @@ export default function Login() {
         <View style={[s.logo, { width: 56 * k, height: 56 * k, marginBottom: 14 * k }]}>
           <Image source={require('../../assets/figma/target.svg')} style={{ width: 38 * k, height: 38 * k }} />
         </View>
-        <Text style={{ fontFamily: fontMedium, fontSize: 52 * k, lineHeight: 54 * k, color: t.text }}>buzzcook</Text>
-        <Text style={{ fontFamily: font, fontSize: 22 * k, lineHeight: 26 * k, color: t.textSoft, marginBottom: 24 * k }}>
+        <Text style={titleStyle(t, 52 * k)}>buzzcook</Text>
+        <Text style={{ fontFamily: t.font, fontSize: 22 * k, lineHeight: 26 * k, color: t.textSoft, marginBottom: 24 * k }}>
           план на тиждень і готування крок за кроком
         </Text>
 
@@ -79,7 +79,7 @@ export default function Login() {
               ) : (
                 <>
                   <Image source={b.icon} style={{ width: 22 * k, height: 22 * k }} />
-                  <Text style={{ fontFamily: fontMedium, fontSize: 23 * k, color: b.fg }}>{b.label}</Text>
+                  <Text style={{ fontFamily: t.fontMedium, fontSize: 23 * k, color: b.fg }}>{b.label}</Text>
                 </>
               )}
             </Pressable>
@@ -95,7 +95,7 @@ export default function Login() {
           style={{ alignSelf: 'center', marginTop: 16 * k }}
           accessibilityRole="button"
         >
-          <Text style={{ fontFamily: font, fontSize: 20 * k, color: t.text, textDecorationLine: 'underline' }}>пізніше</Text>
+          <Text style={{ fontFamily: t.font, fontSize: 20 * k, color: t.text, textDecorationLine: 'underline' }}>пізніше</Text>
         </Pressable>
       </View>
     </Screen>

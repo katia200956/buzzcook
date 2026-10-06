@@ -5,7 +5,7 @@ import { Page } from '../../components/Page';
 import { useScale } from '../../components/scale';
 import { useStore } from '../../components/store';
 import { byId } from '../../data';
-import { font, fontMedium, useTheme } from '../../theme';
+import { titleStyle, useTheme } from '../../theme';
 
 // Figma "recipe process": the cooking steps you have already done.
 export default function Process() {
@@ -13,7 +13,7 @@ export default function Process() {
   const t = useTheme();
   const { current, done } = useStore();
   const r = current ? byId(current) : undefined;
-  const txt = { fontFamily: font, fontSize: 20 * k, lineHeight: 24 * k, color: t.text };
+  const txt = { fontFamily: t.font, fontSize: 20 * k, lineHeight: 24 * k, color: t.text };
 
   if (!r?.steps) {
     return (
@@ -29,7 +29,7 @@ export default function Process() {
 
   return (
     <Page>
-      <Text style={[txt, { fontFamily: fontMedium, fontSize: 28 * k, lineHeight: 32 * k }]}>{r.name}</Text>
+      <Text style={titleStyle(t, 28 * k)}>{r.name}</Text>
       <Text style={[txt, { opacity: 0.6, marginBottom: 16 * k }]}>
         {finished ? 'готово, смачного!' : `зроблено ${n} з ${r.steps.length}`}
       </Text>
@@ -49,7 +49,7 @@ export default function Process() {
       {!finished && (
         <Pressable onPress={() => router.push(`/cook/${r.id}`)} style={{ alignSelf: 'flex-start', marginTop: 12 * k }}>
           <Glass radius={100} style={{ paddingHorizontal: 22 * k, height: 44 * k, justifyContent: 'center' }}>
-            <Text style={{ fontFamily: font, fontSize: 28 * k, color: '#FFFFFF' }}>продовжити</Text>
+            <Text style={{ fontFamily: t.font, fontSize: 28 * k, color: t.poster ? t.text : '#FFFFFF' }}>продовжити</Text>
           </Glass>
         </Pressable>
       )}

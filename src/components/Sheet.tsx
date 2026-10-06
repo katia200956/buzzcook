@@ -67,7 +67,7 @@ export function Sheet({ open, onClose, children }: { open: boolean; onClose: () 
         ]}
       >
         <BlurView intensity={60} tint={t.blurTint} style={StyleSheet.absoluteFill} />
-        <View style={[StyleSheet.absoluteFill, { backgroundColor: t.mode === 'dark' ? 'rgba(30,30,32,0.72)' : 'rgba(235,235,237,0.78)' }]} />
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: t.sheet }]} />
         <View style={[s.grabber, { marginTop: 8 * k, marginBottom: 14 * k, width: 38 * k, height: 5 * k, backgroundColor: t.textSoft }]} />
         <View style={{ paddingHorizontal: 22 * k }}>{children}</View>
       </Animated.View>

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 402 236" width="402" height="236">
+  <!-- Cream card from the ramen flyer: straight sides, top and bottom cut on the same rising slant,
+       corners rounded by a thick round-joined stroke. Rows are 236 tall, so stacked cards leave an
+       even 18pt orange stripe between them, like the flyer's diagonal band. -->
+  <polygon points="34,48 368,18 368,200 34,230" fill="#FFF1DC" stroke="#FFF1DC" stroke-width="36" stroke-linejoin="round"/>
+</svg>

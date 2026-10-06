@@ -7,24 +7,26 @@ import { Lock } from '../../components/Premium';
 import { useScale } from '../../components/scale';
 import { ThemeMode, useStore } from '../../components/store';
 import { byId } from '../../data';
-import { font, fontMedium, sage, useTheme } from '../../theme';
+import { titleStyle, useTheme } from '../../theme';
 
 const themes: [ThemeMode, string][] = [
   ['system', 'авто'],
   ['light', 'світла'],
   ['dark', 'темна'],
+  ['poster', 'постер'],
+  ['posterBlack', 'чорний'],
 ];
 
 export default function Profile() {
   const k = useScale();
   const t = useTheme();
   const { saved, themeMode, setThemeMode, user, signOut, premium, showPaywall } = useStore();
-  const txt = { fontFamily: font, fontSize: 20 * k, lineHeight: 24 * k, color: t.text };
+  const txt = { fontFamily: t.font, fontSize: 20 * k, lineHeight: 24 * k, color: t.text };
   const list = saved.map(byId).filter((r) => !!r);
 
   return (
     <Page>
-      <Text style={[txt, { fontFamily: fontMedium, fontSize: 28 * k, lineHeight: 32 * k }]}>профіль</Text>
+      <Text style={titleStyle(t, 28 * k)}>профіль</Text>
 
       <Text style={[txt, { opacity: 0.6, marginTop: 20 * k, marginBottom: 8 * k }]}>акаунт</Text>
       <Text style={txt}>{user ? `увійшла через ${user.name}` : 'ти ще не увійшла'}</Text>
@@ -44,7 +46,7 @@ export default function Profile() {
       <Text style={[txt, { opacity: 0.6, marginTop: 20 * k, marginBottom: 8 * k }]}>premium</Text>
       <Pressable onPress={() => showPaywall(true)} accessibilityRole="button" style={{ flexDirection: 'row', alignItems: 'center', gap: 10 * k }}>
         {premium ? (
-          <View style={{ backgroundColor: sage, borderRadius: 100, paddingHorizontal: 12 * k, height: 30 * k, justifyContent: 'center' }}>
+          <View style={{ backgroundColor: t.cta, borderRadius: 100, paddingHorizontal: 12 * k, height: 30 * k, justifyContent: 'center' }}>
             <Text style={[txt, { color: '#FFFFFF' }]}>увімкнено</Text>
           </View>
         ) : (
@@ -54,7 +56,7 @@ export default function Profile() {
       </Pressable>
 
       <Text style={[txt, { opacity: 0.6, marginTop: 20 * k, marginBottom: 8 * k }]}>тема</Text>
-      <View style={{ flexDirection: 'row', gap: 8 * k }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 * k }}>
         {themes.map(([m, label]) => (
           <Pressable key={m} onPress={() => setThemeMode(m)}>
             <Glass radius={100} strong={themeMode === m} style={{ paddingHorizontal: 16 * k, height: 34 * k, justifyContent: 'center', opacity: themeMode === m ? 1 : 0.55 }}>

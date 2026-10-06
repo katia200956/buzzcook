@@ -2,7 +2,7 @@ import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { font } from '../theme';
+import { useTheme } from '../theme';
 import { Glass } from './Glass';
 import { Plaque } from './Plaque';
 import { useScale } from './scale';
@@ -22,6 +22,7 @@ export function Header({
   onMenu?: () => void;
 }) {
   const k = useScale();
+  const t = useTheme();
   const insets = useSafeAreaInsets();
   const top = Math.max(insets.top + 6, 59 * k);
 
@@ -43,14 +44,14 @@ export function Header({
           onFocus={() => !onQuery && router.navigate('/')}
           placeholder="пошук..."
           placeholderTextColor="rgba(255,255,255,0.7)"
-          style={[s.input, { fontSize: 20 * k, marginLeft: 8 * k }]}
+          style={[s.input, { fontFamily: t.font, fontSize: 20 * k, marginLeft: 8 * k }]}
           returnKeyType="search"
         />
       </Plaque>
 
       <Pressable onPress={onMenu} accessibilityLabel="Меню">
         <Glass radius={15} style={{ width: 52 * k, height: 52 * k, alignItems: 'center', justifyContent: 'center' }}>
-          <Image source={require('../../assets/figma/menu.svg')} style={{ width: 35 * k, height: 35 * k }} />
+          <Image source={require('../../assets/figma/menu.svg')} tintColor={t.poster ? t.text : undefined} style={{ width: 35 * k, height: 35 * k }} />
         </Glass>
       </Pressable>
     </View>
@@ -59,5 +60,5 @@ export function Header({
 
 const s = StyleSheet.create({
   row: { position: 'absolute', zIndex: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  input: { flex: 1, fontFamily: font, color: '#FFFFFF', paddingVertical: 0, position: 'relative', zIndex: 1, outlineStyle: 'none' } as any,
+  input: { flex: 1, color: '#FFFFFF', paddingVertical: 0, position: 'relative', zIndex: 1, outlineStyle: 'none' } as any,
 });

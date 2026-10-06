@@ -11,9 +11,11 @@ import { StageScene, useReduceMotion } from './StageScene';
 // When a hands-on line is confirmed, what it makes flies from the scene into the bowl and stays
 // there; "stir" spins the bowl's contents, and serving swaps the bowl for the real dish.
 // The bowl is drawn, not a picture: a white rim and a shaded inside, squashed into a 3/4 view.
+// Food has weight here: pieces lift toward the camera before they fly, the bowl dips when they
+// land, stirring tosses the contents, and the served dish turns slowly like a turntable shot.
 
 const native = Platform.OS !== 'web';
-const FLIGHT = 560;
+const FLIGHT = 760;
 const STAGGER = 70;
 
 export type BowlItem = { key: string; bit: BowlBit; born: number };
@@ -42,25 +44,39 @@ export function BowlStage({ layers, size, active, focus, items, fresh, flight, s
   // Where a bit lands, in this view's coordinates (the inside is squashed to half height).
   const spot = (b: BowlBit) => ({ x: cx + ((b.x - 50) / 100) * inner, y: cy + ((b.y - 50) / 100) * inner * 0.5 });
   const flying = flight && !still && layers[flight.from]?.src !== undefined;
+  const bump = useBump(flying ? flight!.key : 0, FLIGHT + 40, stir, still);
 
   return (
     <View style={{ width: size, height: cy + B * 0.4 }} pointerEvents="none">
       <StageScene layers={layers} size={size} active={active} focus={focus} />
 
-      {/* The bowl's body: a deeper ellipse peeking out under the rim. */}
-      <View style={{ position: 'absolute', left: cx - B / 2, top: cy + B * 0.06 - B / 2, width: B, height: B, transform: [{ scaleY: 0.66 }] }}>
-        <LinearGradient colors={['#FFFFFF', '#CFCBC3']} style={{ flex: 1, borderRadius: B / 2 }} />
-      </View>
-      {/* The rim, and the inside the contents sit in. */}
-      <View style={{ position: 'absolute', left: cx - B / 2, top: cy - B / 2, width: B, height: B, transform: [{ scaleY: 0.5 }] }}>
-        <View style={{ flex: 1, borderRadius: B / 2, backgroundColor: '#F7F5F0', alignItems: 'center', justifyContent: 'center' }}>
-          <View style={{ width: inner, height: inner, borderRadius: inner / 2, overflow: 'hidden' }}>
-            <LinearGradient colors={['#C9C5BD', '#EFECE6']} style={{ position: 'absolute', inset: 0 }} />
-            <Contents items={items} inner={inner} fresh={fresh} delayed={!!flying} stir={stir} still={still} hidden={!!served} />
-          </View>
+      <Animated.View
+        style={{
+          position: 'absolute',
+          inset: 0,
+          transformOrigin: `50% ${cy + B * 0.3}px`,
+          transform: [
+            { translateY: bump.interpolate({ inputRange: [-1, 0, 1], outputRange: [-B * 0.03, 0, B * 0.025] }) },
+            { scaleX: bump.interpolate({ inputRange: [-1, 0, 1], outputRange: [0.98, 1, 1.025] }) },
+            { scaleY: bump.interpolate({ inputRange: [-1, 0, 1], outputRange: [1.02, 1, 0.97] }) },
+          ],
+        }}
+      >
+        {/* The bowl's body: a deeper ellipse peeking out under the rim. */}
+        <View style={{ position: 'absolute', left: cx - B / 2, top: cy + B * 0.06 - B / 2, width: B, height: B, transform: [{ scaleY: 0.66 }] }}>
+          <LinearGradient colors={['#FFFFFF', '#CFCBC3']} style={{ flex: 1, borderRadius: B / 2 }} />
         </View>
-        {served && <Served src={served.src} size={B} still={still} />}
-      </View>
+        {/* The rim, and the inside the contents sit in. */}
+        <View style={{ position: 'absolute', left: cx - B / 2, top: cy - B / 2, width: B, height: B, transform: [{ scaleY: 0.5 }] }}>
+          <View style={{ flex: 1, borderRadius: B / 2, backgroundColor: '#F7F5F0', alignItems: 'center', justifyContent: 'center' }}>
+            <View style={{ width: inner, height: inner, borderRadius: inner / 2, overflow: 'hidden' }}>
+              <LinearGradient colors={['#C9C5BD', '#EFECE6']} style={{ position: 'absolute', inset: 0 }} />
+              <Contents items={items} inner={inner} fresh={fresh} delayed={!!flying} stir={stir} still={still} hidden={!!served} />
+            </View>
+          </View>
+          {served && <Served src={served.src} size={B} still={still} />}
+        </View>
+      </Animated.View>
 
       {flying &&
         flight!.bits.map((b, n) => (
@@ -102,7 +118,7 @@ function Contents({
   useEffect(() => {
     if (!stir || still) return;
     turn.setValue(0);
-    const a = Animated.timing(turn, { toValue: 1, duration: 1100, easing: Easing.inOut(Easing.cubic), useNativeDriver: native });
+    const a = Animated.timing(turn, { toValue: 1, duration: 1300, easing: Easing.inOut(Easing.cubic), useNativeDriver: native });
     a.start();
     return () => a.stop();
   }, [stir, still, turn]);
@@ -123,7 +139,12 @@ function Contents({
         position: 'absolute',
         inset: 0,
         opacity: fade,
-        transform: [{ rotate: turn.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] }) }],
+        // Tossed rather than spun: it all jumps up toward the camera, turns over and drops back.
+        transform: [
+          { translateY: turn.interpolate({ inputRange: [0, 0.35, 0.75, 0.88, 1], outputRange: [0, -inner * 0.1, 0, -inner * 0.015, 0] }) },
+          { scale: turn.interpolate({ inputRange: [0, 0.35, 0.75, 1], outputRange: [1, 1.12, 0.98, 1] }) },
+          { rotate: turn.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] }) },
+        ],
       }}
     >
       {leaves.map((i) => (
@@ -166,7 +187,7 @@ function Pop({ delay, still, style, children }: { delay: number; still: boolean;
   const [t] = useState(() => new Animated.Value(delay < 0 || still ? 1 : 0));
   useEffect(() => {
     if (delay < 0 || still) return;
-    const a = Animated.sequence([Animated.delay(delay), Animated.spring(t, { toValue: 1, friction: 5, tension: 120, useNativeDriver: native })]);
+    const a = Animated.sequence([Animated.delay(delay), Animated.spring(t, { toValue: 1, friction: 4.5, tension: 140, useNativeDriver: native })]);
     a.start();
     return () => a.stop();
   }, [t, delay, still]);
@@ -176,7 +197,12 @@ function Pop({ delay, still, style, children }: { delay: number; still: boolean;
         style,
         {
           opacity: t.interpolate({ inputRange: [0, 0.2, 1], outputRange: [0, 1, 1] }),
-          transform: [...(style.transform ?? []), { scale: t.interpolate({ inputRange: [0, 1], outputRange: [0.5, 1] }) }],
+          // Lands flat and springs back: wider and lower first, then its own shape.
+          transform: [
+            ...(style.transform ?? []),
+            { scaleX: t.interpolate({ inputRange: [0, 1, 2], outputRange: [1.25, 1, 0.75] }) },
+            { scaleY: t.interpolate({ inputRange: [0, 1, 2], outputRange: [0.6, 1, 1.4] }) },
+          ],
         },
       ]}
     >
@@ -278,27 +304,58 @@ function Sauce({ inner }: { inner: number }) {
   );
 }
 
-// The real, finished dish taking the bowl's place.
+// The real, finished dish taking the bowl's place: it comes up toward the camera, then turns
+// slowly on the spot like a turntable shot (the bowl's 3/4 squash makes the turn read as 3D).
 function Served({ src, size, still }: { src: number; size: number; still: boolean }) {
   const [t] = useState(() => new Animated.Value(still ? 1 : 0));
+  const [spin] = useState(() => new Animated.Value(0));
   useEffect(() => {
     if (still) return;
-    const a = Animated.spring(t, { toValue: 1, friction: 6, tension: 50, useNativeDriver: native });
+    const a = Animated.parallel([
+      Animated.spring(t, { toValue: 1, friction: 7, tension: 40, useNativeDriver: native }),
+      Animated.loop(Animated.timing(spin, { toValue: 1, duration: 24000, easing: Easing.linear, useNativeDriver: native })),
+    ]);
     a.start();
     return () => a.stop();
-  }, [t, still]);
+  }, [t, spin, still]);
   return (
     <Animated.View
       style={{
         position: 'absolute',
         inset: 0,
         opacity: t.interpolate({ inputRange: [0, 0.4, 1], outputRange: [0, 1, 1] }),
-        transform: [{ scale: t.interpolate({ inputRange: [0, 1], outputRange: [0.86, 1.04] }) }],
+        transform: [
+          { scale: t.interpolate({ inputRange: [0, 1], outputRange: [1.3, 1.06] }) },
+          { rotate: spin.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] }) },
+        ],
       }}
     >
       <Image source={src} style={{ flex: 1 }} contentFit="contain" />
     </Animated.View>
   );
+}
+
+// The bowl's reaction: a dip with a little wobble when food lands in it (after `after` ms), and a
+// lift then a dip when it gets stirred. -1 is up, 1 is down.
+function useBump(landing: number, after: number, stir: number, still: boolean) {
+  const [v] = useState(() => new Animated.Value(0));
+  const settle = () => Animated.spring(v, { toValue: 0, friction: 4, tension: 160, useNativeDriver: native });
+  const to = (x: number, ms: number) => Animated.timing(v, { toValue: x, duration: ms, easing: Easing.out(Easing.quad), useNativeDriver: native });
+  useEffect(() => {
+    if (!landing || still) return;
+    const a = Animated.sequence([Animated.delay(after), to(1, 90), settle()]);
+    a.start();
+    return () => a.stop();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [landing, after, still]);
+  useEffect(() => {
+    if (!stir || still) return;
+    const a = Animated.sequence([to(-1, 380), Animated.delay(200), to(1, 220), settle()]);
+    a.start();
+    return () => a.stop();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stir, still]);
+  return v;
 }
 
 // One piece flying from its scene layer into the bowl on an arc, shrinking to its size there.
@@ -330,7 +387,7 @@ function Flyer({
   useEffect(() => {
     const a = Animated.sequence([
       Animated.delay(delay),
-      Animated.timing(t, { toValue: 1, duration: FLIGHT, easing: Easing.inOut(Easing.quad), useNativeDriver: native }),
+      Animated.timing(t, { toValue: 1, duration: FLIGHT, easing: Easing.bezier(0.45, 0, 0.6, 1), useNativeDriver: native }),
     ]);
     a.start(({ finished }) => {
       if (finished && buzz) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
@@ -345,12 +402,18 @@ function Flyer({
         top: from.y - h / 2,
         width: w,
         height: h,
-        opacity: t.interpolate({ inputRange: [0, 0.05, 0.85, 1], outputRange: [0, 1, 1, 0] }),
+        opacity: t.interpolate({ inputRange: [0, 0.05, 0.9, 1], outputRange: [0, 1, 1, 0] }),
+        // A beat of lift toward the camera, then a high arc down into the bowl with a turn.
         transform: [
-          { translateX: t.interpolate({ inputRange: [0, 1], outputRange: [0, dx] }) },
-          { translateY: t.interpolate({ inputRange: [0, 0.4, 1], outputRange: [0, dy * 0.25 - size * 0.12, dy] }) },
-          { rotate: t.interpolate({ inputRange: [0, 1], outputRange: ['0deg', `${(bit.rotate ?? 0) + 25}deg`] }) },
-          { scale: t.interpolate({ inputRange: [0, 1], outputRange: [1, target / w] }) },
+          { translateX: t.interpolate({ inputRange: [0, 0.18, 1], outputRange: [0, 0, dx] }) },
+          {
+            translateY: t.interpolate({
+              inputRange: [0, 0.18, 0.45, 0.7, 1],
+              outputRange: [0, -size * 0.05, dy * 0.15 - size * 0.2, dy * 0.55, dy],
+            }),
+          },
+          { rotate: t.interpolate({ inputRange: [0, 0.18, 1], outputRange: ['0deg', '-8deg', `${(bit.rotate ?? 0) + 200}deg`] }) },
+          { scale: t.interpolate({ inputRange: [0, 0.18, 0.45, 1], outputRange: [1, 1.22, 1.1, target / w] }) },
         ],
       }}
     >

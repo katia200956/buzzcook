@@ -25,6 +25,8 @@ export type SceneLayer = {
   float?: boolean;
   // For 'cut': juice colour; no splash without it.
   splash?: string;
+  // Pan tossing, on a loop once everything has landed: the pan flicks, the food jumps.
+  toss?: 'pan' | 'food';
 };
 
 const cut = (src: number, w: number, h: number) => ({ src, aspect: h / w });
@@ -46,9 +48,18 @@ export const salatArt = {
   ],
 };
 
-// Shrimps falling into the scene one after another.
-const droppingShrimps = (positions: [x: number, y: number, delay: number, rotate?: number][]): SceneLayer[] =>
-  positions.map(([x, y, delay, rotate], i) => ({ ...salatArt.shrimps[i % 3], x, y, w: 13, delay, rotate, anim: 'dropIn' }));
+// Shrimps falling into the scene one after another (and tossed, when they are in a pan).
+const droppingShrimps = (positions: [x: number, y: number, delay: number, rotate?: number][], inPan = false): SceneLayer[] =>
+  positions.map(([x, y, delay, rotate], i) => ({
+    ...salatArt.shrimps[i % 3],
+    x,
+    y,
+    w: 13,
+    delay,
+    rotate,
+    anim: 'dropIn',
+    toss: inPan ? 'food' : undefined,
+  }));
 
 const scenes: Record<string, SceneLayer[][]> = {
   salat: [
@@ -59,16 +70,16 @@ const scenes: Record<string, SceneLayer[][]> = {
       { ...salatArt.tomatoPile, x: 33, y: 74, w: 40, anim: 'driftIn', delay: 1.5 },
       { ...salatArt.avocadoPile, x: 68, y: 76, w: 36, anim: 'driftIn', delay: 1.75 },
     ],
-    // 2. Обсмажте креветки: shrimps drop into the hot pan, steam rises.
+    // 2. Обсмажте креветки: shrimps drop into the hot pan, steam rises, the pan gets tossed.
     [
-      { ...salatArt.pan, x: 50, y: 54, w: 74, anim: 'driftIn' },
+      { ...salatArt.pan, x: 50, y: 54, w: 74, anim: 'driftIn', toss: 'pan' },
       ...droppingShrimps([
         [40, 42, 0.55],
         [59, 47, 0.75, 25],
         [47, 60, 0.95, -20],
         [63, 63, 1.15, 60],
         [36, 60, 1.35, -45],
-      ]),
+      ], true),
       { fx: 'steam', x: 50, y: 30, w: 44, delay: 1.9 },
     ],
     // 3. З'єднайте в мисці: the hot shrimps land on the salad.

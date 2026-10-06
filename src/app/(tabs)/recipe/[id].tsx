@@ -5,6 +5,7 @@ import { Belt } from '../../../components/Belt';
 import { Header } from '../../../components/Header';
 import { Menu } from '../../../components/Menu';
 import { Plaque } from '../../../components/Plaque';
+import { PosterPanel } from '../../../components/PosterRow';
 import { Plate } from '../../../components/Plate';
 import { Lock } from '../../../components/Premium';
 import { Screen } from '../../../components/Screen';
@@ -33,7 +34,7 @@ export default function RecipeScreen() {
 
   return (
     <Screen>
-      <Belt />
+      {t.poster ? <PosterPanel tilt={-4} style={{ left: 14 * k, top: 186 * k, width: 236 * k, height: 128 * k, borderRadius: 26 * k }} /> : <Belt />}
       <View style={{ position: 'absolute', left: 31 * k, top: 140 * k }}>
         <Plate recipe={r} size={199 * k} />
       </View>

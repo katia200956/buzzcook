@@ -4,7 +4,7 @@ import { Suspense, useMemo, useRef, useState } from 'react';
 import { PanResponder, StyleProp, View, ViewStyle } from 'react-native';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { findProduct, Product } from './catalog';
+import { findProduct, Finish, Product } from './catalog';
 
 // A single library product rendered in 3D. It slowly turns on its own; dragging a finger
 // rotates it in any direction, and letting go hands it back to the slow spin.
@@ -61,20 +61,21 @@ export function ProductView({
         <directionalLight position={[2, 4, 3]} intensity={2.2} />
         <directionalLight position={[-3, 1, -2]} intensity={0.6} />
         <Suspense fallback={null}>
-          <Model url={p.model} spin={spin} autoRotate={autoRotate} />
+          <Model url={p.model} finish={p.finish} spin={spin} autoRotate={autoRotate} />
         </Suspense>
       </Canvas>
     </View>
   );
 }
 
-function Model({ url, spin, autoRotate }: { url: string; spin: Spin; autoRotate: boolean }) {
+function Model({ url, finish, spin, autoRotate }: { url: string; finish: Finish; spin: Spin; autoRotate: boolean }) {
   const gltf = useLoader(GLTFLoader, url);
   const group = useRef<THREE.Group>(null);
 
   // Center the model and scale its longest side to 1.6 units so every product fills the view alike.
   const scene = useMemo(() => {
     const obj = gltf.scene.clone(true);
+    applyFinish(obj, finish);
     const box = new THREE.Box3().setFromObject(obj);
     const center = box.getCenter(new THREE.Vector3());
     const size = box.getSize(new THREE.Vector3());
@@ -83,7 +84,7 @@ function Model({ url, spin, autoRotate }: { url: string; spin: Spin; autoRotate:
     wrap.add(obj);
     wrap.scale.setScalar(1.6 / Math.max(size.x, size.y, size.z));
     return wrap;
-  }, [gltf]);
+  }, [gltf, finish]);
 
   useFrame((_, dt) => {
     spin.tick(dt, autoRotate);
@@ -97,3 +98,27 @@ function Model({ url, spin, autoRotate }: { url: string; spin: Spin; autoRotate:
   );
 }
 
+
+// How the surface reads: a clear coat over the scanned textures gives the wet, freshly washed
+// gloss of fruit and cut flesh; dry foods (bread, cheese) keep a soft satin look.
+const finishes: Record<Finish, { roughness: number; clearcoat: number; clearcoatRoughness: number }> = {
+  juicy: { roughness: 0.45, clearcoat: 0.8, clearcoatRoughness: 0.08 },
+  wet: { roughness: 0.35, clearcoat: 1, clearcoatRoughness: 0.04 },
+  satin: { roughness: 0.7, clearcoat: 0, clearcoatRoughness: 0.5 },
+};
+
+function applyFinish(root: THREE.Object3D, finish: Finish) {
+  const f = finishes[finish];
+  root.traverse((node) => {
+    const mesh = node as THREE.Mesh;
+    if (!mesh.isMesh) return;
+    const src = mesh.material as THREE.MeshStandardMaterial;
+    mesh.material = new THREE.MeshPhysicalMaterial({
+      map: src.map,
+      normalMap: src.normalMap,
+      roughnessMap: src.roughnessMap,
+      metalness: 0,
+      ...f,
+    });
+  });
+}

@@ -82,10 +82,10 @@ const narration: Record<string, Step[]> = {
     {
       // The shrimps come straight from the pan.
       scene: [
-        { ...salatArt.pan, x: 50, y: 52, w: 74, anim: 'driftIn' },
-        { ...salatArt.shrimps[0], x: 41, y: 45, w: 13, anim: 'dropIn', delay: 0.4 },
-        { ...salatArt.shrimps[1], x: 60, y: 49, w: 13, rotate: 25, anim: 'dropIn', delay: 0.55 },
-        { ...salatArt.shrimps[2], x: 48, y: 61, w: 13, rotate: -20, anim: 'dropIn', delay: 0.7 },
+        { ...salatArt.pan, x: 50, y: 52, w: 74, anim: 'driftIn', toss: 'pan' },
+        { ...salatArt.shrimps[0], x: 41, y: 45, w: 13, anim: 'dropIn', delay: 0.4, toss: 'food' },
+        { ...salatArt.shrimps[1], x: 60, y: 49, w: 13, rotate: 25, anim: 'dropIn', delay: 0.55, toss: 'food' },
+        { ...salatArt.shrimps[2], x: 48, y: 61, w: 13, rotate: -20, anim: 'dropIn', delay: 0.7, toss: 'food' },
         { fx: 'steam', x: 50, y: 30, w: 40, delay: 1.2 },
       ],
       lines: [

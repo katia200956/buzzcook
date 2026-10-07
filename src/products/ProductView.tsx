@@ -63,15 +63,15 @@ export function ProductView({
         <directionalLight position={[2, 4, 3]} intensity={2.2} />
         <directionalLight position={[-3, 1, -2]} intensity={0.6} />
         <Suspense fallback={null}>
-          <Model url={p.model} finish={p.finish} spin={spin} autoRotate={autoRotate} />
+          <Model product={p} spin={spin} autoRotate={autoRotate} />
         </Suspense>
       </Canvas>
     </View>
   );
 }
 
-function Model({ url, finish, spin, autoRotate }: { url: string; finish: Finish; spin: Spin; autoRotate: boolean }) {
-  const gltf = useLoader(GLTFLoader, url);
+function Model({ product, spin, autoRotate }: { product: Product; spin: Spin; autoRotate: boolean }) {
+  const gltf = useLoader(GLTFLoader, product.model);
   const group = useRef<THREE.Group>(null);
 
   // Center the model and scale its longest side to 1.6 units so every product fills the view alike.
@@ -80,13 +80,13 @@ function Model({ url, finish, spin, autoRotate }: { url: string; finish: Finish;
     const box = new THREE.Box3().setFromObject(obj);
     const center = box.getCenter(new THREE.Vector3());
     const size = box.getSize(new THREE.Vector3());
-    applyFinish(obj, finish, 1 / Math.max(size.x, size.y, size.z));
+    applyFinish(obj, product, 1 / Math.max(size.x, size.y, size.z));
     obj.position.sub(center);
     const wrap = new THREE.Group();
     wrap.add(obj);
     wrap.scale.setScalar(1.6 / Math.max(size.x, size.y, size.z));
     return wrap;
-  }, [gltf, finish]);
+  }, [gltf, product]);
 
   useFrame((_, dt) => {
     spin.tick(dt, autoRotate);
@@ -117,12 +117,13 @@ const finishes: Record<
 };
 
 
-function applyFinish(root: THREE.Object3D, finish: Finish, scale: number) {
+function applyFinish(root: THREE.Object3D, product: Product, scale: number) {
+  const { finish, base, skin } = product;
   if (finish === 'natural') return;
   const { color, ...f } = finishes[finish];
   const convert = (src: THREE.MeshStandardMaterial): THREE.Material => {
     // Inside parts of a cut product (flesh, gel, seeds, calyx) keep their own look, whatever the skin's.
-    const inside = insideMaterial(src.name);
+    const inside = insideMaterial(src, base);
     if (inside) return inside;
     const material = new THREE.MeshPhysicalMaterial({
       name: src.name,
@@ -133,8 +134,10 @@ function applyFinish(root: THREE.Object3D, finish: Finish, scale: number) {
       color: src.map ? (color ?? '#ffffff') : src.color,
       metalness: 0,
       ...f,
+      ...(finish === 'skin' && skin?.roughness !== undefined && { roughness: skin.roughness }),
+      ...(finish === 'skin' && skin?.clearcoat !== undefined && { clearcoat: skin.clearcoat }),
     });
-    if (finish === 'skin') applySkin(material, scale, 0.001, 0.25);
+    if (finish === 'skin') applySkin(material, scale, skin?.bump ?? 0.001, skin?.tone ?? 0.25);
     return material;
   };
   root.traverse((node) => {

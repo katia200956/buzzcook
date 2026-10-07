@@ -62,6 +62,57 @@ export const metadata: ProductMeta[] = [
       'green calyx of thin curling sepals around a short stem. Inside: thick bright red wall, radial walls meeting in a ' +
       'paler core, 6–8 chambers of translucent orange-red gel with pale yellow flat seeds, gel slightly below the cut.',
   },
+  {
+    id: 'lemon',
+    sizeCm: { width: 6, height: 8, depth: 6 },
+    weightG: 110,
+    density: 1.03,
+    pieceWeightG: { whole: 110, half: 55, wedge: 14, slice: 9 },
+    edibleParts: ['flesh', 'juice', 'zest'],
+    preparation: ['squeezed for juice', 'sliced for drinks and fish', 'wedges for serving', 'zested'],
+    states: ['whole', 'half', 'slice'],
+    planned: ['wedge'],
+    actions: ['wash', 'cut', 'slice', 'place', 'pour'],
+    look:
+      'Oval with a pointed nipple at the blossom end and a smaller point at the stem end. Bright saturated yellow peel, ' +
+      'pebbly with dense oil-gland pores, satin shine. Cut: thin yellow rind over a thick white pith (about 4 mm), then ' +
+      '9–10 wedge segments split by thin white membranes, packed with translucent pale-yellow juice vesicles that catch ' +
+      'light, a small white core, and a few cream teardrop seeds lying in the segments. Very wet and glossy on the cut.',
+  },
+  {
+    id: 'onion-red',
+    sizeCm: { width: 7.5, height: 6.5, depth: 7.5 },
+    weightG: 150,
+    density: 0.95,
+    pieceWeightG: { whole: 150, half: 70, quarter: 35, slice: 18, strips: 2, diced: 0.5, chopped: 0.2 },
+    edibleParts: ['flesh layers'],
+    preparation: ['sliced into rings for salads', 'half-moon strips', 'diced for sauces', 'caramelised', 'pickled'],
+    states: ['whole', 'half', 'slice'],
+    planned: ['peeled', 'quarter', 'strips', 'diced', 'chopped', 'cooked'],
+    actions: ['peel', 'cut', 'slice', 'dice', 'chop', 'fry', 'stew', 'place', 'mix'],
+    look:
+      'Squat sphere tapering to a neck with dry brown fibres on top and a flat root plate below. Skin magenta-purple ' +
+      'with fine vertical darker veins and a light sheen. Cut: about 10 concentric layers, each 3–4 mm, white to pale ' +
+      'pink with a thin purple outer edge, nested in slightly off-centre ovals around a small core; edges of each slice ' +
+      'show purple vertical stripes. Layers are separate shells, slightly translucent and wet.',
+  },
+  {
+    id: 'banana',
+    sizeCm: { width: 4, height: 19, depth: 3.6 },
+    weightG: 120,
+    density: 0.95,
+    pieceWeightG: { whole: 120, peeled: 100, half: 50, slice: 6, cubes: 4, mashed: 100 },
+    edibleParts: ['flesh'],
+    preparation: ['peeled and sliced', 'mashed for baking', 'in smoothies', 'fried or baked'],
+    states: ['whole', 'peeled', 'half', 'slice'],
+    planned: ['cubes', 'mashed', 'cooked'],
+    actions: ['peel', 'cut', 'slice', 'mash', 'mix', 'place', 'fry', 'bake'],
+    look:
+      'Long curved fruit with five soft ridges, ripe yellow peel with a few tiny brown flecks, a green-tinged neck and a ' +
+      'dark brown stem and tip. Peel about 3 mm, cream-white on the inside. Flesh pale buttery yellow, matte to satin, ' +
+      'with faint lengthwise fibre lines on the sides of slices. Cut face: creamy centre with a tan three-armed star of ' +
+      'seed traces and tiny dark dots, a slightly lighter outer ring. Slices about 1.5 cm thick.',
+  },
 ];
 
 export function findMeta(id: string): ProductMeta | undefined {

@@ -84,7 +84,8 @@ from the reference photos.
 ## Phones
 
 GLBs stay under about 2.5 MB each. No Draco or Meshopt compression (Hermes cannot run their
-WebAssembly decoders). Textures 1024 px JPEG at most.
+WebAssembly decoders). Textures 1024 px JPEG at most. No vertex quantization either: the skin and
+flesh shaders read the raw positions in metres, and quantized positions make the skin speckle.
 
 ## Checking
 
@@ -96,3 +97,7 @@ added to the catalog.
 The tomato's `whole`, `half` and `slice` were built before this standard, in units where the
 tomato is 1 across. They are re-exported in metres when the remaining tomato states are built, so
 all tomato states come from one build.
+
+Lemon (whole, half, slice), red onion (whole, half, slice) and banana (whole, peeled, half, slice)
+follow this standard. The onion's half and rings are 2.6 and 2.9 MB, a little over the target,
+because each of its ten layers is a separate shell; they get lighter when its layers are simplified.

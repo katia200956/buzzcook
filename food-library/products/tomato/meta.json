@@ -1,0 +1,49 @@
+{
+  "id": "tomato",
+  "names": { "uk": "Помідор", "en": "Tomato" },
+  "aliases": ["томат", "помідори", "помідор червоний", "tomatoes"],
+  "category": "vegetable",
+  "dimensions_m": {
+    "x": 0.07, "y": 0.056, "z": 0.07,
+    "range": { "min": { "x": 0.055, "y": 0.045, "z": 0.055 }, "max": { "x": 0.09, "y": 0.072, "z": 0.09 } }
+  },
+  "mass_g": { "avg": 130, "min": 80, "max": 220 },
+  "density_g_cm3": 0.98,
+  "edible_parts": ["skin", "flesh", "gel", "seed", "core"],
+  "inedible_parts": ["calyx", "stem"],
+  "waste_ratio": 0.03,
+  "states": {
+    "whole": { "status": "planned" },
+    "half": { "status": "planned", "variants": ["half", "half_cross"] },
+    "quarter": { "status": "planned" },
+    "wedges": { "status": "planned" },
+    "slices": { "status": "planned", "variants": ["thin", "medium", "thick"] },
+    "half_slices": { "status": "planned" },
+    "strips": { "status": "planned" },
+    "cubes": { "status": "planned" },
+    "diced": { "status": "planned" },
+    "chopped": { "status": "planned" },
+    "mashed": { "status": "planned", "variants": ["crushed", "puree"] },
+    "peeled": { "status": "planned" },
+    "cooked": { "status": "planned", "variants": ["stewed", "roasted", "fried", "grilled"] },
+    "parts": { "status": "planned", "variants": ["skin", "seeds", "flesh"] }
+  },
+  "preparation": ["wash", "remove calyx", "core", "slice", "dice", "blanch and peel", "crush", "seed"],
+  "cooking_actions": [
+    { "action": "slice", "from_state": "whole", "to_state": "slices" },
+    { "action": "cut_half", "from_state": "whole", "to_state": "half" },
+    { "action": "quarter", "from_state": "half", "to_state": "quarter" },
+    { "action": "cube", "from_state": "slices", "to_state": "cubes" },
+    { "action": "dice", "from_state": "slices", "to_state": "diced" },
+    { "action": "chop", "from_state": "diced", "to_state": "chopped" },
+    { "action": "peel", "from_state": "whole", "to_state": "peeled" },
+    { "action": "crush", "from_state": "peeled", "to_state": "mashed" },
+    { "action": "place_in", "from_state": "cubes" },
+    { "action": "toss", "from_state": "wedges" },
+    { "action": "simmer", "from_state": "mashed", "to_state": "cooked" },
+    { "action": "roast", "from_state": "half", "to_state": "cooked" }
+  ],
+  "look": "Round, slightly flattened (h ≈ 0.8 d), saturated red-orange skin with soft natural gloss and a few droplets; 5–6 thin curling sepals and a short thick stem; 6–8 mm wall, 7–8 unequal chambers with thin pale septa, pale star-shaped columella, cream-yellow seeds along the outer edge of each chamber in glossy dark-red gel. See reference.md.",
+  "references": ["/mnt/project-files/products/references/tomato-v2.jpg"],
+  "build": { "seed": 1001, "script": "tools/tomato.py" }
+}

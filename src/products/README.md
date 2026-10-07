@@ -11,7 +11,8 @@ import { ProductView } from '../products/ProductView';
 findProduct("м'ясо")?.model                  // the GLB url, for your own three.js scene
 ```
 
-All products can be browsed at the `/products` route.
+All products can be browsed at the `/products` route. Every product follows [STANDARD.md](STANDARD.md)
+(scale, axes, pivots, states, material names, metadata); facts per product are in `metadata.ts`.
 
 ## How a product is made
 

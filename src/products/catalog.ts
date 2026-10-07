@@ -12,8 +12,21 @@ export type ProductCategory = 'bakery' | 'dairy' | 'eggs' | 'meat' | 'vegetables
  */
 export type Finish = 'natural' | 'juicy' | 'wet' | 'satin' | 'skin';
 
-/** How a product is prepared. A recipe asks for "tomato" + "half" and gets that model. */
-export type Form = 'whole' | 'half' | 'slice' | 'wedge' | 'cubes' | 'raw' | 'cooked';
+/** How a product is prepared (the states in STANDARD.md). A recipe asks for "tomato" + "half" and gets that model. */
+export type Form =
+  | 'whole'
+  | 'half'
+  | 'quarter'
+  | 'slice'
+  | 'strips'
+  | 'cubes'
+  | 'diced'
+  | 'chopped'
+  | 'mashed'
+  | 'peeled'
+  | 'cooked'
+  | 'wedge'
+  | 'raw';
 // Cut forms (half, slice) are made in Blender from the whole product, so they match it exactly. Each
 // piece is its own node in the GLB (half_top/half_bottom, slice_0 = bottom ... slice_N = top), laid
 // out apart (halves side by side cut face up, slices floating), so a recipe scene can move them.

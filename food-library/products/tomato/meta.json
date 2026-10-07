@@ -1,49 +1,634 @@
 {
   "id": "tomato",
-  "names": { "uk": "Помідор", "en": "Tomato" },
-  "aliases": ["томат", "помідори", "помідор червоний", "tomatoes"],
+  "names": {
+    "uk": "Помідор",
+    "en": "Tomato"
+  },
+  "aliases": [
+    "томат",
+    "помідори",
+    "помідор червоний",
+    "tomatoes"
+  ],
   "category": "vegetable",
   "dimensions_m": {
-    "x": 0.07, "y": 0.056, "z": 0.07,
-    "range": { "min": { "x": 0.055, "y": 0.045, "z": 0.055 }, "max": { "x": 0.09, "y": 0.072, "z": 0.09 } }
+    "x": 0.07,
+    "y": 0.056,
+    "z": 0.07,
+    "range": {
+      "min": {
+        "x": 0.055,
+        "y": 0.045,
+        "z": 0.055
+      },
+      "max": {
+        "x": 0.09,
+        "y": 0.072,
+        "z": 0.09
+      }
+    }
   },
-  "mass_g": { "avg": 130, "min": 80, "max": 220 },
+  "mass_g": {
+    "avg": 130,
+    "min": 80,
+    "max": 220
+  },
   "density_g_cm3": 0.98,
-  "edible_parts": ["skin", "flesh", "gel", "seed", "core"],
-  "inedible_parts": ["calyx", "stem"],
+  "edible_parts": [
+    "skin",
+    "flesh",
+    "gel",
+    "seed",
+    "core"
+  ],
+  "inedible_parts": [
+    "calyx",
+    "stem"
+  ],
   "waste_ratio": 0.03,
   "states": {
-    "whole": { "status": "planned" },
-    "half": { "status": "planned", "variants": ["half", "half_cross"] },
-    "quarter": { "status": "planned" },
-    "wedges": { "status": "planned" },
-    "slices": { "status": "planned", "variants": ["thin", "medium", "thick"] },
-    "half_slices": { "status": "planned" },
-    "strips": { "status": "planned" },
-    "cubes": { "status": "planned" },
-    "diced": { "status": "planned" },
-    "chopped": { "status": "planned" },
-    "mashed": { "status": "planned", "variants": ["crushed", "puree"] },
-    "peeled": { "status": "planned" },
-    "cooked": { "status": "planned", "variants": ["stewed", "roasted", "fried", "grilled"] },
-    "parts": { "status": "planned", "variants": ["skin", "seeds", "flesh"] }
+    "whole": {
+      "status": "built",
+      "files": [
+        {
+          "name": "tomato_whole.glb",
+          "lod": 0,
+          "bytes": 235020,
+          "triangles": 10704,
+          "pieces": 1,
+          "piece_mass_g": 147.75,
+          "mass_total_g": 147.8,
+          "piece_size_mm": [
+            70.4,
+            70.4,
+            65.6
+          ]
+        }
+      ],
+      "piece_count": 1,
+      "piece_mass_g": 147.75,
+      "piece_size_mm": {
+        "x": 70.4,
+        "y": 70.4,
+        "z": 65.6
+      }
+    },
+    "half": {
+      "status": "built",
+      "variants": [
+        "half",
+        "half_cross"
+      ],
+      "files": [
+        {
+          "name": "tomato_half.glb",
+          "lod": 0,
+          "bytes": 962040,
+          "triangles": 39892,
+          "pieces": 2,
+          "piece_mass_g": 73.88,
+          "mass_total_g": 147.8,
+          "piece_size_mm": [
+            65.0,
+            54.2,
+            53.7
+          ]
+        },
+        {
+          "name": "tomato_half_cross.glb",
+          "lod": 0,
+          "bytes": 986932,
+          "triangles": 40556,
+          "pieces": 2,
+          "piece_mass_g": 73.88,
+          "mass_total_g": 147.8,
+          "piece_size_mm": [
+            70.4,
+            70.3,
+            27.6
+          ]
+        }
+      ],
+      "piece_count": 2,
+      "piece_mass_g": 73.88,
+      "piece_size_mm": {
+        "x": 65.0,
+        "y": 54.2,
+        "z": 53.7
+      }
+    },
+    "quarter": {
+      "status": "built",
+      "files": [
+        {
+          "name": "tomato_quarter.glb",
+          "lod": 0,
+          "bytes": 1110272,
+          "triangles": 43660,
+          "pieces": 4,
+          "piece_mass_g": 36.94,
+          "mass_total_g": 147.7,
+          "piece_size_mm": [
+            54.1,
+            37.2,
+            35.3
+          ]
+        }
+      ],
+      "piece_count": 4,
+      "piece_mass_g": 36.94,
+      "piece_size_mm": {
+        "x": 54.1,
+        "y": 37.2,
+        "z": 35.3
+      }
+    },
+    "wedges": {
+      "status": "built",
+      "files": [
+        {
+          "name": "tomato_wedges.glb",
+          "lod": 0,
+          "bytes": 1220608,
+          "triangles": 46310,
+          "pieces": 8,
+          "piece_mass_g": 18.47,
+          "mass_total_g": 147.8,
+          "piece_size_mm": [
+            46.9,
+            26.6,
+            25.5
+          ]
+        }
+      ],
+      "piece_count": 8,
+      "piece_mass_g": 18.47,
+      "piece_size_mm": {
+        "x": 46.9,
+        "y": 26.6,
+        "z": 25.5
+      }
+    },
+    "slices": {
+      "status": "built",
+      "variants": [
+        "thin",
+        "medium",
+        "thick"
+      ],
+      "files": [
+        {
+          "name": "tomato_slices_medium.glb",
+          "lod": 0,
+          "bytes": 1505708,
+          "triangles": 54776,
+          "pieces": 8,
+          "piece_mass_g": 18.47,
+          "mass_total_g": 147.8,
+          "piece_size_mm": [
+            65.4,
+            65.1,
+            9.3
+          ]
+        },
+        {
+          "name": "tomato_slices_thick.glb",
+          "lod": 0,
+          "bytes": 1220944,
+          "triangles": 47052,
+          "pieces": 4,
+          "piece_mass_g": 36.94,
+          "mass_total_g": 147.8,
+          "piece_size_mm": [
+            68.4,
+            68.3,
+            17.5
+          ]
+        },
+        {
+          "name": "tomato_slices_thin.glb",
+          "lod": 0,
+          "bytes": 2092488,
+          "triangles": 70564,
+          "pieces": 17,
+          "piece_mass_g": 8.69,
+          "mass_total_g": 147.8,
+          "piece_size_mm": [
+            63.0,
+            62.7,
+            4.5
+          ]
+        }
+      ],
+      "piece_count": 8,
+      "piece_mass_g": 18.47,
+      "piece_size_mm": {
+        "x": 65.4,
+        "y": 65.1,
+        "z": 9.3
+      }
+    },
+    "half_slices": {
+      "status": "built",
+      "files": [
+        {
+          "name": "tomato_half_slices.glb",
+          "lod": 0,
+          "bytes": 1713776,
+          "triangles": 58480,
+          "pieces": 18,
+          "piece_mass_g": 8.21,
+          "mass_total_g": 147.7,
+          "piece_size_mm": [
+            57.2,
+            50.5,
+            6.8
+          ]
+        }
+      ],
+      "piece_count": 18,
+      "piece_mass_g": 8.21,
+      "piece_size_mm": {
+        "x": 57.2,
+        "y": 50.5,
+        "z": 6.8
+      }
+    },
+    "strips": {
+      "status": "built",
+      "notes": "edge scraps under 0.35 cm3 are discarded, as a cook would",
+      "files": [
+        {
+          "name": "tomato_strips.glb",
+          "lod": 0,
+          "bytes": 2729708,
+          "triangles": 81006,
+          "pieces": 57,
+          "piece_mass_g": 2.57,
+          "mass_total_g": 146.7,
+          "piece_size_mm": [
+            55.7,
+            9.1,
+            7.9
+          ]
+        }
+      ],
+      "piece_count": 57,
+      "piece_mass_g": 2.57,
+      "piece_size_mm": {
+        "x": 55.7,
+        "y": 9.1,
+        "z": 7.9
+      }
+    },
+    "cubes": {
+      "status": "built",
+      "files": [
+        {
+          "name": "tomato_cubes.glb",
+          "lod": 0,
+          "bytes": 2606776,
+          "triangles": 75256,
+          "pieces": 82,
+          "piece_mass_g": 1.8,
+          "mass_total_g": 147.6,
+          "piece_size_mm": [
+            16.2,
+            14.3,
+            10.7
+          ]
+        }
+      ],
+      "piece_count": 82,
+      "piece_mass_g": 1.8,
+      "piece_size_mm": {
+        "x": 16.2,
+        "y": 14.3,
+        "z": 10.7
+      }
+    },
+    "diced": {
+      "status": "built",
+      "notes": "representative set of pieces cut from one 7 mm slab; the app instances them to reach the grams",
+      "files": [
+        {
+          "name": "tomato_diced.glb",
+          "lod": 0,
+          "bytes": 1223916,
+          "triangles": 27388,
+          "pieces": 82,
+          "piece_mass_g": 0.31,
+          "mass_total_g": 25.8,
+          "piece_size_mm": [
+            10.9,
+            7.8,
+            5.4
+          ]
+        }
+      ],
+      "piece_count": 82,
+      "piece_mass_g": 0.31,
+      "piece_size_mm": {
+        "x": 10.9,
+        "y": 7.8,
+        "z": 5.4
+      }
+    },
+    "chopped": {
+      "status": "built",
+      "notes": "representative set from one quadrant of a 3 mm slab; the app instances them",
+      "files": [
+        {
+          "name": "tomato_chopped.glb",
+          "lod": 0,
+          "bytes": 686992,
+          "triangles": 10484,
+          "pieces": 106,
+          "piece_mass_g": 0.03,
+          "mass_total_g": 2.8,
+          "piece_size_mm": [
+            4.8,
+            3.2,
+            2.3
+          ]
+        }
+      ],
+      "piece_count": 106,
+      "piece_mass_g": 0.03,
+      "piece_size_mm": {
+        "x": 4.8,
+        "y": 3.2,
+        "z": 2.3
+      }
+    },
+    "mashed": {
+      "status": "built",
+      "variants": [
+        "crushed",
+        "puree"
+      ],
+      "files": [
+        {
+          "name": "tomato_mashed_crushed.glb",
+          "lod": 0,
+          "bytes": 1329324,
+          "triangles": 35124,
+          "pieces": 66,
+          "piece_mass_g": 0.85,
+          "mass_total_g": 56.1,
+          "piece_size_mm": [
+            13.8,
+            8.9,
+            4.6
+          ]
+        },
+        {
+          "name": "tomato_mashed_puree.glb",
+          "lod": 0,
+          "bytes": 245044,
+          "triangles": 10848,
+          "pieces": 1,
+          "piece_mass_g": 143.32,
+          "mass_total_g": 143.3,
+          "piece_size_mm": [
+            120.8,
+            116.3,
+            25.9
+          ]
+        }
+      ],
+      "piece_count": 66,
+      "piece_mass_g": 0.85,
+      "piece_size_mm": {
+        "x": 13.8,
+        "y": 8.9,
+        "z": 4.6
+      }
+    },
+    "peeled": {
+      "status": "built",
+      "files": [
+        {
+          "name": "tomato_peeled.glb",
+          "lod": 0,
+          "bytes": 182004,
+          "triangles": 9024,
+          "pieces": 1,
+          "piece_mass_g": 139.91,
+          "mass_total_g": 139.9,
+          "piece_size_mm": [
+            69.2,
+            69.2,
+            53.2
+          ]
+        }
+      ],
+      "piece_count": 1,
+      "piece_mass_g": 139.91,
+      "piece_size_mm": {
+        "x": 69.2,
+        "y": 69.2,
+        "z": 53.2
+      }
+    },
+    "cooked": {
+      "status": "built",
+      "variants": [
+        "roasted",
+        "stewed",
+        "grilled"
+      ],
+      "notes": "fried: planned",
+      "files": [
+        {
+          "name": "tomato_cooked_grilled.glb",
+          "lod": 0,
+          "bytes": 980876,
+          "triangles": 36084,
+          "pieces": 3,
+          "piece_mass_g": 30.27,
+          "mass_total_g": 90.8,
+          "piece_size_mm": [
+            65.9,
+            65.8,
+            9.4
+          ]
+        },
+        {
+          "name": "tomato_cooked_roasted.glb",
+          "lod": 0,
+          "bytes": 986932,
+          "triangles": 40556,
+          "pieces": 2,
+          "piece_mass_g": 59.1,
+          "mass_total_g": 118.2,
+          "piece_size_mm": [
+            63.6,
+            63.5,
+            24.9
+          ]
+        },
+        {
+          "name": "tomato_cooked_stewed.glb",
+          "lod": 0,
+          "bytes": 2614576,
+          "triangles": 75256,
+          "pieces": 82,
+          "piece_mass_g": 1.53,
+          "mass_total_g": 125.5,
+          "piece_size_mm": [
+            14.0,
+            12.3,
+            9.2
+          ]
+        }
+      ],
+      "piece_count": 3,
+      "piece_mass_g": 30.27,
+      "piece_size_mm": {
+        "x": 65.9,
+        "y": 65.8,
+        "z": 9.4
+      }
+    },
+    "parts": {
+      "status": "built",
+      "variants": [
+        "skin",
+        "seeds",
+        "flesh"
+      ],
+      "files": [
+        {
+          "name": "tomato_parts_flesh.glb",
+          "lod": 0,
+          "bytes": 314464,
+          "triangles": 13528,
+          "pieces": 4,
+          "piece_mass_g": 19.85,
+          "mass_total_g": 79.4,
+          "piece_size_mm": [
+            54.1,
+            48.9,
+            35.7
+          ]
+        },
+        {
+          "name": "tomato_parts_seeds.glb",
+          "lod": 0,
+          "bytes": 532988,
+          "triangles": 20744,
+          "pieces": 7,
+          "piece_mass_g": 3.42,
+          "mass_total_g": 24.0,
+          "piece_size_mm": [
+            29.0,
+            17.9,
+            14.8
+          ]
+        },
+        {
+          "name": "tomato_parts_skin.glb",
+          "lod": 0,
+          "bytes": 198364,
+          "triangles": 8336,
+          "pieces": 4,
+          "piece_mass_g": 0.69,
+          "mass_total_g": 2.8,
+          "piece_size_mm": [
+            36.0,
+            34.5,
+            29.0
+          ]
+        }
+      ],
+      "piece_count": 4,
+      "piece_mass_g": 19.85,
+      "piece_size_mm": {
+        "x": 54.1,
+        "y": 48.9,
+        "z": 35.7
+      }
+    }
   },
-  "preparation": ["wash", "remove calyx", "core", "slice", "dice", "blanch and peel", "crush", "seed"],
+  "preparation": [
+    "wash",
+    "remove calyx",
+    "core",
+    "slice",
+    "dice",
+    "blanch and peel",
+    "crush",
+    "seed"
+  ],
   "cooking_actions": [
-    { "action": "slice", "from_state": "whole", "to_state": "slices" },
-    { "action": "cut_half", "from_state": "whole", "to_state": "half" },
-    { "action": "quarter", "from_state": "half", "to_state": "quarter" },
-    { "action": "cube", "from_state": "slices", "to_state": "cubes" },
-    { "action": "dice", "from_state": "slices", "to_state": "diced" },
-    { "action": "chop", "from_state": "diced", "to_state": "chopped" },
-    { "action": "peel", "from_state": "whole", "to_state": "peeled" },
-    { "action": "crush", "from_state": "peeled", "to_state": "mashed" },
-    { "action": "place_in", "from_state": "cubes" },
-    { "action": "toss", "from_state": "wedges" },
-    { "action": "simmer", "from_state": "mashed", "to_state": "cooked" },
-    { "action": "roast", "from_state": "half", "to_state": "cooked" }
+    {
+      "action": "slice",
+      "from_state": "whole",
+      "to_state": "slices"
+    },
+    {
+      "action": "cut_half",
+      "from_state": "whole",
+      "to_state": "half"
+    },
+    {
+      "action": "quarter",
+      "from_state": "half",
+      "to_state": "quarter"
+    },
+    {
+      "action": "cube",
+      "from_state": "slices",
+      "to_state": "cubes"
+    },
+    {
+      "action": "dice",
+      "from_state": "slices",
+      "to_state": "diced"
+    },
+    {
+      "action": "chop",
+      "from_state": "diced",
+      "to_state": "chopped"
+    },
+    {
+      "action": "peel",
+      "from_state": "whole",
+      "to_state": "peeled"
+    },
+    {
+      "action": "crush",
+      "from_state": "peeled",
+      "to_state": "mashed"
+    },
+    {
+      "action": "place_in",
+      "from_state": "cubes"
+    },
+    {
+      "action": "toss",
+      "from_state": "wedges"
+    },
+    {
+      "action": "simmer",
+      "from_state": "mashed",
+      "to_state": "cooked"
+    },
+    {
+      "action": "roast",
+      "from_state": "half",
+      "to_state": "cooked"
+    }
   ],
   "look": "Round, slightly flattened (h ≈ 0.8 d), saturated red-orange skin with soft natural gloss and a few droplets; 5–6 thin curling sepals and a short thick stem; 6–8 mm wall, 7–8 unequal chambers with thin pale septa, pale star-shaped columella, cream-yellow seeds along the outer edge of each chamber in glossy dark-red gel. See reference.md.",
-  "references": ["/mnt/project-files/products/references/tomato-v2.jpg"],
-  "build": { "seed": 1001, "script": "tools/tomato.py" }
+  "references": [
+    "/mnt/project-files/products/references/tomato-v2.jpg"
+  ],
+  "build": {
+    "seed": 1001,
+    "script": "tools/tomato.py",
+    "script_version": "1",
+    "built_at": ""
+  }
 }

@@ -5,6 +5,7 @@ import { PanResponder, StyleProp, View, ViewStyle } from 'react-native';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { findProduct, Finish, Product } from './catalog';
+import { insideMaterial } from './inside';
 import { applySkin } from './skin';
 
 // A single library product rendered in 3D. It slowly turns on its own; dragging a finger
@@ -115,23 +116,21 @@ const finishes: Record<
   skin: { roughness: 0.22, clearcoat: 0.3, clearcoatRoughness: 0.15 },
 };
 
-// Cut faces made in Blender (src/products/README.md) carry a material named "flesh": the inside of
-// the product, always freshly cut and wet, whatever the finish of the skin around it.
-const flesh = { roughness: 0.2, clearcoat: 0.4, clearcoatRoughness: 0.1 };
 
 function applyFinish(root: THREE.Object3D, finish: Finish, scale: number) {
   if (finish === 'natural') return;
   const { color, ...f } = finishes[finish];
-  const convert = (src: THREE.MeshStandardMaterial) => {
-    if (src.name.startsWith('flesh')) {
-      return new THREE.MeshPhysicalMaterial({ name: src.name, map: src.map, metalness: 0, ...flesh });
-    }
+  const convert = (src: THREE.MeshStandardMaterial): THREE.Material => {
+    // Inside parts of a cut product (flesh, gel, seeds, calyx) keep their own look, whatever the skin's.
+    const inside = insideMaterial(src.name);
+    if (inside) return inside;
     const material = new THREE.MeshPhysicalMaterial({
       name: src.name,
       map: src.map,
       normalMap: src.normalMap,
       roughnessMap: finish === 'skin' ? null : src.roughnessMap,
-      color: color ?? '#ffffff',
+      // Models built in Blender have no texture, only a base colour.
+      color: src.map ? (color ?? '#ffffff') : src.color,
       metalness: 0,
       ...f,
     });

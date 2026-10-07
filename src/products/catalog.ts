@@ -14,9 +14,9 @@ export type Finish = 'natural' | 'juicy' | 'wet' | 'satin' | 'skin';
 
 /** How a product is prepared. A recipe asks for "tomato" + "half" and gets that model. */
 export type Form = 'whole' | 'half' | 'slice' | 'wedge' | 'cubes' | 'raw' | 'cooked';
-// Cut forms (half, slice) are made in Blender from the whole model, so they match it exactly. Each
+// Cut forms (half, slice) are made in Blender from the whole product, so they match it exactly. Each
 // piece is its own node in the GLB (half_top/half_bottom, slice_0 = bottom ... slice_N = top), laid
-// out apart like a floating cut, so a recipe scene can move the pieces separately.
+// out apart (halves side by side cut face up, slices floating), so a recipe scene can move them.
 
 export type Product = {
   id: string;
@@ -33,7 +33,7 @@ export type Product = {
   sizeCm: number;
   finish: Finish;
   /** Where the model came from, for licensing. */
-  source: 'higgsfield-tripo' | 'polyhaven-cc0';
+  source: 'higgsfield-tripo' | 'polyhaven-cc0' | 'blender-procedural';
 };
 
 const cdn = 'https://d2ol7oe51mr4n9.cloudfront.net/user_3JEO9h5kAQyW1nFbAaW0QOpZhET/';
@@ -70,12 +70,13 @@ export const products: Product[] = [
     name: { uk: 'Помідор', en: 'Tomato' },
     aliases: ['помідори', 'томат', 'томати', 'tomatoes'],
     category: 'vegetables',
-    // Round glossy tomato recreated from Katusha's reference photo (Meshy 7). The half and slices
-    // below are cut from this same model in Blender.
-    model: cdn + '620fe9c9-050d-4b20-a1d1-ca5076e20858.glb',
+    // Built in Blender as a real tomato (tools/tomato.py), matched to Katusha's reference photo.
+    // The half and slices below are cut from the same tomato, so their insides are true 3D:
+    // thick walls, 7 gel chambers sitting just below the cut, and seeds standing in the gel.
+    model: cdn + 'd69b3725-0cc2-4cb9-b3a9-2073ee7c20e7.glb',
     sizeCm: 7,
     finish: 'skin',
-    source: 'higgsfield-tripo',
+    source: 'blender-procedural',
   },
   {
     id: 'tomato-half',
@@ -84,10 +85,10 @@ export const products: Product[] = [
     name: { uk: 'Половинка помідора', en: 'Tomato half' },
     aliases: ['помідор навпіл', 'розрізаний помідор', 'halved tomato'],
     category: 'vegetables',
-    model: cdn + 'd1a48fe4-2648-488e-8052-9e969fa90a79.glb',
+    model: cdn + '22831bf3-1f49-499f-bd6c-49b25c71c34f.glb',
     sizeCm: 7,
     finish: 'skin',
-    source: 'higgsfield-tripo',
+    source: 'blender-procedural',
   },
   {
     id: 'tomato-slice',
@@ -96,10 +97,10 @@ export const products: Product[] = [
     name: { uk: 'Помідор слайсами', en: 'Sliced tomato' },
     aliases: ['скибки помідора', 'нарізаний помідор', 'кружальця помідора', 'tomato slices'],
     category: 'vegetables',
-    model: cdn + 'a86828b7-abd3-4d24-a7ac-9da3a19c48e9.glb',
+    model: cdn + '82878732-7e85-4ac4-b8c5-6dce0dc19e2b.glb',
     sizeCm: 7,
     finish: 'skin',
-    source: 'higgsfield-tripo',
+    source: 'blender-procedural',
   },
   {
     id: 'cheese-wedge',

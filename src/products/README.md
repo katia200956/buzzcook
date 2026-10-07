@@ -57,3 +57,13 @@ runs headless Blender (`pip install bpy==4.2.0`, Python 3.11, in the Higgsfield 
 mesh, fills each cut and maps a top-down photo of the cut face onto it as a material named `flesh`
 (generate that photo once per product: "top-down photo of the cut face, circle filling the frame").
 Each piece stays a separate node, so recipe scenes can move them apart or together.
+
+A photo on a flat cut reads as 2D, so products whose inside matters are built as real anatomy
+instead. `tools/tomato.py` models the tomato the way it grows: skin, a thick wall, radial walls
+meeting in a pale core, 7 chambers filled with gel, and about 320 flat seeds. It then cuts every
+part separately, so a cut shows the gel sitting a few millimetres below the flesh, seeds standing
+in it (some sliced through), and seeds deeper down seen through the clear gel. The GLB has no
+textures, only materials named `skin`, `flesh`, `gel`, `seed` and `calyx`; `inside.ts` gives the
+inside parts their real look (the flesh colour follows the 3D position: pale core, bright walls,
+deeper red under the skin). Don't quantize these GLBs: the flesh shading reads the raw positions.
+Use the same pattern for the next products with an inside worth seeing (lemon, onion, egg, kiwi).

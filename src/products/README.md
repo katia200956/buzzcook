@@ -49,3 +49,11 @@ tomato against a studio photo of real beefsteak tomatoes):
   shine and micro-bumps in shader, so every product gets it without new textures.
 - Preview on a light background with a soft overhead key and gentle contact shadow, the way food
   is photographed; dark dramatic backdrops exaggerate gloss.
+
+## Cut forms (half, slices) with Blender
+
+Halves and slices are cut from the whole model, so every form of a product matches. `tools/cut.py`
+runs headless Blender (`pip install bpy==4.2.0`, Python 3.11, in the Higgsfield sandbox), slices the
+mesh, fills each cut and maps a top-down photo of the cut face onto it as a material named `flesh`
+(generate that photo once per product: "top-down photo of the cut face, circle filling the frame").
+Each piece stays a separate node, so recipe scenes can move them apart or together.

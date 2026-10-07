@@ -14,6 +14,9 @@ export type Finish = 'natural' | 'juicy' | 'wet' | 'satin' | 'skin';
 
 /** How a product is prepared. A recipe asks for "tomato" + "half" and gets that model. */
 export type Form = 'whole' | 'half' | 'slice' | 'wedge' | 'cubes' | 'raw' | 'cooked';
+// Cut forms (half, slice) are made in Blender from the whole model, so they match it exactly. Each
+// piece is its own node in the GLB (half_top/half_bottom, slice_0 = bottom ... slice_N = top), laid
+// out apart like a floating cut, so a recipe scene can move the pieces separately.
 
 export type Product = {
   id: string;
@@ -67,8 +70,9 @@ export const products: Product[] = [
     name: { uk: 'Помідор', en: 'Tomato' },
     aliases: ['помідори', 'томат', 'томати', 'tomatoes'],
     category: 'vegetables',
-    // Ribbed beefsteak tomato (Meshy 7), matched to a studio photo of real ones.
-    model: cdn + 'c87e4dca-dd2d-4c9b-b7bd-3fa384f304a3.glb',
+    // Ribbed beefsteak tomato (Meshy 7), matched to a studio photo of real ones. The half and slices
+    // below are cut from this same model in Blender.
+    model: cdn + 'bb04a161-74c3-4507-b7b4-d72ec6d9f30c.glb',
     sizeCm: 9,
     finish: 'skin',
     source: 'higgsfield-tripo',
@@ -80,9 +84,21 @@ export const products: Product[] = [
     name: { uk: 'Половинка помідора', en: 'Tomato half' },
     aliases: ['помідор навпіл', 'розрізаний помідор', 'halved tomato'],
     category: 'vegetables',
-    model: cdn + '3c48685d-3011-472e-b071-a827d4120cd9.glb',
-    sizeCm: 7,
-    finish: 'wet',
+    model: cdn + '46409c00-0a26-42fb-978a-4692618a4f03.glb',
+    sizeCm: 9,
+    finish: 'skin',
+    source: 'higgsfield-tripo',
+  },
+  {
+    id: 'tomato-slice',
+    base: 'tomato',
+    form: 'slice',
+    name: { uk: 'Помідор слайсами', en: 'Sliced tomato' },
+    aliases: ['скибки помідора', 'нарізаний помідор', 'кружальця помідора', 'tomato slices'],
+    category: 'vegetables',
+    model: cdn + '0e5b8912-22e0-4827-95a6-24a867084402.glb',
+    sizeCm: 9,
+    finish: 'skin',
     source: 'higgsfield-tripo',
   },
   {

@@ -114,14 +114,19 @@ const finishes: Record<
   skin: { roughness: 0.38, clearcoat: 0, clearcoatRoughness: 0.5, specularIntensity: 0.8, color: '#e6c2bc' },
 };
 
+// Cut faces made in Blender (src/products/README.md) carry a material named "flesh": the inside of
+// the product, always freshly cut and wet, whatever the finish of the skin around it.
+const flesh = { roughness: 0.2, clearcoat: 0.35, clearcoatRoughness: 0.12 };
+
 function applyFinish(root: THREE.Object3D, finish: Finish, scale: number) {
   if (finish === 'natural') return;
   const { color, ...f } = finishes[finish];
-  root.traverse((node) => {
-    const mesh = node as THREE.Mesh;
-    if (!mesh.isMesh) return;
-    const src = mesh.material as THREE.MeshStandardMaterial;
+  const convert = (src: THREE.MeshStandardMaterial) => {
+    if (src.name.startsWith('flesh')) {
+      return new THREE.MeshPhysicalMaterial({ name: src.name, map: src.map, metalness: 0, ...flesh });
+    }
     const material = new THREE.MeshPhysicalMaterial({
+      name: src.name,
       map: src.map,
       normalMap: src.normalMap,
       roughnessMap: finish === 'skin' ? null : src.roughnessMap,
@@ -130,6 +135,13 @@ function applyFinish(root: THREE.Object3D, finish: Finish, scale: number) {
       ...f,
     });
     if (finish === 'skin') applySkin(material, scale);
-    mesh.material = material;
+    return material;
+  };
+  root.traverse((node) => {
+    const mesh = node as THREE.Mesh;
+    if (!mesh.isMesh) return;
+    mesh.material = Array.isArray(mesh.material)
+      ? mesh.material.map((m) => convert(m as THREE.MeshStandardMaterial))
+      : convert(mesh.material as THREE.MeshStandardMaterial);
   });
 }

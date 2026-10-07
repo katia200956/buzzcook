@@ -110,13 +110,14 @@ const finishes: Record<
   juicy: { roughness: 0.32, clearcoat: 0.15, clearcoatRoughness: 0.1 },
   wet: { roughness: 0.3, clearcoat: 0.35, clearcoatRoughness: 0.08 },
   satin: { roughness: 0.7, clearcoat: 0, clearcoatRoughness: 0.5 },
-  // Matched to a studio photo of real beefsteak tomatoes; color deepens the flat generated red.
-  skin: { roughness: 0.38, clearcoat: 0, clearcoatRoughness: 0.5, specularIntensity: 0.8, color: '#e6c2bc' },
+  // Matched to Katusha's reference photo of a sliced tomato: taut, freshly washed skin with a broad
+  // soft highlight, and only a light touch of the procedural skin over the model's own colours.
+  skin: { roughness: 0.22, clearcoat: 0.3, clearcoatRoughness: 0.15 },
 };
 
 // Cut faces made in Blender (src/products/README.md) carry a material named "flesh": the inside of
 // the product, always freshly cut and wet, whatever the finish of the skin around it.
-const flesh = { roughness: 0.2, clearcoat: 0.35, clearcoatRoughness: 0.12 };
+const flesh = { roughness: 0.2, clearcoat: 0.4, clearcoatRoughness: 0.1 };
 
 function applyFinish(root: THREE.Object3D, finish: Finish, scale: number) {
   if (finish === 'natural') return;
@@ -134,7 +135,7 @@ function applyFinish(root: THREE.Object3D, finish: Finish, scale: number) {
       metalness: 0,
       ...f,
     });
-    if (finish === 'skin') applySkin(material, scale);
+    if (finish === 'skin') applySkin(material, scale, 0.001, 0.25);
     return material;
   };
   root.traverse((node) => {

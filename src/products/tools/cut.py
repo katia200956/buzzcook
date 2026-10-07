@@ -3,10 +3,13 @@
 # material wet). Runs headless with the bpy wheel: pip install bpy==4.2.0 (Python 3.11).
 #   python3 cut.py in.glb section.jpg outdir
 # Writes whole.glb, half.glb (half_top, half_bottom) and slices.glb (slice_0 = bottom ... slice_4).
-import sys, bpy, bmesh
+import os, sys, bpy, bmesh
 from mathutils import Vector, Matrix
 
 src, section, out = sys.argv[-3:]
+# How far apart the pieces float (the model is scaled to longest side 1). The tomato used HALF_GAP=0.3 SLICE_GAP=0.2.
+HALF_GAP = float(os.environ.get('HALF_GAP', '0.3'))
+SLICE_GAP = float(os.environ.get('SLICE_GAP', '0.2'))
 
 def load():
     bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -87,7 +90,7 @@ export([ob], out + '/whole.glb')
 
 # Half: cut across the middle, top half lifted so both cut faces show.
 top = piece(ob, H * 0.5, None, flesh, 'half_top'); bot = piece(ob, None, H * 0.5, flesh, 'half_bottom')
-top.location.z = 0.32
+top.location.z = HALF_GAP
 export([top, bot], out + '/half.glb')
 for o in (top, bot): bpy.data.objects.remove(o)
 
@@ -96,6 +99,6 @@ bounds = [None] + [H * f for f in (0.2, 0.37, 0.54, 0.7)] + [None]
 parts = []
 for i in range(len(bounds) - 1):
     p = piece(ob, bounds[i], bounds[i + 1], flesh, f'slice_{i}')
-    p.location.z = i * 0.22
+    p.location.z = i * SLICE_GAP
     parts.append(p)
 export(parts, out + '/slices.glb')

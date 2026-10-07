@@ -25,7 +25,8 @@
       "expo-font",
       "expo-router",
       "expo-image",
-      "expo-video"
+      "expo-video",
+      "expo-asset"
     ],
     "scheme": "buzzcook",
     "experiments": {

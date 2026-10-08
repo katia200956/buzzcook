@@ -25,9 +25,9 @@ ID = "tomato"
 SEED = 1001
 D, H = 0.070, 0.056          # average diameter / height, metres
 N_LOC = 7                    # locules (chambers)
-WALL = 0.0065                # pericarp thickness at the equator
+WALL = 0.0058                # pericarp thickness at the equator
 WALL_V = 0.0085              # wall under the stem and at the blossom end
-SEPTUM = 0.0018
+SEPTUM = 0.0014
 DENSITY = 0.98               # g/cm3
 
 R = lib.rng(SEED)
@@ -38,8 +38,9 @@ RIB_PHASE = R.uniform(0, 2 * math.pi)
 MAT_NAMES = ["skin", "flesh", "flesh_cut", "core", "core_cut", "gel", "gel_cut",
              "seed", "seed_cut", "calyx", "stem"]
 M = {n: i for i, n in enumerate(MAT_NAMES)}
-CUT = {"wall": M["flesh_cut"], "core": M["core_cut"], "gel": M["gel_cut"], "seeds": M["seed_cut"]}
-PART_ORDER = ["wall", "core", "gel", "seeds"]
+CUT = {"wall": M["flesh_cut"], "core": M["core_cut"], "placenta": M["core_cut"], "gel": M["gel_cut"],
+       "seeds": M["seed_cut"]}
+PART_ORDER = ["wall", "core", "placenta", "gel", "seeds"]
 
 
 def materials():
@@ -49,8 +50,8 @@ def materials():
         lib.make_material("flesh_cut", rough=0.42, coat=0.2, coat_rough=0.3, spec=0.35),
         lib.make_material("core", rough=0.5, coat=0.3),
         lib.make_material("core_cut", rough=0.45, coat=0.2, coat_rough=0.3, spec=0.35),
-        lib.make_material("gel", rough=0.15, coat=0.5, coat_rough=0.05, spec=0.5, alpha=0.62),
-        lib.make_material("gel_cut", rough=0.2, coat=0.35, coat_rough=0.12, spec=0.45, alpha=0.62),
+        lib.make_material("gel", rough=0.12, coat=0.6, coat_rough=0.04, spec=0.5, alpha=0.7),
+        lib.make_material("gel_cut", rough=0.15, coat=0.5, coat_rough=0.08, spec=0.5, alpha=0.7),
         lib.make_material("seed", rough=0.45),
         lib.make_material("seed_cut", rough=0.4, coat=0.4),
         lib.make_material("calyx", rough=0.62, sheen=0.2),
@@ -87,28 +88,34 @@ def shape(u, v, d, h, dimple=True, ribs=1.0):
 
 def build():
     """Returns dict with part bmeshes (in place, Z up, bottom at z=0) and helpers."""
-    o_v, o_f = lib.grid_shell(lambda u, v: shape(u, v, D, H), 96, 48)
+    o_v, o_f = lib.grid_shell(lambda u, v: shape(u, v, D, H), 88, 44)
     zmin = min(p.z for p in o_v)
     o_v = [p - Vector((0, 0, zmin)) for p in o_v]
     c_v, c_f = lib.grid_shell(
         lambda u, v: shape(u, v, D - 2 * WALL, H - 2 * WALL_V, dimple=False, ribs=0.5)
-        + Vector((0, 0, -zmin - 0.001)), 48, 24)
+        + Vector((0, 0, -zmin - 0.001)), 40, 20)
     outer_tree = lib.bvh(o_v, o_f)
     cav_tree = lib.bvh(c_v, c_f)
     wall_min = min(outer_tree.find_nearest(p)[3] for p in c_v)
     assert all(lib.inside(outer_tree, p) for p in c_v[::7]), "cavity pokes out of the skin"
 
-    # cavity radius per height (conservative), for fitting the locules
-    zc = sum(p.z for p in c_v) / len(c_v)
+    # cavity radius per height (conservative), for fitting the locules: cast rays from the
+    # axis outward at many angles and keep the shortest hit
     zs = [p.z for p in c_v]
     c_lo, c_hi = min(zs), max(zs)
-    bins = 40
-    rmin = [1.0] * bins
-    for p in c_v:
-        b = min(bins - 1, int((p.z - c_lo) / (c_hi - c_lo) * bins))
-        rmin[b] = min(rmin[b], math.hypot(p.x, p.y))
-    raw = list(rmin)  # neighbour min keeps the table conservative
-    rmin = [min(raw[max(0, b - 1)], raw[b], raw[min(bins - 1, b + 1)]) for b in range(bins)]
+    zc = (c_lo + c_hi) / 2
+    bins = 60
+    rmin = []
+    for b in range(bins):
+        z = c_lo + (c_hi - c_lo) * (b + 0.5) / bins
+        best = 1.0
+        for k in range(36):
+            a = 2 * math.pi * k / 36
+            hit = cav_tree.ray_cast(Vector((0, 0, z)), Vector((math.cos(a), math.sin(a), 0)))
+            if hit[0] is not None:
+                best = min(best, hit[3])
+        rmin.append(best if best < 1.0 else 0.0)
+    rmin = [min(rmin[max(0, b - 1)], rmin[b], rmin[min(bins - 1, b + 1)]) for b in range(bins)]
 
     def cav_r(z):
         b = int((z - c_lo) / (c_hi - c_lo) * bins)
@@ -125,8 +132,8 @@ def build():
     a = start
     for i in range(N_LOC):
         locs.append(dict(center=a + spans[i] / 2 + R.uniform(-0.03, 0.03), span=spans[i],
-                         rin=R.uniform(0.0050, 0.0068), hz=hc * R.uniform(0.70, 0.80),
-                         zc=zc + R.uniform(-0.0015, 0.0015), p=R.uniform(2.2, 2.7),
+                         rin=R.uniform(0.0030, 0.0042), hz=hc * R.uniform(0.89, 0.93),
+                         zc=zc + R.uniform(-0.0015, 0.0015), p=R.uniform(3.6, 4.4),
                          off=Vector((R.uniform(0, 50), R.uniform(0, 50), R.uniform(0, 50)))))
         a += spans[i]
 
@@ -134,7 +141,7 @@ def build():
         """Superellipsoid coords (radial, tangential, vertical) in [-1,1] -> world point."""
         ar, at, az = a3
         z = L["zc"] + az * L["hz"]
-        rout = max(cav_r(z) * 0.9 - 0.0007, L["rin"] + 0.002)
+        rout = max(cav_r(z) * 0.96 - 0.0005, L["rin"] + 0.002)
         r = L["rin"] + (ar + 1) / 2 * (rout - L["rin"])
         r += 0.0005 * noise.noise(Vector(a3) * 1.7 + L["off"])
         halfw = max(L["span"] / 2 - (SEPTUM / 2) / max(r, 1e-4), 0.03)
@@ -147,40 +154,68 @@ def build():
             x, y, z = math.sin(v) * math.cos(u), math.sin(v) * math.sin(u), math.cos(v)
             n = (abs(x) ** L["p"] + abs(y) ** L["p"] + abs(z) ** L["p"]) ** (1 / L["p"])
             return loc_map(L, (x / n, y / n, z / n))
-        loc_meshes.append(lib.grid_shell(fn, 20, 12))
+        loc_meshes.append(lib.grid_shell(fn, 24, 14))
     bad = sum(1 for lv, _ in loc_meshes for p in lv[::5] if not lib.inside(cav_tree, p))
     assert bad == 0, f"{bad} locule points outside the cavity"
 
-    # seeds: flat teardrops, mostly toward the inner (placenta) side of each locule
+    # placenta: pale fibrous body on the inner side of each locule, fanning out in lobes;
+    # the seeds hang in a band along its outer edge, the gel fills the rest
+    def placenta_edge(L, at, az):
+        lobes = 0.14 * abs(math.cos(1.5 * math.pi * at)) + 0.08 * abs(math.cos(2.5 * math.pi * az))
+        return -0.38 + lobes + 0.05 * noise.noise(Vector((at, az, 0)) * 2.5 + L["off"])
+
+    def placenta_map(L, a3):
+        ar, at, az = a3
+        edge = placenta_edge(L, at, az)
+        r = -0.96 + (ar + 1) / 2 * (edge + 0.96)
+        return loc_map(L, (r, at * 0.94, az * 0.92))
+
+    pla_meshes = []
+    for L in locs:
+        def fn(u, v, L=L):
+            x, y, z = math.sin(v) * math.cos(u), math.sin(v) * math.sin(u), math.cos(v)
+            n = (abs(x) ** L["p"] + abs(y) ** L["p"] + abs(z) ** L["p"]) ** (1 / L["p"])
+            return placenta_map(L, (x / n, y / n, z / n))
+        pla_meshes.append(lib.grid_shell(fn, 20, 12))
+
+    # seeds: flat teardrops, long axis pointing outward, in a band just outside the placenta
     ico_v, ico_f = SEED_MESH
     seeds = []
     seeds_by_loc = []
     for li, L in enumerate(locs):
         lv, lf = loc_meshes[li]
         ltree = lib.bvh(lv, lf)
+        ptree = lib.bvh(*pla_meshes[li])
         placed, tries = [], 0
-        target = R.randint(24, 32)
-        while len(placed) < target and tries < 4000:
+        target = R.randint(28, 34)
+        while len(placed) < target and tries < 6000:
             tries += 1
-            a3 = (-0.85 + 1.15 * R.random() ** 1.3, R.uniform(-0.8, 0.8), R.uniform(-0.8, 0.8))
-            if sum(abs(t) ** L["p"] for t in a3) ** (1 / L["p"]) > 0.82:
+            at, az = R.uniform(-0.85, 0.85), R.uniform(-0.85, 0.85)
+            edge = placenta_edge(L, at, az)
+            a3 = (edge + R.uniform(0.10, 0.60), at, az)
+            if sum(abs(t) ** L["p"] for t in a3) ** (1 / L["p"]) > 0.86:
                 continue
             p = loc_map(L, a3)
-            if ltree.find_nearest(p)[3] < 0.0016 or not lib.inside(ltree, p):
+            if ltree.find_nearest(p)[3] < 0.0014 or not lib.inside(ltree, p):
                 continue
-            if any((p - q).length < 0.0031 for q in placed):
+            if ptree.find_nearest(p)[3] < 0.0012:
                 continue
-            placed.append(p)
-        for p in placed:
+            if any((p - q).length < 0.0027 for q, _ in placed):
+                continue
+            placed.append((p, L["center"] + at * L["span"] / 2))
+        for p, ang in placed:
             sc = R.uniform(0.85, 1.15)
-            rot = Euler((R.uniform(0, 6.3), R.uniform(0, 6.3), R.uniform(0, 6.3))).to_matrix()
-            tip = Vector((0, 0, 0))
+            radial = Vector((math.cos(ang), math.sin(ang), 0))
+            rot = (Euler((R.uniform(-0.45, 0.45), R.uniform(-0.45, 0.45), 0)).to_matrix()
+                   @ radial.to_track_quat("X", "Z").to_matrix()
+                   @ Matrix.Rotation(R.uniform(0, 6.3), 3, "X"))
             verts = []
             for q in ico_v:
-                w = Vector((q.x * 0.00145, q.y * 0.00105, q.z * 0.00042))
-                if q.x > 0:  # teardrop: narrower toward one end
-                    w.y *= 1 - 0.35 * q.x
-                verts.append(p + rot @ (w * sc) + tip)
+                w = Vector((q.x * 0.0019, q.y * 0.0013, q.z * 0.00048))
+                if q.x > 0:  # teardrop: pointed end outward
+                    w.y *= 1 - 0.45 * q.x
+                    w.z *= 1 - 0.3 * q.x
+                verts.append(p + rot @ (w * sc))
             seeds.append((verts, ico_f))
         seeds_by_loc.append(seeds[len(seeds) - len(placed):])
 
@@ -196,10 +231,16 @@ def build():
         lib.add_shell(b, lv, lf, M["core"], reverse=True)
     parts["core"] = b
     b = bmesh.new()
+    for pv, pf in pla_meshes:
+        lib.add_shell(b, pv, pf, M["core"])
+    parts["placenta"] = b
+    b = bmesh.new()
     for lv, lf in loc_meshes:
         lib.add_shell(b, lv, lf, M["gel"])
-    for sv, sf in seeds:
-        lib.add_shell(b, sv, sf, M["gel"], reverse=True)
+    for pv, pf in pla_meshes:
+        lib.add_shell(b, pv, pf, M["gel"], reverse=True)
+    # seeds sit inside the gel without holes cut for them (saves a third of the interior
+    # triangles); the gel's volume therefore already includes the seeds
     parts["gel"] = b
     b = bmesh.new()
     for sv, sf in seeds:
@@ -211,7 +252,8 @@ def build():
     top = max(o_v, key=lambda p: p.z if math.hypot(p.x, p.y) < 0.001 else -1)
     info = dict(outer=(o_v, o_f), outer_tree=outer_tree, wall_min=wall_min, top=top,
                 height=max(p.z for p in o_v), n_seeds=len(seeds), locs=locs,
-                loc_meshes=loc_meshes, seeds_by_loc=seeds_by_loc, cavity=(c_v, c_f))
+                loc_meshes=loc_meshes, pla_meshes=pla_meshes, seeds_by_loc=seeds_by_loc,
+                cavity=(c_v, c_f))
     info["calyx"] = calyx(outer_tree, top)
     return parts, info
 
@@ -314,10 +356,10 @@ def calyx(tree, top):
 C = {
     "skin": srgb("#C9260C"), "skin_orange": srgb("#D9480F"), "skin_yellow": srgb("#D7701E"),
     "scar": srgb("#7D6A2C"),
-    "flesh": srgb("#E0502A"), "flesh_out": srgb("#C9250C"), "flesh_in": srgb("#F68A58"),
-    "core": srgb("#F07E52"), "core_c": srgb("#F9BE9C"),
-    "gel": srgb("#D23A14"), "gel_hi": srgb("#EE6430"),
-    "seed": srgb("#EEC24C"), "seed_cut": srgb("#F7DE8E"),
+    "flesh": srgb("#E0502A"), "flesh_out": srgb("#D0260C"), "flesh_in": srgb("#E85A38"),
+    "core": srgb("#F2B494"), "core_c": srgb("#F8D9C6"),
+    "gel": srgb("#E24A20"), "gel_hi": srgb("#F27A4A"),
+    "seed": srgb("#F0B848"), "seed_cut": srgb("#F8DC96"),
     "calyx": srgb("#3D6420"), "calyx_tip": srgb("#5E7F2C"), "stem": srgb("#5A8628"),
     "stem_cut": srgb("#A3B567"),
 }
@@ -341,11 +383,12 @@ def colour_fn(info):
             return C["flesh"]
         if mat == M["flesh_cut"]:
             d = tree.find_nearest(co)[3]
-            return lerp(C["flesh_out"], C["flesh_in"], (d / WALL) ** 0.8)
+            return lerp(C["flesh_out"], C["flesh_in"], (d / WALL) ** 2)
         if mat == M["core"]:
             return C["core"]
         if mat == M["core_cut"]:
-            return lerp(C["core_c"], C["core"], (rh - 0.002) / 0.012)
+            fib = noise.noise(Vector((math.atan2(co.y, co.x) * 6, co.z * 120, rh * 60)) + OFF) * 0.5 + 0.5
+            return lerp(lerp(C["core_c"], C["core"], (rh - 0.003) / 0.016), C["flesh_in"], 0.5 * fib)
         if mat in (M["gel"], M["gel_cut"]):
             n = noise.noise(co * 400 + OFF) * 0.5 + 0.5
             return lerp(C["gel"], C["gel_hi"], 0.4 * n)
@@ -385,9 +428,12 @@ def make_pieces(parts, planes):
     return lib.split_all([copy_parts(parts)], planes, CUT)
 
 
+SOLID_PARTS = ["wall", "core", "placenta", "gel"]  # gel volume includes the seeds
+
+
 def piece_mass_g(piece):
-    # nested shells: wall + core + gel + seeds volumes add up to the solid volume
-    v = sum(lib.volume(piece[p]) for p in PART_ORDER if p in piece)
+    # nested shells: wall + core + placenta + gel volumes add up to the solid volume
+    v = sum(lib.volume(piece[p]) for p in SOLID_PARTS if p in piece)
     return v * 1e6 * DENSITY
 
 
@@ -460,7 +506,7 @@ def state_whole(parts, info, mats, coll):
     bpy.data.meshes.remove(me)
     bm.normal_update()
     lib.paint(bm, colour_fn(info))
-    vol = sum(lib.volume(parts[p]) for p in PART_ORDER)
+    vol = sum(lib.volume(parts[p]) for p in SOLID_PARTS)
     ob = lib.to_object("whole", bm, mats, coll, origin="bottom")
     return [ob], [vol * 1e6 * DENSITY]
 
@@ -609,7 +655,7 @@ def seed_shells(points, rng):
 
 def state_puree(parts, info, mats, coll):
     rng = lib.rng(SEED + 41)
-    vol_whole = sum(lib.volume(parts[p]) for p in PART_ORDER) * 0.97  # minus calyx scar
+    vol_whole = sum(lib.volume(parts[p]) for p in SOLID_PARTS) * 0.97  # minus calyx scar
     r = (vol_whole / (2 / 3 * math.pi * 0.38)) ** (1 / 3)
     mv, mf = mound(r, r * 0.38, salt=1)
     bm = bmesh.new()
@@ -781,9 +827,12 @@ def state_parts_pulp(parts, info, mats, coll):
     """Seeds with their gel, scooped out locule by locule."""
     obs, masses = [], []
     fn = colour_fn(info)
-    for i, ((lv, lf), seeds) in enumerate(zip(info["loc_meshes"], info["seeds_by_loc"])):
+    for i, ((lv, lf), (pv, pf), seeds) in enumerate(zip(info["loc_meshes"], info["pla_meshes"],
+                                                       info["seeds_by_loc"])):
         bm = bmesh.new()
         lib.add_shell(bm, lv, lf, M["gel"])
+        lib.add_shell(bm, pv, pf, M["gel"], reverse=True)
+        lib.add_shell(bm, pv, pf, M["core"])
         for sv, sf in seeds:
             lib.add_shell(bm, sv, sf, M["gel"], reverse=True)
             lib.add_shell(bm, sv, sf, M["seed"])

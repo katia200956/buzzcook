@@ -1,27 +1,27 @@
 {
  "wall_min_mm": 5.22,
  "height_m": 0.0543,
- "seeds": 184,
+ "seeds": 213,
  "whole": {
   "file": "whole/tomato_whole.glb",
   "pieces": 1,
-  "triangles": 10704,
-  "bytes": 235020,
-  "mass_total_g": 147.8,
-  "piece_mass_g": 147.75,
+  "triangles": 9248,
+  "bytes": 205216,
+  "mass_total_g": 147.7,
+  "piece_mass_g": 147.7,
   "piece_size_mm": [
    70.4,
    70.4,
-   65.6
+   68.1
   ]
  },
  "half": {
   "file": "half/tomato_half.glb",
   "pieces": 2,
-  "triangles": 39892,
-  "bytes": 962040,
-  "mass_total_g": 147.8,
-  "piece_mass_g": 73.88,
+  "triangles": 38445,
+  "bytes": 938172,
+  "mass_total_g": 147.6,
+  "piece_mass_g": 73.81,
   "piece_size_mm": [
    65.0,
    54.2,
@@ -31,10 +31,10 @@
  "half_cross": {
   "file": "half/tomato_half_cross.glb",
   "pieces": 2,
-  "triangles": 40556,
-  "bytes": 986932,
-  "mass_total_g": 147.8,
-  "piece_mass_g": 73.88,
+  "triangles": 39282,
+  "bytes": 972808,
+  "mass_total_g": 146.5,
+  "piece_mass_g": 73.27,
   "piece_size_mm": [
    70.4,
    70.3,
@@ -44,10 +44,10 @@
  "quarter": {
   "file": "quarter/tomato_quarter.glb",
   "pieces": 4,
-  "triangles": 43660,
-  "bytes": 1110272,
+  "triangles": 41100,
+  "bytes": 1047024,
   "mass_total_g": 147.7,
-  "piece_mass_g": 36.94,
+  "piece_mass_g": 36.92,
   "piece_size_mm": [
    54.1,
    37.2,
@@ -57,10 +57,10 @@
  "wedges": {
   "file": "wedges/tomato_wedges.glb",
   "pieces": 8,
-  "triangles": 46310,
-  "bytes": 1220608,
-  "mass_total_g": 147.8,
-  "piece_mass_g": 18.47,
+  "triangles": 44787,
+  "bytes": 1196260,
+  "mass_total_g": 147.7,
+  "piece_mass_g": 18.46,
   "piece_size_mm": [
    46.9,
    26.6,
@@ -70,51 +70,51 @@
  "slices_thin": {
   "file": "slices/tomato_slices_thin.glb",
   "pieces": 17,
-  "triangles": 70564,
-  "bytes": 2092488,
-  "mass_total_g": 147.8,
-  "piece_mass_g": 8.69,
+  "triangles": 82229,
+  "bytes": 2613688,
+  "mass_total_g": 152.1,
+  "piece_mass_g": 8.95,
   "piece_size_mm": [
-   63.0,
-   62.7,
-   4.5
+   62.8,
+   62.5,
+   4.6
   ]
  },
  "slices_medium": {
   "file": "slices/tomato_slices_medium.glb",
   "pieces": 8,
-  "triangles": 54776,
-  "bytes": 1505708,
-  "mass_total_g": 147.8,
-  "piece_mass_g": 18.47,
+  "triangles": 58920,
+  "bytes": 1717560,
+  "mass_total_g": 149.7,
+  "piece_mass_g": 18.71,
   "piece_size_mm": [
-   65.4,
+   65.3,
    65.1,
-   9.3
+   9.6
   ]
  },
  "slices_thick": {
   "file": "slices/tomato_slices_thick.glb",
   "pieces": 4,
-  "triangles": 47052,
-  "bytes": 1220944,
-  "mass_total_g": 147.8,
-  "piece_mass_g": 36.94,
+  "triangles": 48926,
+  "bytes": 1332096,
+  "mass_total_g": 145.4,
+  "piece_mass_g": 36.36,
   "piece_size_mm": [
    68.4,
    68.3,
-   17.5
+   18.1
   ]
  },
  "half_slices": {
   "file": "half_slices/tomato_half_slices.glb",
   "pieces": 18,
-  "triangles": 58480,
-  "bytes": 1713776,
-  "mass_total_g": 147.7,
+  "triangles": 65524,
+  "bytes": 2037072,
+  "mass_total_g": 147.8,
   "piece_mass_g": 8.21,
   "piece_size_mm": [
-   57.2,
+   57.1,
    50.5,
    6.8
   ]
@@ -122,10 +122,10 @@
  "strips": {
   "file": "strips/tomato_strips.glb",
   "pieces": 57,
-  "triangles": 81006,
-  "bytes": 2729708,
-  "mass_total_g": 146.7,
-  "piece_mass_g": 2.57,
+  "triangles": 85220,
+  "bytes": 3003440,
+  "mass_total_g": 146.8,
+  "piece_mass_g": 2.58,
   "piece_size_mm": [
    55.7,
    9.1,
@@ -134,24 +134,24 @@
  },
  "cubes": {
   "file": "cubes/tomato_cubes.glb",
-  "pieces": 82,
-  "triangles": 75256,
-  "bytes": 2606776,
-  "mass_total_g": 147.6,
-  "piece_mass_g": 1.8,
+  "pieces": 81,
+  "triangles": 74445,
+  "bytes": 2671808,
+  "mass_total_g": 147.5,
+  "piece_mass_g": 1.82,
   "piece_size_mm": [
-   16.2,
+   16.3,
    14.3,
-   10.7
+   10.8
   ]
  },
  "diced": {
   "file": "diced/tomato_diced.glb",
   "pieces": 82,
-  "triangles": 27388,
-  "bytes": 1223916,
-  "mass_total_g": 25.8,
-  "piece_mass_g": 0.31,
+  "triangles": 21667,
+  "bytes": 1096164,
+  "mass_total_g": 24.8,
+  "piece_mass_g": 0.3,
   "piece_size_mm": [
    10.9,
    7.8,
@@ -161,8 +161,8 @@
  "chopped": {
   "file": "chopped/tomato_chopped.glb",
   "pieces": 106,
-  "triangles": 10484,
-  "bytes": 686992,
+  "triangles": 8860,
+  "bytes": 643180,
   "mass_total_g": 2.8,
   "piece_mass_g": 0.03,
   "piece_size_mm": [
@@ -174,12 +174,12 @@
  "mashed_crushed": {
   "file": "mashed/tomato_mashed_crushed.glb",
   "pieces": 66,
-  "triangles": 35124,
-  "bytes": 1329324,
-  "mass_total_g": 56.1,
+  "triangles": 29510,
+  "bytes": 1212296,
+  "mass_total_g": 55.9,
   "piece_mass_g": 0.85,
   "piece_size_mm": [
-   13.8,
+   13.7,
    8.9,
    4.6
   ]
@@ -188,9 +188,9 @@
   "file": "mashed/tomato_mashed_puree.glb",
   "pieces": 1,
   "triangles": 10848,
-  "bytes": 245044,
+  "bytes": 245056,
   "mass_total_g": 143.3,
-  "piece_mass_g": 143.32,
+  "piece_mass_g": 143.27,
   "piece_size_mm": [
    120.8,
    116.3,
@@ -200,49 +200,49 @@
  "peeled": {
   "file": "peeled/tomato_peeled.glb",
   "pieces": 1,
-  "triangles": 9024,
-  "bytes": 182004,
+  "triangles": 7568,
+  "bytes": 152884,
   "mass_total_g": 139.9,
-  "piece_mass_g": 139.91,
+  "piece_mass_g": 139.86,
   "piece_size_mm": [
    69.2,
    69.2,
-   53.2
+   53.1
   ]
  },
  "cooked_roasted": {
   "file": "cooked/tomato_cooked_roasted.glb",
   "pieces": 2,
-  "triangles": 40556,
-  "bytes": 986932,
-  "mass_total_g": 118.2,
-  "piece_mass_g": 59.1,
+  "triangles": 39282,
+  "bytes": 972904,
+  "mass_total_g": 117.2,
+  "piece_mass_g": 58.61,
   "piece_size_mm": [
    63.6,
    63.5,
-   24.9
+   25.1
   ]
  },
  "cooked_stewed": {
   "file": "cooked/tomato_cooked_stewed.glb",
-  "pieces": 82,
-  "triangles": 75256,
-  "bytes": 2614576,
-  "mass_total_g": 125.5,
-  "piece_mass_g": 1.53,
+  "pieces": 81,
+  "triangles": 74445,
+  "bytes": 2679160,
+  "mass_total_g": 125.4,
+  "piece_mass_g": 1.55,
   "piece_size_mm": [
    14.0,
    12.3,
-   9.2
+   9.3
   ]
  },
  "cooked_grilled": {
   "file": "cooked/tomato_cooked_grilled.glb",
   "pieces": 3,
-  "triangles": 36084,
-  "bytes": 980876,
+  "triangles": 32258,
+  "bytes": 930476,
   "mass_total_g": 90.8,
-  "piece_mass_g": 30.27,
+  "piece_mass_g": 30.26,
   "piece_size_mm": [
    65.9,
    65.8,
@@ -252,36 +252,36 @@
  "parts_skin": {
   "file": "parts/tomato_parts_skin.glb",
   "pieces": 4,
-  "triangles": 8336,
-  "bytes": 198364,
+  "triangles": 7112,
+  "bytes": 172308,
   "mass_total_g": 2.8,
-  "piece_mass_g": 0.69,
+  "piece_mass_g": 0.7,
   "piece_size_mm": [
    36.0,
-   34.5,
-   29.0
+   34.7,
+   29.3
   ]
  },
  "parts_seeds": {
   "file": "parts/tomato_parts_seeds.glb",
   "pieces": 7,
-  "triangles": 20744,
-  "bytes": 532988,
-  "mass_total_g": 24.0,
-  "piece_mass_g": 3.42,
+  "triangles": 30976,
+  "bytes": 797836,
+  "mass_total_g": 43.0,
+  "piece_mass_g": 6.14,
   "piece_size_mm": [
-   29.0,
-   17.9,
-   14.8
+   35.4,
+   22.8,
+   18.4
   ]
  },
  "parts_flesh": {
   "file": "parts/tomato_parts_flesh.glb",
   "pieces": 4,
-  "triangles": 13528,
-  "bytes": 314464,
-  "mass_total_g": 79.4,
-  "piece_mass_g": 19.85,
+  "triangles": 11128,
+  "bytes": 262868,
+  "mass_total_g": 76.2,
+  "piece_mass_g": 19.04,
   "piece_size_mm": [
    54.1,
    48.9,

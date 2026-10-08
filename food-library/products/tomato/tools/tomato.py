@@ -35,7 +35,7 @@ OFF = Vector((R.uniform(0, 100), R.uniform(0, 100), R.uniform(0, 100)))
 RIB_PHASE = R.uniform(0, 2 * math.pi)
 
 # material slots (indices are shared by every piece mesh)
-MAT_NAMES = ["skin", "flesh", "flesh_cut", "core", "core_cut", "gel", "gel_cut",
+MAT_NAMES = ["juice", "skin", "flesh", "flesh_cut", "core", "core_cut", "gel", "gel_cut",
              "seed", "seed_cut", "calyx", "stem"]
 M = {n: i for i, n in enumerate(MAT_NAMES)}
 CUT = {"wall": M["flesh_cut"], "core": M["core_cut"], "placenta": M["core_cut"], "gel": M["gel_cut"],
@@ -45,13 +45,14 @@ PART_ORDER = ["wall", "core", "placenta", "gel", "seeds"]
 
 def materials():
     return [
+        lib.make_material("juice", rough=0.06, coat=0.5, coat_rough=0.03, spec=0.6, alpha=0.6),
         lib.make_material("skin", rough=0.32, coat=0.12, coat_rough=0.12),
         lib.make_material("flesh", rough=0.45, coat=0.3),
         lib.make_material("flesh_cut", rough=0.42, coat=0.2, coat_rough=0.3, spec=0.35),
         lib.make_material("core", rough=0.5, coat=0.3),
         lib.make_material("core_cut", rough=0.45, coat=0.2, coat_rough=0.3, spec=0.35),
-        lib.make_material("gel", rough=0.12, coat=0.6, coat_rough=0.04, spec=0.5, alpha=0.7),
-        lib.make_material("gel_cut", rough=0.15, coat=0.5, coat_rough=0.08, spec=0.5, alpha=0.7),
+        lib.make_material("gel", rough=0.12, coat=0.6, coat_rough=0.04, spec=0.5, alpha=0.92),
+        lib.make_material("gel_cut", rough=0.15, coat=0.5, coat_rough=0.08, spec=0.5, alpha=0.92),
         lib.make_material("seed", rough=0.45),
         lib.make_material("seed_cut", rough=0.4, coat=0.4),
         lib.make_material("calyx", rough=0.62, sheen=0.2),
@@ -161,8 +162,8 @@ def build():
     # placenta: pale fibrous body on the inner side of each locule, fanning out in lobes;
     # the seeds hang in a band along its outer edge, the gel fills the rest
     def placenta_edge(L, at, az):
-        lobes = 0.14 * abs(math.cos(1.5 * math.pi * at)) + 0.08 * abs(math.cos(2.5 * math.pi * az))
-        return -0.38 + lobes + 0.05 * noise.noise(Vector((at, az, 0)) * 2.5 + L["off"])
+        lobes = 0.12 * abs(math.cos(1.5 * math.pi * at)) + 0.07 * abs(math.cos(2.5 * math.pi * az))
+        return -0.30 + lobes + 0.05 * noise.noise(Vector((at, az, 0)) * 2.5 + L["off"])
 
     def placenta_map(L, a3):
         ar, at, az = a3
@@ -178,45 +179,78 @@ def build():
             return placenta_map(L, (x / n, y / n, z / n))
         pla_meshes.append(lib.grid_shell(fn, 20, 12))
 
-    # seeds: flat teardrops, long axis pointing outward, in a band just outside the placenta
+    # seeds: flat teardrops in a band near the locule wall, pointed end inward, each hanging on
+    # a pale funiculus (thin rod) that runs from the placenta body to the seed. On a cut face the
+    # rods in the cut plane read as the radial streaks between placenta and seeds (reference 2).
     ico_v, ico_f = SEED_MESH
     seeds = []
     seeds_by_loc = []
+    rods = []
     for li, L in enumerate(locs):
         lv, lf = loc_meshes[li]
         ltree = lib.bvh(lv, lf)
-        ptree = lib.bvh(*pla_meshes[li])
         placed, tries = [], 0
-        target = R.randint(28, 34)
-        while len(placed) < target and tries < 6000:
+        target = R.randint(36, 42)
+        while len(placed) < target and tries < 8000:
             tries += 1
-            at, az = R.uniform(-0.85, 0.85), R.uniform(-0.85, 0.85)
+            at, az = R.uniform(-0.9, 0.9), R.uniform(-0.9, 0.9)
             edge = placenta_edge(L, at, az)
-            a3 = (edge + R.uniform(0.10, 0.60), at, az)
-            if sum(abs(t) ** L["p"] for t in a3) ** (1 / L["p"]) > 0.86:
+            a3 = (R.uniform(max(edge + 0.25, 0.50), 0.86), at, az)
+            if sum(abs(t) ** L["p"] for t in a3) ** (1 / L["p"]) > 0.93:
                 continue
             p = loc_map(L, a3)
-            if ltree.find_nearest(p)[3] < 0.0014 or not lib.inside(ltree, p):
+            if ltree.find_nearest(p)[3] < 0.0013 or not lib.inside(ltree, p):
                 continue
-            if ptree.find_nearest(p)[3] < 0.0012:
+            if any((p - q).length < 0.0024 for q, _, _ in placed):
                 continue
-            if any((p - q).length < 0.0027 for q, _ in placed):
-                continue
-            placed.append((p, L["center"] + at * L["span"] / 2))
-        for p, ang in placed:
+            hub = R.uniform(0.4, 0.75)  # rods fan out from the placenta body
+            root = loc_map(L, (placenta_edge(L, at * hub, az * hub) - 0.15, at * hub, az * hub))
+            placed.append((p, root, L["center"] + at * L["span"] / 2))
+        for p, root, ang in placed:
             sc = R.uniform(0.85, 1.15)
-            radial = Vector((math.cos(ang), math.sin(ang), 0))
-            rot = (Euler((R.uniform(-0.45, 0.45), R.uniform(-0.45, 0.45), 0)).to_matrix()
-                   @ radial.to_track_quat("X", "Z").to_matrix()
+            axis = (p - root)
+            axis.z *= 0.6  # seeds lie flatter than the rod points
+            axis = axis.normalized()
+            rot = (Euler((R.uniform(-0.3, 0.3), R.uniform(-0.3, 0.3), 0)).to_matrix()
+                   @ axis.to_track_quat("X", "Z").to_matrix()
                    @ Matrix.Rotation(R.uniform(0, 6.3), 3, "X"))
             verts = []
             for q in ico_v:
-                w = Vector((q.x * 0.0019, q.y * 0.0013, q.z * 0.00048))
-                if q.x > 0:  # teardrop: pointed end outward
+                w = Vector((-q.x * 0.0019, q.y * 0.0013, q.z * 0.00048))
+                if q.x > 0:  # teardrop: pointed end inward, towards the rod
                     w.y *= 1 - 0.45 * q.x
                     w.z *= 1 - 0.3 * q.x
                 verts.append(p + rot @ (w * sc))
             seeds.append((verts, ico_f))
+            # funiculus: slightly curved hexagonal rod from inside the placenta body into the seed
+            d = p - root
+            tip = root + d * 0.92
+            rr = R.uniform(0.00028, 0.00040)
+            u = d.normalized()
+            side = u.cross(Vector((0, 0, 1)))
+            if side.length < 1e-6:
+                side = u.cross(Vector((1, 0, 0)))
+            side.normalize()
+            up = u.cross(side)
+            # the rod is a flat ribbon (placental tissue is sheet-like), rolled at a random
+            # angle, wide at the body and narrowing to the seed, with a slight bow
+            roll = R.uniform(0, math.pi)
+            wide = side * math.cos(roll) + up * math.sin(roll)
+            thin = up * math.cos(roll) - side * math.sin(roll)
+            bow = thin * R.uniform(-1, 1) * d.length * 0.06
+            centres = [(root, 3.5, 1.1), (root + d * 0.5 + bow, 3.0, 1.0), (tip, 1.5, 0.7)]
+            rv = []
+            for c, sw, st in centres:
+                for k in range(6):
+                    a = 2 * math.pi * k / 6
+                    rv.append(c + (wide * math.cos(a) * sw + thin * math.sin(a) * st) * rr)
+            rf = []
+            for ring in range(2):
+                b0 = ring * 6
+                rf += [(b0 + k, b0 + (k + 1) % 6, b0 + 6 + (k + 1) % 6, b0 + 6 + k) for k in range(6)]
+            rf.append(tuple(reversed(range(6))))
+            rf.append(tuple(range(12, 18)))
+            rods.append((rv, rf))
         seeds_by_loc.append(seeds[len(seeds) - len(placed):])
 
     # parts as nested closed shells
@@ -233,6 +267,8 @@ def build():
     b = bmesh.new()
     for pv, pf in pla_meshes:
         lib.add_shell(b, pv, pf, M["core"])
+    for rv, rf in rods:
+        lib.add_shell(b, rv, rf, M["core"])
     parts["placenta"] = b
     b = bmesh.new()
     for lv, lf in loc_meshes:
@@ -252,7 +288,7 @@ def build():
     top = max(o_v, key=lambda p: p.z if math.hypot(p.x, p.y) < 0.001 else -1)
     info = dict(outer=(o_v, o_f), outer_tree=outer_tree, wall_min=wall_min, top=top,
                 height=max(p.z for p in o_v), n_seeds=len(seeds), locs=locs,
-                loc_meshes=loc_meshes, pla_meshes=pla_meshes, seeds_by_loc=seeds_by_loc,
+                loc_meshes=loc_meshes, pla_meshes=pla_meshes, seeds_by_loc=seeds_by_loc, rods=rods,
                 cavity=(c_v, c_f))
     info["calyx"] = calyx(outer_tree, top)
     return parts, info
@@ -266,6 +302,7 @@ def surface_z(tree, x, y):
 def calyx(tree, top):
     """Calyx (5-6 thin curling sepals + centre) and a short bent stem, closed shells."""
     bm = bmesh.new()
+    anchors = []  # (point, normal, material, length scale) for the trichomes
     n = 6 if R.random() < 0.6 else 5
     base_ang = R.uniform(0, 2 * math.pi)
     for k in range(n):
@@ -294,6 +331,10 @@ def calyx(tree, top):
             th = 0.00035 + 0.00025 * (1 - s)
             top_rows.append([c + sd, c + up * keel, c - sd])
             bot_rows.append([c + sd - up * th * 0.5, c - up * th, c - sd - up * th * 0.5])
+            if 0.08 < s < 0.97:
+                for _ in range(2):
+                    f_ = R.uniform(-0.85, 0.85)
+                    anchors.append((c + sd * f_ + up * keel * (1 - abs(f_)), up, M["calyx"], 0.8))
         vt = [[bm.verts.new(p) for p in row] for row in top_rows]
         vb = [[bm.verts.new(p) for p in row] for row in bot_rows]
         for i in range(segs):
@@ -337,6 +378,10 @@ def calyx(tree, top):
             a = 2 * math.pi * j / sides
             rr = r * (1 + 0.08 * math.cos(3 * a + s))
             ring.append(bm.verts.new(c + q @ Vector((rr * math.cos(a), rr * math.sin(a), 0))))
+            if 0 < i < segs and R.random() < 0.9:
+                nrm = (q @ Vector((math.cos(a), math.sin(a), 0))).normalized()
+                anchors.append((c + q @ Vector((rr * math.cos(a), rr * math.sin(a), 0)) + nrm * 0.00003,
+                                nrm, M["stem"], 1.0))
         rings.append(ring)
     for i in range(segs):
         for j in range(sides):
@@ -347,6 +392,27 @@ def calyx(tree, top):
     f.material_index = M["stem"]
     f = bm.faces.new(rings[-1])
     f.material_index = M["stem"]
+    # trichomes: short pale hairs (3-sided closed cones) leaning away from the surface
+    for p, nrm, mat, ls in anchors:
+        length = R.uniform(0.0004, 0.0011) * ls
+        tilt = Vector((R.uniform(-1, 1), R.uniform(-1, 1), R.uniform(-0.3, 0.6))).normalized()
+        d = (nrm + tilt * 0.7).normalized()
+        side = d.cross(Vector((0, 0, 1)))
+        if side.length < 1e-6:
+            side = d.cross(Vector((1, 0, 0)))
+        side.normalize()
+        up2 = d.cross(side)
+        rb = 0.00009
+        base = [bm.verts.new(p + (side * math.cos(2 * math.pi * k / 3) + up2 * math.sin(2 * math.pi * k / 3)) * rb)
+                for k in range(3)]
+        tip = bm.verts.new(p + d * length)
+        for k in range(3):
+            f = bm.faces.new((base[k], base[(k + 1) % 3], tip))
+            f.material_index = mat
+            f.select = True
+        f = bm.faces.new((base[2], base[1], base[0]))
+        f.material_index = mat
+        f.select = True
     bm.normal_update()
     return bm
 
@@ -358,10 +424,11 @@ C = {
     "scar": srgb("#7D6A2C"),
     "flesh": srgb("#E0502A"), "flesh_out": srgb("#D0260C"), "flesh_in": srgb("#E85A38"),
     "core": srgb("#F2B494"), "core_c": srgb("#F8D9C6"),
-    "gel": srgb("#E24A20"), "gel_hi": srgb("#F27A4A"),
+    "gel": srgb("#D2330F"), "gel_hi": srgb("#EC6236"),
     "seed": srgb("#F0B848"), "seed_cut": srgb("#F8DC96"),
     "calyx": srgb("#3D6420"), "calyx_tip": srgb("#5E7F2C"), "stem": srgb("#5A8628"),
-    "stem_cut": srgb("#A3B567"),
+    "stem_cut": srgb("#A3B567"), "hair": srgb("#D5DEBB"),
+    "juice": srgb("#E3502A"), "juice_hi": srgb("#F58350"),
 }
 
 
@@ -370,6 +437,10 @@ def colour_fn(info):
     top = info["top"]
 
     def fn(mat, co, face):
+        if face.select:  # trichomes on the calyx and stem
+            return C["hair"]
+        if mat == M["juice"]:
+            return lerp(C["juice"], C["juice_hi"], 0.5 + 0.5 * noise.noise(co * 90))
         rh = math.hypot(co.x, co.y)
         if mat == M["skin"]:
             n = noise.noise(co * 90 + OFF) * 0.5 + noise.noise(co * 260 + OFF * 3) * 0.25
@@ -596,6 +667,10 @@ def peeled_colour_fn(info):
         bounds += [L["center"] - L["span"] / 2, L["center"] + L["span"] / 2]
 
     def fn(mat, co, face):
+        if face.select:  # trichomes on the calyx and stem
+            return C["hair"]
+        if mat == M["juice"]:
+            return lerp(C["juice"], C["juice_hi"], 0.5 + 0.5 * noise.noise(co * 90))
         n = noise.noise(co * 140 + OFF) * 0.5 + 0.5
         a = math.atan2(co.y, co.x)
         d = min(abs((a - b + math.pi) % (2 * math.pi) - math.pi) for b in bounds)
@@ -843,6 +918,84 @@ def state_parts_pulp(parts, info, mats, coll):
     return obs, masses
 
 
+def juice_blob(bm, centre, radius, height, rng, mat):
+    """Flat glossy puddle or droplet: a squashed, noisy closed blob resting on the floor."""
+    off = Vector((rng.uniform(0, 30), rng.uniform(0, 30), 0))
+    def fn(u, v):
+        x, y, z = math.sin(v) * math.cos(u), math.sin(v) * math.sin(u), math.cos(v)
+        r = radius * (1 + 0.22 * noise.noise(Vector((x, y, 0)) * 1.6 + off)
+                      + 0.08 * noise.noise(Vector((x, y, 0)) * 4.1 + off))
+        zz = height * (0.5 + 0.5 * z) if z > -0.6 else height * 0.2 * (1 + z) / 0.4
+        return centre + Vector((x * r, y * r, max(zz, 0.00005)))
+    nu, nv = (36, 10) if radius > 0.008 else (12, 6)
+    vs, fs = lib.grid_shell(fn, nu, nv)
+    lib.add_shell(bm, vs, fs, mat)
+
+
+def state_juice(parts, info, mats, coll):
+    """Juice released on the board when the tomato is cut: a puddle, droplets and a few loose seeds."""
+    rng = lib.rng(SEED + 91)
+    fn = colour_fn(info)
+    obs, masses = [], []
+    bm = bmesh.new()
+    juice_blob(bm, Vector((0, 0, 0)), 0.021, 0.0009, rng, M["juice"])
+    for k in range(3):
+        a = rng.uniform(0, 6.3)
+        juice_blob(bm, Vector((math.cos(a) * 0.016, math.sin(a) * 0.016, 0)), 0.009, 0.0007, rng, M["juice"])
+    bm.normal_update()
+    masses.append(lib.volume(bm) * 1e6 * 1.0)
+    lib.paint(bm, fn)
+    obs.append(lib.to_object("puddle", bm, mats, coll))
+    bm = bmesh.new()
+    for k in range(14):
+        a, d = rng.uniform(0, 6.3), rng.uniform(0.024, 0.042)
+        juice_blob(bm, Vector((math.cos(a) * d, math.sin(a) * d, 0)), rng.uniform(0.0012, 0.003),
+                   rng.uniform(0.0005, 0.0011), rng, M["juice"])
+    bm.normal_update()
+    masses.append(lib.volume(bm) * 1e6 * 1.0)
+    lib.paint(bm, fn)
+    obs.append(lib.to_object("drops", bm, mats, coll))
+    bm = bmesh.new()
+    ico_v, ico_f = SEED_MESH
+    for k in range(4):
+        a = rng.uniform(0, 6.3)
+        tgt = Vector((math.cos(a) * rng.uniform(0.006, 0.02), math.sin(a) * rng.uniform(0.006, 0.02), 0.0008))
+        rot = Matrix.Rotation(rng.uniform(0, 6.3), 3, "Z")
+        verts = []
+        for q in ico_v:
+            w = Vector((q.x * 0.0019, q.y * 0.0013, q.z * 0.00048))
+            if q.x > 0:
+                w.y *= 1 - 0.45 * q.x
+                w.z *= 1 - 0.3 * q.x
+            verts.append(tgt + rot @ w)
+        lib.add_shell(bm, verts, ico_f, M["seed"])
+    bm.normal_update()
+    masses.append(lib.volume(bm) * 1e6 * DENSITY)
+    lib.paint(bm, fn)
+    obs.append(lib.to_object("seeds", bm, mats, coll))
+    return obs, masses
+
+
+def preview_juice(scene, coll, mats, obs, rng, info):
+    """Render-only puddles under posed cut pieces (not exported)."""
+    fn = colour_fn(info)
+    bpy.context.view_layer.update()
+    bm = bmesh.new()
+    for ob in obs[: min(len(obs), 6)]:
+        pts = [ob.matrix_world @ v.co for v in list(ob.data.vertices)[::9]]
+        c = sum(pts, Vector()) / len(pts)
+        ext = max(max(p.x for p in pts) - min(p.x for p in pts), max(p.y for p in pts) - min(p.y for p in pts))
+        c = Vector((c.x + rng.uniform(-0.3, 0.3) * ext, c.y - 0.25 * ext, 0))
+        juice_blob(bm, c, ext * rng.uniform(0.2, 0.32), 0.0006, rng, M["juice"])
+        for k in range(3):
+            a = rng.uniform(0, 6.3)
+            juice_blob(bm, c + Vector((math.cos(a), math.sin(a), 0)) * ext * rng.uniform(0.35, 0.6),
+                       rng.uniform(0.001, 0.0025), 0.0007, rng, M["juice"])
+    bm.normal_update()
+    lib.paint(bm, fn)
+    lib.to_object("_juice_preview", bm, mats, coll)
+
+
 def state_parts_flesh(parts, info, mats, coll):
     """Seeded tomato flesh: the wall cut into four petals, without gel and seeds."""
     rng = lib.rng(SEED + 71)
@@ -933,7 +1086,7 @@ STATES = {
                ("cooked_stewed", S(state_cooked, "stewed")),
                ("cooked_grilled", S(state_cooked, "grilled"))],
     "parts": [("parts_skin", S(state_parts_skin)), ("parts_seeds", S(state_parts_pulp)),
-              ("parts_flesh", S(state_parts_flesh))],
+              ("parts_flesh", S(state_parts_flesh)), ("parts_juice", S(state_juice))],
 }
 
 CUT_UP = {"half", "half_cross", "quarter", "wedges", "parts_flesh"}
@@ -1046,8 +1199,10 @@ def main():
                 else:
                     if name in CUT_UP:
                         pose_cut_up(obs)
+                        preview_juice(scene, coll, mats, obs, lib.rng(SEED + 97), info)
                     elif name in HEAP:
                         heap_place(obs, HEAP[name], lib.rng(SEED + 99), HEAP[name] * 0.5)
+                        preview_juice(scene, coll, mats, obs[:1], lib.rng(SEED + 97), info)
                     elif name in FLAT:
                         lay_out(obs, gap=0.004, per_row=6)
                         for ob in obs:
@@ -1055,6 +1210,8 @@ def main():
                     elif name in EXPLODE:
                         pose_explode(obs, EXPLODE[name])
                     frame(scene, obs, elev=30 if name not in ("whole", "peeled") else 14)
+                    if name == "parts_juice":
+                        frame(scene, obs, elev=38)
                 lib.render(scene, os.path.join(a.preview, f"{ID}_{name}.jpg"))
             with open(report_path, "w") as f:
                 json.dump(report, f, indent=1)

@@ -621,7 +621,7 @@
       "to_state": "cooked"
     }
   ],
-  "look": "Round, slightly flattened (h ≈ 0.8 d), saturated red-orange skin with soft natural gloss; 5–6 thin curling sepals and a short thick stem; 5–6 mm wall with a lighter inner layer, 7 large unequal chambers with thin septa, narrow pale columella, pale fibrous placenta fanning into each chamber with a row of large yellow teardrop seeds along its edge, bright translucent red-orange gel outside the seeds. See reference.md.",
+  "look": "Round, slightly flattened (h ≈ 0.8 d), saturated red-orange skin with soft natural gloss; 5–6 thin curling sepals and a short thick stem; 5–6 mm wall with a lighter inner layer, 7 large unequal chambers with thin septa, narrow pale columella, pale placenta body with flat pale funiculi fanning out to the seeds (radial streaks on the cut), large yellow teardrop seeds near the chamber wall pointing inward, bright translucent red-orange gel outside the seeds. See reference.md. Calyx and stem carry tiny pale trichomes; cutting releases juice (parts_juice).",
   "references": [
     "/mnt/project-files/products/references/tomato-v2.jpg",
     "/mnt/project-files/products/references/tomato-half-inside.jpg"
@@ -629,7 +629,7 @@
   "build": {
     "seed": 1001,
     "script": "tools/tomato.py",
-    "script_version": "2",
+    "script_version": "3",
     "built_at": ""
   },
   "transitions": [
@@ -728,6 +728,12 @@
       "to": "cooked",
       "op": "cook",
       "detail": "stewed: куби, усадка 14 %"
+    },
+    {
+      "from": "half",
+      "to": "parts",
+      "op": "cut",
+      "detail": "будь-який розріз виділяє сік: parts_juice (калюжка, краплі, насінини) кладеться під шматки"
     }
   ]
 }

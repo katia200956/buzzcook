@@ -89,7 +89,7 @@ def shape(u, v, d, h, dimple=True, ribs=1.0):
 
 def build():
     """Returns dict with part bmeshes (in place, Z up, bottom at z=0) and helpers."""
-    o_v, o_f = lib.grid_shell(lambda u, v: shape(u, v, D, H), 88, 44)
+    o_v, o_f = lib.grid_shell(lambda u, v: shape(u, v, D, H), 80, 40)
     zmin = min(p.z for p in o_v)
     o_v = [p - Vector((0, 0, zmin)) for p in o_v]
     c_v, c_f = lib.grid_shell(
@@ -155,7 +155,7 @@ def build():
             x, y, z = math.sin(v) * math.cos(u), math.sin(v) * math.sin(u), math.cos(v)
             n = (abs(x) ** L["p"] + abs(y) ** L["p"] + abs(z) ** L["p"]) ** (1 / L["p"])
             return loc_map(L, (x / n, y / n, z / n))
-        loc_meshes.append(lib.grid_shell(fn, 24, 14))
+        loc_meshes.append(lib.grid_shell(fn, 22, 12))
     bad = sum(1 for lv, _ in loc_meshes for p in lv[::5] if not lib.inside(cav_tree, p))
     assert bad == 0, f"{bad} locule points outside the cavity"
 
@@ -241,15 +241,15 @@ def build():
             centres = [(root, 3.5, 1.1), (root + d * 0.5 + bow, 3.0, 1.0), (tip, 1.5, 0.7)]
             rv = []
             for c, sw, st in centres:
-                for k in range(6):
-                    a = 2 * math.pi * k / 6
+                for k in range(4):
+                    a = 2 * math.pi * k / 4 + math.pi / 4
                     rv.append(c + (wide * math.cos(a) * sw + thin * math.sin(a) * st) * rr)
             rf = []
             for ring in range(2):
-                b0 = ring * 6
-                rf += [(b0 + k, b0 + (k + 1) % 6, b0 + 6 + (k + 1) % 6, b0 + 6 + k) for k in range(6)]
-            rf.append(tuple(reversed(range(6))))
-            rf.append(tuple(range(12, 18)))
+                b0 = ring * 4
+                rf += [(b0 + k, b0 + (k + 1) % 4, b0 + 4 + (k + 1) % 4, b0 + 4 + k) for k in range(4)]
+            rf.append(tuple(reversed(range(4))))
+            rf.append(tuple(range(8, 12)))
             rods.append((rv, rf))
         seeds_by_loc.append(seeds[len(seeds) - len(placed):])
 

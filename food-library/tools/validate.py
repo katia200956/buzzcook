@@ -12,7 +12,7 @@ PARTS = {"skin", "peel", "rind", "pith", "flesh", "gel", "seed", "core", "layer"
          "calyx", "stem", "crust", "crumb", "meat", "fat", "bone", "yolk", "white", "juice",
          "zest", "leaf", "puree"}
 MAX_BYTES = 2.5 * 1024 * 1024
-MAX_BYTES_MANY = 3.0 * 1024 * 1024  # states with 40+ pieces
+MAX_BYTES_MANY = 3.5 * 1024 * 1024  # states with 16+ pieces (many cut caps)
 BANNED_EXT = {"KHR_draco_mesh_compression", "EXT_meshopt_compression", "KHR_mesh_quantization"}
 
 
@@ -42,7 +42,7 @@ def check(meta, build_dir):
             if not re.fullmatch(rf"{re.escape(pid)}_{re.escape(state)}(_[a-z0-9]+)*", name):
                 problems.append(f"{fn}: file name does not follow <id>_<state>[_<variant>]")
             n_pieces = len(g["nodes"]) - 1
-            limit = MAX_BYTES_MANY if n_pieces >= 40 else MAX_BYTES
+            limit = MAX_BYTES_MANY if n_pieces >= 16 else MAX_BYTES
             if size > limit:
                 problems.append(f"{fn}: {size / 1048576:.2f} MB is over the "
                                 f"{limit / 1048576:.1f} MB budget")

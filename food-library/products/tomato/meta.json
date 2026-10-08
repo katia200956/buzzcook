@@ -53,24 +53,24 @@
         {
           "name": "tomato_whole.glb",
           "lod": 0,
-          "bytes": 205216,
-          "triangles": 9248,
+          "bytes": 257596,
+          "triangles": 8660,
           "pieces": 1,
-          "piece_mass_g": 147.7,
-          "mass_total_g": 147.7,
+          "piece_mass_g": 149.4,
+          "mass_total_g": 149.4,
           "piece_size_mm": [
             70.4,
             70.4,
-            68.1
+            64.7
           ]
         }
       ],
       "piece_count": 1,
-      "piece_mass_g": 147.7,
+      "piece_mass_g": 149.4,
       "piece_size_mm": {
         "x": 70.4,
         "y": 70.4,
-        "z": 68.1
+        "z": 64.7
       }
     },
     "half": {
@@ -83,11 +83,11 @@
         {
           "name": "tomato_half.glb",
           "lod": 0,
-          "bytes": 938172,
-          "triangles": 38445,
+          "bytes": 1240572,
+          "triangles": 43992,
           "pieces": 2,
-          "piece_mass_g": 73.81,
-          "mass_total_g": 147.6,
+          "piece_mass_g": 74.72,
+          "mass_total_g": 149.4,
           "piece_size_mm": [
             65.0,
             54.2,
@@ -97,11 +97,11 @@
         {
           "name": "tomato_half_cross.glb",
           "lod": 0,
-          "bytes": 972808,
-          "triangles": 39282,
+          "bytes": 1317856,
+          "triangles": 45812,
           "pieces": 2,
-          "piece_mass_g": 73.27,
-          "mass_total_g": 146.5,
+          "piece_mass_g": 74.87,
+          "mass_total_g": 149.7,
           "piece_size_mm": [
             70.4,
             70.3,
@@ -110,7 +110,7 @@
         }
       ],
       "piece_count": 2,
-      "piece_mass_g": 73.81,
+      "piece_mass_g": 74.72,
       "piece_size_mm": {
         "x": 65.0,
         "y": 54.2,
@@ -123,11 +123,11 @@
         {
           "name": "tomato_quarter.glb",
           "lod": 0,
-          "bytes": 1047024,
-          "triangles": 41100,
+          "bytes": 1390420,
+          "triangles": 47522,
           "pieces": 4,
-          "piece_mass_g": 36.92,
-          "mass_total_g": 147.7,
+          "piece_mass_g": 37.34,
+          "mass_total_g": 149.4,
           "piece_size_mm": [
             54.1,
             37.2,
@@ -136,7 +136,7 @@
         }
       ],
       "piece_count": 4,
-      "piece_mass_g": 36.92,
+      "piece_mass_g": 37.34,
       "piece_size_mm": {
         "x": 54.1,
         "y": 37.2,
@@ -149,11 +149,11 @@
         {
           "name": "tomato_wedges.glb",
           "lod": 0,
-          "bytes": 1196260,
-          "triangles": 44787,
+          "bytes": 1520456,
+          "triangles": 50733,
           "pieces": 8,
-          "piece_mass_g": 18.46,
-          "mass_total_g": 147.7,
+          "piece_mass_g": 18.68,
+          "mass_total_g": 149.4,
           "piece_size_mm": [
             46.9,
             26.6,
@@ -162,7 +162,7 @@
         }
       ],
       "piece_count": 8,
-      "piece_mass_g": 18.46,
+      "piece_mass_g": 18.68,
       "piece_size_mm": {
         "x": 46.9,
         "y": 26.6,
@@ -180,52 +180,52 @@
         {
           "name": "tomato_slices_medium.glb",
           "lod": 0,
-          "bytes": 1717560,
-          "triangles": 58920,
+          "bytes": 2218760,
+          "triangles": 67521,
           "pieces": 8,
-          "piece_mass_g": 18.71,
-          "mass_total_g": 149.7,
+          "piece_mass_g": 18.08,
+          "mass_total_g": 144.7,
           "piece_size_mm": [
             65.3,
             65.1,
-            9.6
+            9.2
           ]
         },
         {
           "name": "tomato_slices_thick.glb",
           "lod": 0,
-          "bytes": 1332096,
-          "triangles": 48926,
+          "bytes": 1795768,
+          "triangles": 56753,
           "pieces": 4,
-          "piece_mass_g": 36.36,
-          "mass_total_g": 145.4,
+          "piece_mass_g": 36.86,
+          "mass_total_g": 147.4,
           "piece_size_mm": [
             68.4,
             68.3,
-            18.1
+            17.2
           ]
         },
         {
           "name": "tomato_slices_thin.glb",
           "lod": 0,
-          "bytes": 2613688,
-          "triangles": 82229,
+          "bytes": 3260576,
+          "triangles": 93543,
           "pieces": 17,
-          "piece_mass_g": 8.95,
-          "mass_total_g": 152.1,
+          "piece_mass_g": 8.54,
+          "mass_total_g": 145.3,
           "piece_size_mm": [
-            62.8,
+            63.0,
             62.5,
-            4.6
+            4.4
           ]
         }
       ],
       "piece_count": 8,
-      "piece_mass_g": 18.71,
+      "piece_mass_g": 18.08,
       "piece_size_mm": {
         "x": 65.3,
         "y": 65.1,
-        "z": 9.6
+        "z": 9.2
       }
     },
     "half_slices": {
@@ -234,11 +234,11 @@
         {
           "name": "tomato_half_slices.glb",
           "lod": 0,
-          "bytes": 2037072,
-          "triangles": 65524,
+          "bytes": 2448772,
+          "triangles": 72943,
           "pieces": 18,
-          "piece_mass_g": 8.21,
-          "mass_total_g": 147.8,
+          "piece_mass_g": 8.34,
+          "mass_total_g": 150.1,
           "piece_size_mm": [
             57.1,
             50.5,
@@ -247,7 +247,7 @@
         }
       ],
       "piece_count": 18,
-      "piece_mass_g": 8.21,
+      "piece_mass_g": 8.34,
       "piece_size_mm": {
         "x": 57.1,
         "y": 50.5,
@@ -261,11 +261,11 @@
         {
           "name": "tomato_strips.glb",
           "lod": 0,
-          "bytes": 3003440,
-          "triangles": 85220,
+          "bytes": 3596972,
+          "triangles": 95518,
           "pieces": 57,
-          "piece_mass_g": 2.58,
-          "mass_total_g": 146.8,
+          "piece_mass_g": 2.62,
+          "mass_total_g": 149.3,
           "piece_size_mm": [
             55.7,
             9.1,
@@ -274,7 +274,7 @@
         }
       ],
       "piece_count": 57,
-      "piece_mass_g": 2.58,
+      "piece_mass_g": 2.62,
       "piece_size_mm": {
         "x": 55.7,
         "y": 9.1,
@@ -287,24 +287,24 @@
         {
           "name": "tomato_cubes.glb",
           "lod": 0,
-          "bytes": 2671808,
-          "triangles": 74445,
-          "pieces": 81,
-          "piece_mass_g": 1.82,
-          "mass_total_g": 147.5,
+          "bytes": 3239376,
+          "triangles": 84468,
+          "pieces": 80,
+          "piece_mass_g": 1.87,
+          "mass_total_g": 149.3,
           "piece_size_mm": [
-            16.3,
-            14.3,
-            10.8
+            16.4,
+            14.4,
+            10.9
           ]
         }
       ],
-      "piece_count": 81,
-      "piece_mass_g": 1.82,
+      "piece_count": 80,
+      "piece_mass_g": 1.87,
       "piece_size_mm": {
-        "x": 16.3,
-        "y": 14.3,
-        "z": 10.8
+        "x": 16.4,
+        "y": 14.4,
+        "z": 10.9
       }
     },
     "diced": {
@@ -314,11 +314,11 @@
         {
           "name": "tomato_diced.glb",
           "lod": 0,
-          "bytes": 1096164,
-          "triangles": 21667,
+          "bytes": 1607204,
+          "triangles": 31848,
           "pieces": 82,
-          "piece_mass_g": 0.3,
-          "mass_total_g": 24.8,
+          "piece_mass_g": 0.31,
+          "mass_total_g": 25.7,
           "piece_size_mm": [
             10.9,
             7.8,
@@ -327,7 +327,7 @@
         }
       ],
       "piece_count": 82,
-      "piece_mass_g": 0.3,
+      "piece_mass_g": 0.31,
       "piece_size_mm": {
         "x": 10.9,
         "y": 7.8,
@@ -341,24 +341,24 @@
         {
           "name": "tomato_chopped.glb",
           "lod": 0,
-          "bytes": 643180,
-          "triangles": 8860,
+          "bytes": 797132,
+          "triangles": 11170,
           "pieces": 106,
           "piece_mass_g": 0.03,
-          "mass_total_g": 2.8,
+          "mass_total_g": 2.9,
           "piece_size_mm": [
-            4.8,
+            4.7,
             3.2,
-            2.3
+            2.2
           ]
         }
       ],
       "piece_count": 106,
       "piece_mass_g": 0.03,
       "piece_size_mm": {
-        "x": 4.8,
+        "x": 4.7,
         "y": 3.2,
-        "z": 2.3
+        "z": 2.2
       }
     },
     "mashed": {
@@ -371,37 +371,37 @@
         {
           "name": "tomato_mashed_crushed.glb",
           "lod": 0,
-          "bytes": 1212296,
-          "triangles": 29510,
+          "bytes": 1731068,
+          "triangles": 39740,
           "pieces": 66,
-          "piece_mass_g": 0.85,
-          "mass_total_g": 55.9,
+          "piece_mass_g": 0.86,
+          "mass_total_g": 57.0,
           "piece_size_mm": [
             13.7,
-            8.9,
+            9.1,
             4.6
           ]
         },
         {
           "name": "tomato_mashed_puree.glb",
           "lod": 0,
-          "bytes": 245056,
+          "bytes": 245060,
           "triangles": 10848,
           "pieces": 1,
-          "piece_mass_g": 143.27,
-          "mass_total_g": 143.3,
+          "piece_mass_g": 144.91,
+          "mass_total_g": 144.9,
           "piece_size_mm": [
-            120.8,
-            116.3,
-            25.9
+            121.3,
+            116.7,
+            26.0
           ]
         }
       ],
       "piece_count": 66,
-      "piece_mass_g": 0.85,
+      "piece_mass_g": 0.86,
       "piece_size_mm": {
         "x": 13.7,
-        "y": 8.9,
+        "y": 9.1,
         "z": 4.6
       }
     },
@@ -411,11 +411,11 @@
         {
           "name": "tomato_peeled.glb",
           "lod": 0,
-          "bytes": 152884,
-          "triangles": 7568,
+          "bytes": 126320,
+          "triangles": 6240,
           "pieces": 1,
-          "piece_mass_g": 139.86,
-          "mass_total_g": 139.9,
+          "piece_mass_g": 139.79,
+          "mass_total_g": 139.8,
           "piece_size_mm": [
             69.2,
             69.2,
@@ -424,7 +424,7 @@
         }
       ],
       "piece_count": 1,
-      "piece_mass_g": 139.86,
+      "piece_mass_g": 139.79,
       "piece_size_mm": {
         "x": 69.2,
         "y": 69.2,
@@ -443,11 +443,11 @@
         {
           "name": "tomato_cooked_grilled.glb",
           "lod": 0,
-          "bytes": 930476,
-          "triangles": 32258,
+          "bytes": 1353908,
+          "triangles": 41606,
           "pieces": 3,
-          "piece_mass_g": 30.26,
-          "mass_total_g": 90.8,
+          "piece_mass_g": 31.38,
+          "mass_total_g": 94.1,
           "piece_size_mm": [
             65.9,
             65.8,
@@ -457,34 +457,34 @@
         {
           "name": "tomato_cooked_roasted.glb",
           "lod": 0,
-          "bytes": 972904,
-          "triangles": 39282,
+          "bytes": 1317780,
+          "triangles": 45812,
           "pieces": 2,
-          "piece_mass_g": 58.61,
-          "mass_total_g": 117.2,
+          "piece_mass_g": 59.9,
+          "mass_total_g": 119.8,
           "piece_size_mm": [
-            63.6,
             63.5,
-            25.1
+            63.4,
+            25.0
           ]
         },
         {
           "name": "tomato_cooked_stewed.glb",
           "lod": 0,
-          "bytes": 2679160,
-          "triangles": 74445,
-          "pieces": 81,
-          "piece_mass_g": 1.55,
-          "mass_total_g": 125.4,
+          "bytes": 3247732,
+          "triangles": 84468,
+          "pieces": 80,
+          "piece_mass_g": 1.59,
+          "mass_total_g": 126.9,
           "piece_size_mm": [
-            14.0,
-            12.3,
-            9.3
+            14.1,
+            12.4,
+            9.4
           ]
         }
       ],
       "piece_count": 3,
-      "piece_mass_g": 30.26,
+      "piece_mass_g": 31.38,
       "piece_size_mm": {
         "x": 65.9,
         "y": 65.8,
@@ -502,11 +502,11 @@
         {
           "name": "tomato_parts_flesh.glb",
           "lod": 0,
-          "bytes": 262868,
-          "triangles": 11128,
+          "bytes": 232212,
+          "triangles": 9680,
           "pieces": 4,
-          "piece_mass_g": 19.04,
-          "mass_total_g": 76.2,
+          "piece_mass_g": 19.02,
+          "mass_total_g": 76.1,
           "piece_size_mm": [
             54.1,
             48.9,
@@ -514,36 +514,50 @@
           ]
         },
         {
+          "name": "tomato_parts_juice.glb",
+          "lod": 0,
+          "bytes": 104240,
+          "triangles": 4464,
+          "pieces": 3,
+          "piece_mass_g": 0.42,
+          "mass_total_g": 1.3,
+          "piece_size_mm": [
+            53.2,
+            42.0,
+            1.0
+          ]
+        },
+        {
           "name": "tomato_parts_seeds.glb",
           "lod": 0,
-          "bytes": 797836,
-          "triangles": 30976,
+          "bytes": 944268,
+          "triangles": 36524,
           "pieces": 7,
-          "piece_mass_g": 6.14,
-          "mass_total_g": 43.0,
+          "piece_mass_g": 6.06,
+          "mass_total_g": 42.5,
           "piece_size_mm": [
             35.4,
             22.8,
-            18.4
+            18.3
           ]
         },
         {
           "name": "tomato_parts_skin.glb",
           "lod": 0,
-          "bytes": 172308,
-          "triangles": 7112,
+          "bytes": 148428,
+          "triangles": 5980,
           "pieces": 4,
           "piece_mass_g": 0.7,
           "mass_total_g": 2.8,
           "piece_size_mm": [
-            36.0,
-            34.7,
-            29.3
+            36.7,
+            34.4,
+            29.2
           ]
         }
       ],
       "piece_count": 4,
-      "piece_mass_g": 19.04,
+      "piece_mass_g": 19.02,
       "piece_size_mm": {
         "x": 54.1,
         "y": 48.9,

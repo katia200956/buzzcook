@@ -22,8 +22,11 @@ def mat_tex(name, base, normal=None, rough=None, rough_scale=1.0, coat=0.0, sss=
     L.new(b.outputs[0], out.inputs["Surface"])
     t = N.new("ShaderNodeTexImage"); t.image = img(base)
     hsv = N.new("ShaderNodeHueSaturation")
-    hsv.inputs["Saturation"].default_value = 1.08 if name == "cut" else 1.0
-    hsv.inputs["Value"].default_value = 0.82 if name == "cut" else 1.0
+    grade = {"cut": (0.49, 1.3, 0.72), "skin": (0.497, 1.25, 0.82), "skin_whole": (0.497, 1.25, 0.82)}
+    hh, ss, vv = grade.get(name, (0.5, 1.0, 1.0))
+    hsv.inputs["Hue"].default_value = hh
+    hsv.inputs["Saturation"].default_value = ss
+    hsv.inputs["Value"].default_value = vv
     L.new(t.outputs["Color"], hsv.inputs["Color"]); L.new(hsv.outputs[0], b.inputs["Base Color"])
     if alpha:
         L.new(t.outputs["Alpha"], b.inputs["Alpha"])
@@ -60,7 +63,7 @@ for o in allh:
     if o.type != "MESH": bpy.data.objects.remove(o)
 half.name = "tomato_half"
 m_skin_h = mat_tex("skin", "tomato_bunkatu_hontai.png", "tomato_normal2_for_bake.png", None, rough_scale=0.36,
-                   coat=0.15, sss=0.15, normal_strength=0.4)
+                   coat=0.08, sss=0.06, normal_strength=0.4)
 m_cut = mat_tex("cut", "tomato_cut_danmen.png", "tomato_cut_normal3.jpg", "tomato_cut_roughness3.jpg",
                 rough_scale=0.45, rough_bias=0.04, coat=0.6, sss=0.22, normal_strength=1.2)
 half.data.materials[0] = m_skin_h; half.data.materials[1] = m_cut
@@ -72,7 +75,7 @@ for o in allw:
     if o.type != "MESH": bpy.data.objects.remove(o)
 whole.name = "tomato_whole"
 m_skin_w = mat_tex("skin_whole", "tomato_for_bake.png", "tomato_normal2_for_bake.png", "tomato_roughness.png",
-                   rough_scale=0.45, rough_bias=0.2, coat=0.15, sss=0.15, normal_strength=0.5)
+                   rough_scale=0.45, rough_bias=0.2, coat=0.08, sss=0.06, normal_strength=0.5)
 m_heta_big = mat_tex("calyx_stem", "heta_big.png", None, None, rough_scale=0.65, alpha=True)
 m_heta = mat_tex("calyx", "tomatoheta.png", None, None, rough_scale=0.65, alpha=True)
 for m in (m_heta_big, m_heta):
@@ -176,15 +179,34 @@ for i, (c, n) in enumerate(picked):
     drop(c + n * 0.0002, n, 0.0014 + 0.0004 * i, length=0.006 if i == 0 else 0.0)
 he.to_mesh_clear()
 half.location.z += 0.0405
-half.rotation_euler.z -= 0.45
+half.rotation_euler.z += 0.45
 for o in scene.objects:
     if o.name.startswith('juice_drop'):
-        o.matrix_world = Matrix.Translation((0, 0, 0.0405)) @ Matrix.Rotation(-0.45, 4, 'Z') @ o.matrix_world
+        o.matrix_world = Matrix.Translation((0, 0, 0.0405)) @ Matrix.Rotation(0.45, 4, 'Z') @ o.matrix_world
 whole.location = (0.055, 0.075, 0.0411)
 whole.rotation_euler.z += 0.6
 lib.studio(scene, cam_loc=(-0.03, -0.30, 0.09), cam_target=(0.01, 0.02, 0.03), res=(1600, 1200), samples=SAMPLES, lens=85)
 scene.cycles.use_denoising = True
-scene.view_settings.exposure = -0.45
+scene.view_settings.view_transform = 'AgX'
+scene.view_settings.look = 'AgX - Medium High Contrast'
+scene.view_settings.exposure = 0.35
 scene.cycles.transmission_bounces = 8
 bpy.ops.wm.save_as_mainfile(filepath=OUT_BLEND)
 lib.render(scene, OUT_JPG)
+if len(args) > 3:  # turntable video frames
+    piv = bpy.data.objects.new("turntable", None); scene.collection.objects.link(piv)
+    piv.location = (0.025, 0.035, 0.0)
+    bpy.context.view_layer.update()
+    for o in list(scene.objects):
+        if o.type == "MESH" and (o.name.startswith(("tomato", "juice"))):
+            mw = o.matrix_world.copy(); o.parent = piv; o.matrix_parent_inverse = piv.matrix_world.inverted(); o.matrix_world = mw
+    scene.frame_start, scene.frame_end = 1, 96
+    piv.rotation_euler = (0, 0, 0); piv.keyframe_insert("rotation_euler", frame=1)
+    piv.rotation_euler = (0, 0, 2 * math.pi); piv.keyframe_insert("rotation_euler", frame=97)
+    for fc in piv.animation_data.action.fcurves if hasattr(piv.animation_data.action, "fcurves") else []:
+        for k in fc.keyframe_points: k.interpolation = "LINEAR"
+    scene.render.resolution_x, scene.render.resolution_y = 960, 720
+    scene.cycles.samples = 20
+    scene.render.image_settings.file_format = "JPEG"
+    scene.render.filepath = args[3]
+    bpy.ops.render.render(animation=True)

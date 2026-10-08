@@ -631,5 +631,103 @@
     "script": "tools/tomato.py",
     "script_version": "2",
     "built_at": ""
-  }
+  },
+  "transitions": [
+    {
+      "from": "whole",
+      "to": "half",
+      "op": "cut",
+      "detail": "одна площина через вісь (або поперек для half_cross)"
+    },
+    {
+      "from": "half",
+      "to": "quarter",
+      "op": "cut",
+      "detail": "друга площина через вісь"
+    },
+    {
+      "from": "quarter",
+      "to": "wedges",
+      "op": "cut",
+      "detail": "ще дві площини через вісь"
+    },
+    {
+      "from": "whole",
+      "to": "slices",
+      "op": "slice",
+      "detail": "видалити чашечку, паралельні площини 3 / 6 / 10 мм"
+    },
+    {
+      "from": "slices",
+      "to": "half_slices",
+      "op": "cut",
+      "detail": "площина навпіл поперек слайсів"
+    },
+    {
+      "from": "slices",
+      "to": "strips",
+      "op": "cut",
+      "detail": "сітка 8 мм в одному напрямку"
+    },
+    {
+      "from": "strips",
+      "to": "cubes",
+      "op": "cut",
+      "detail": "поперечні площини, крок 15 мм"
+    },
+    {
+      "from": "cubes",
+      "to": "diced",
+      "op": "chop",
+      "detail": "дрібніша сітка 6–8 мм"
+    },
+    {
+      "from": "diced",
+      "to": "chopped",
+      "op": "chop",
+      "detail": "сітка 2–4 мм, випадковий кут"
+    },
+    {
+      "from": "whole",
+      "to": "peeled",
+      "op": "peel",
+      "detail": "бланшувати, зняти оболонку skin; відхід — parts_skin"
+    },
+    {
+      "from": "half",
+      "to": "parts",
+      "op": "scoop",
+      "detail": "вийняти gel+seeds (parts_seeds), лишається parts_flesh"
+    },
+    {
+      "from": "cubes",
+      "to": "mashed",
+      "op": "crush",
+      "detail": "сплющити шматки, вільні насінини (mashed_crushed)"
+    },
+    {
+      "from": "mashed",
+      "to": "mashed",
+      "op": "blend",
+      "detail": "crushed → puree, один суцільний меш"
+    },
+    {
+      "from": "half",
+      "to": "cooked",
+      "op": "cook",
+      "detail": "roasted: половини, усадка 10 %"
+    },
+    {
+      "from": "slices",
+      "to": "cooked",
+      "op": "cook",
+      "detail": "grilled: товсті слайси, усадка 6 %"
+    },
+    {
+      "from": "cubes",
+      "to": "cooked",
+      "op": "cook",
+      "detail": "stewed: куби, усадка 14 %"
+    }
+  ]
 }

@@ -179,6 +179,7 @@ PBR metallic-roughness, `metallic = 0` для всієї їжі. Спільни�
 ```
 food-library/products/<id>/
   meta.json            метадані (схема: food-library/schema/meta.schema.json)
+  MASTER_TEMPLATE.md   лише у помідора: як система побудована і як її копіювати
   reference.md         аналіз референсів (§11)
   tools/<id>.py        Blender-скрипт: збирає цілий продукт і ріже всі стани
   whole/               <id>_whole.glb, <id>_whole_lod1.glb, preview.jpg
@@ -224,6 +225,9 @@ python tools/update_meta.py products/<id> <build>                  # маси й
 - `preparation` — типові способи підготовки;
 - `cooking_actions` — рекомендовані дії анімації (`slice`, `dice`, `crush`, `stir`, `pour`,
   `place_in`, `fry`, `simmer` …) і стан, у якому продукт для неї потрібен;
+- `transitions` — з якого стану і якою операцією (`cut`, `slice`, `chop`, `peel`, `scoop`,
+  `crush`, `blend`, `cook`) отримується кожен наступний стан; це карта для анімацій
+  (шматки нового стану — завжди підмножина розрізу попереднього);
 - `look` — короткий підсумок аналізу референсу;
 - `build` — `seed`, версія скрипта, дата збірки.
 

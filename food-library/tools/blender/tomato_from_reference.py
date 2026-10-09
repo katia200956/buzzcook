@@ -9,8 +9,11 @@ rng = random.Random(5)
 bpy.ops.wm.read_factory_settings(use_empty=True)
 scene = bpy.context.scene
 
+import os
+PAL = "/tmp/kat2/pal/"
 def img(name, non_color=False):
-    im = bpy.data.images.load(R + name, check_existing=True)
+    src = PAL + name if os.path.exists(PAL + name) else R + name
+    im = bpy.data.images.load(src, check_existing=True)
     if non_color: im.colorspace_settings.name = "Non-Color"
     return im
 
@@ -22,7 +25,7 @@ def mat_tex(name, base, normal=None, rough=None, rough_scale=1.0, coat=0.0, sss=
     L.new(b.outputs[0], out.inputs["Surface"])
     t = N.new("ShaderNodeTexImage"); t.image = img(base)
     hsv = N.new("ShaderNodeHueSaturation")
-    grade = {"cut": (0.49, 1.3, 0.72), "skin": (0.497, 1.25, 0.82), "skin_whole": (0.497, 1.25, 0.82)}
+    grade = {}  # colours baked into palette textures (recolor.py)
     hh, ss, vv = grade.get(name, (0.5, 1.0, 1.0))
     hsv.inputs["Hue"].default_value = hh
     hsv.inputs["Saturation"].default_value = ss
@@ -63,9 +66,9 @@ for o in allh:
     if o.type != "MESH": bpy.data.objects.remove(o)
 half.name = "tomato_half"
 m_skin_h = mat_tex("skin", "tomato_bunkatu_hontai.png", "tomato_normal2_for_bake.png", None, rough_scale=0.36,
-                   coat=0.08, sss=0.06, normal_strength=0.4)
+                   coat=0.04, sss=0.04, normal_strength=0.4)
 m_cut = mat_tex("cut", "tomato_cut_danmen.png", "tomato_cut_normal3.jpg", "tomato_cut_roughness3.jpg",
-                rough_scale=0.45, rough_bias=0.04, coat=0.6, sss=0.22, normal_strength=1.2)
+                rough_scale=0.45, rough_bias=0.04, coat=0.3, sss=0.15, normal_strength=1.2)
 half.data.materials[0] = m_skin_h; half.data.materials[1] = m_cut
 
 # ---------- whole
@@ -75,7 +78,7 @@ for o in allw:
     if o.type != "MESH": bpy.data.objects.remove(o)
 whole.name = "tomato_whole"
 m_skin_w = mat_tex("skin_whole", "tomato_for_bake.png", "tomato_normal2_for_bake.png", "tomato_roughness.png",
-                   rough_scale=0.45, rough_bias=0.2, coat=0.08, sss=0.06, normal_strength=0.5)
+                   rough_scale=0.45, rough_bias=0.2, coat=0.04, sss=0.04, normal_strength=0.5)
 m_heta_big = mat_tex("calyx_stem", "heta_big.png", None, None, rough_scale=0.65, alpha=True)
 m_heta = mat_tex("calyx", "tomatoheta.png", None, None, rough_scale=0.65, alpha=True)
 for m in (m_heta_big, m_heta):
@@ -104,10 +107,15 @@ def prep(ob, cut_mi=None, levels=2):
     bm = bmesh.new(); bm.from_mesh(me)
     if cut_mi is not None:
         cr = bm.edges.layers.float.get("crease_edge") or bm.edges.layers.float.new("crease_edge")
+        bw = bm.edges.layers.float.get("bevel_weight_edge") or bm.edges.layers.float.new("bevel_weight_edge")
         for e in bm.edges:
             mats = {f.material_index for f in e.link_faces}
-            if len(mats) > 1: e[cr] = 1.0
+            if len(mats) > 1: e[cr] = 0.0; e[bw] = 1.0
     bm.to_mesh(me); bm.free()
+    if cut_mi is not None:  # even, slightly flattened rounded rim
+        bv = ob.modifiers.new("Rim", "BEVEL"); bv.limit_method = "WEIGHT"
+        bv.width = 0.0022 / max(ob.matrix_world.to_scale()); bv.segments = 4; bv.profile = 0.62
+        bv.harden_normals = False
     sub = ob.modifiers.new("Smooth", "SUBSURF"); sub.levels = levels; sub.render_levels = levels
     return sub
 prep(half, cut_mi=1, levels=4)
@@ -187,9 +195,9 @@ whole.location = (0.055, 0.075, 0.0411)
 whole.rotation_euler.z += 0.6
 lib.studio(scene, cam_loc=(-0.03, -0.30, 0.09), cam_target=(0.01, 0.02, 0.03), res=(1600, 1200), samples=SAMPLES, lens=85)
 scene.cycles.use_denoising = True
-scene.view_settings.view_transform = 'AgX'
-scene.view_settings.look = 'AgX - Medium High Contrast'
-scene.view_settings.exposure = 0.35
+scene.view_settings.view_transform = 'Standard'
+scene.view_settings.look = 'None'
+scene.view_settings.exposure = -0.35
 scene.cycles.transmission_bounces = 8
 bpy.ops.wm.save_as_mainfile(filepath=OUT_BLEND)
 lib.render(scene, OUT_JPG)

@@ -47,6 +47,8 @@ def mat_tex(name, base, normal=None, rough=None, rough_scale=1.0, coat=0.0, sss=
         b.inputs["Roughness"].default_value = rough_scale
     b.inputs["Coat Weight"].default_value = coat
     b.inputs["Coat Roughness"].default_value = 0.05
+    if name.startswith("skin"):
+        b.inputs["Specular IOR Level"].default_value = 0.3
     if sss:
         b.inputs["Subsurface Weight"].default_value = sss
         b.inputs["Subsurface Radius"].default_value = (1.0, 0.25, 0.12)
@@ -65,8 +67,8 @@ half = halves[0]
 for o in allh:
     if o.type != "MESH": bpy.data.objects.remove(o)
 half.name = "tomato_half"
-m_skin_h = mat_tex("skin", "tomato_bunkatu_hontai.png", "tomato_normal2_for_bake.png", None, rough_scale=0.36,
-                   coat=0.04, sss=0.04, normal_strength=0.4)
+m_skin_h = mat_tex("skin", "tomato_bunkatu_hontai.png", "tomato_normal2_for_bake.png", None, rough_scale=0.24,
+                   coat=0.04, sss=0.0, normal_strength=0.4)
 m_cut = mat_tex("cut", "tomato_cut_danmen.png", "tomato_cut_normal3.jpg", "tomato_cut_roughness3.jpg",
                 rough_scale=0.45, rough_bias=0.04, coat=0.3, sss=0.15, normal_strength=1.2)
 half.data.materials[0] = m_skin_h; half.data.materials[1] = m_cut
@@ -78,7 +80,7 @@ for o in allw:
     if o.type != "MESH": bpy.data.objects.remove(o)
 whole.name = "tomato_whole"
 m_skin_w = mat_tex("skin_whole", "tomato_for_bake.png", "tomato_normal2_for_bake.png", "tomato_roughness.png",
-                   rough_scale=0.45, rough_bias=0.2, coat=0.04, sss=0.04, normal_strength=0.5)
+                   rough_scale=0.45, rough_bias=0.2, coat=0.04, sss=0.0, normal_strength=0.5)
 m_heta_big = mat_tex("calyx_stem", "heta_big.png", None, None, rough_scale=0.65, alpha=True)
 m_heta = mat_tex("calyx", "tomatoheta.png", None, None, rough_scale=0.65, alpha=True)
 for m in (m_heta_big, m_heta):
@@ -195,6 +197,47 @@ whole.location = (0.055, 0.075, 0.0411)
 whole.rotation_euler.z += 0.6
 lib.studio(scene, cam_loc=(-0.03, -0.30, 0.09), cam_target=(0.01, 0.02, 0.03), res=(1600, 1200), samples=SAMPLES, lens=85)
 scene.cycles.use_denoising = True
+
+# ---- cut face coloured from Katusha's reference: project it from the camera, relief from its detail
+from bpy_extras.object_utils import world_to_camera_view
+bpy.context.view_layer.update()
+me = half.data
+orig_uv = me.uv_layers.active.name
+uvl = me.uv_layers.new(name="proj")
+me.uv_layers[orig_uv].active = True; me.uv_layers[orig_uv].active_render = True
+cam = scene.camera; mw = half.matrix_world
+pts = {}
+for poly in me.polygons:
+    if poly.material_index != 1: continue
+    for li in poly.loop_indices:
+        vi = me.loops[li].vertex_index
+        if vi not in pts: pts[vi] = world_to_camera_view(scene, cam, mw @ me.vertices[vi].co)
+xs = [q.x for q in pts.values()]; ys = [q.y for q in pts.values()]
+x0, x1, y0, y1 = min(xs), max(xs), min(ys), max(ys)
+INSET = 0.012
+for poly in me.polygons:
+    for li in poly.loop_indices:
+        q = pts.get(me.loops[li].vertex_index)
+        if q is None: continue
+        uvl.data[li].uv = (INSET + (1 - 2 * INSET) * (q.x - x0) / (x1 - x0), INSET + (1 - 2 * INSET) * (q.y - y0) / (y1 - y0))
+nt = m_cut.node_tree; N = nt.nodes; Lk = nt.links
+bsdf = next(n for n in N if n.type == "BSDF_PRINCIPLED")
+for n in list(N):
+    if n.type in ("TEX_IMAGE", "NORMAL_MAP", "HUE_SAT", "MAP_RANGE"): N.remove(n)
+uvn = N.new("ShaderNodeUVMap"); uvn.uv_map = "proj"
+tc = N.new("ShaderNodeTexImage"); tc.image = bpy.data.images.load("/tmp/kat2/pal/cut_ref.png"); tc.extension = "EXTEND"
+th = N.new("ShaderNodeTexImage"); th.image = bpy.data.images.load("/tmp/kat2/pal/cut_ref_height.png"); th.extension = "EXTEND"
+th.image.colorspace_settings.name = "Non-Color"
+Lk.new(uvn.outputs[0], tc.inputs[0]); Lk.new(uvn.outputs[0], th.inputs[0])
+Lk.new(tc.outputs["Color"], bsdf.inputs["Base Color"])
+bump = N.new("ShaderNodeBump"); bump.inputs["Strength"].default_value = 0.6; bump.inputs["Distance"].default_value = 0.0004
+Lk.new(th.outputs["Color"], bump.inputs["Height"]); Lk.new(bump.outputs[0], bsdf.inputs["Normal"])
+# wet: glossy where the detail is raised (gel, seeds), a bit less on the flesh
+mr = N.new("ShaderNodeMapRange"); mr.inputs["To Min"].default_value = 0.32; mr.inputs["To Max"].default_value = 0.06
+Lk.new(th.outputs["Color"], mr.inputs["Value"]); Lk.new(mr.outputs[0], bsdf.inputs["Roughness"])
+Lk.new(tc.outputs["Color"], bsdf.inputs["Emission Color"]); bsdf.inputs["Emission Strength"].default_value = 0.22
+bsdf.inputs["Coat Weight"].default_value = 0.2; bsdf.inputs["Subsurface Weight"].default_value = 0.08
+tex.image = th.image; dsp.uv_layer = "proj"; dsp.strength = 0.0012; dsp.mid_level = 0.5
 scene.view_settings.view_transform = 'Standard'
 scene.view_settings.look = 'None'
 scene.view_settings.exposure = -0.35

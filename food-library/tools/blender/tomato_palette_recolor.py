@@ -50,10 +50,10 @@ for n in ["tomato_bunkatu_hontai.png","tomato_for_bake.png"]:
     red=mix(P["TOMATO"]*np.ones_like(rgb),P["REDORANGE"]*np.ones_like(rgb),sm(k,1.0,1.35)*0.8)
     red=red*np.clip(1+(k-1)*0.35,0.75,1.1)[...,None]
     gr=mix(P["LEAF"]*np.ones_like(rgb),P["STEM"]*np.ones_like(rgb),sm(k,0.6,1.1))
-    save(np.dstack([mix(sat(red*np.array([1.02,1.05,0.8]),1.1)*np.array([0.93,0.85,0.45]),gr,gm),a[...,3]]),n)
+    save(np.dstack([mix(sat(red*np.array([1.02,1.05,0.8]),1.35)*np.array([0.95,0.82,0.5]),gr,gm),a[...,3]]),n)
 # ---- calyx/stem: leaf green in shadows, stem green in light
 for n in ["heta_big.png","tomatoheta.png"]:
     a=load(n); Lr=lum(a[...,:3]); L2=norm(Lr,a[...,3]>0.5)
-    g=ramp(L2,[(0,P["LEAF"]*1.15),(0.45,P["STEM"]*1.15),(0.8,P["STEM"]*1.4),(1,P["STEM"]*1.6)])
+    g=ramp(L2,[(0,P["LEAF"]*0.8),(0.45,P["LEAF"]),(0.8,P["STEM"]),(1,P["STEM"]*1.15)])
     save(np.dstack([g,a[...,3]]),n)
 print("ok")

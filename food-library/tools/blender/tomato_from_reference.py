@@ -235,7 +235,7 @@ Lk.new(th.outputs["Color"], bump.inputs["Height"]); Lk.new(bump.outputs[0], bsdf
 # wet: glossy where the detail is raised (gel, seeds), a bit less on the flesh
 mr = N.new("ShaderNodeMapRange"); mr.inputs["To Min"].default_value = 0.32; mr.inputs["To Max"].default_value = 0.06
 Lk.new(th.outputs["Color"], mr.inputs["Value"]); Lk.new(mr.outputs[0], bsdf.inputs["Roughness"])
-Lk.new(tc.outputs["Color"], bsdf.inputs["Emission Color"]); bsdf.inputs["Emission Strength"].default_value = 0.25
+Lk.new(tc.outputs["Color"], bsdf.inputs["Emission Color"]); bsdf.inputs["Emission Strength"].default_value = 0.18
 bsdf.inputs["Coat Weight"].default_value = 0.2; bsdf.inputs["Subsurface Weight"].default_value = 0.08
 tex.image = th.image; dsp.uv_layer = "proj"; dsp.strength = 0.0019; dsp.mid_level = 0.5
 # deep gel pockets around the seeds: darker, glassy and see-through

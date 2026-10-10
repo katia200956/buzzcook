@@ -36,3 +36,31 @@ g=(a2@np.array([.299,.587,.114]))[...,None]; a2=g+(a2-g)*1.25
 a2=a2*np.array([1.0,0.95,0.72])
 Image.fromarray((np.clip(a2,0,1)*255).astype(np.uint8)).save('/tmp/kat2/pal/cut_ref.png')
 print('cav mean',cav.mean(),'seed mean',seed.mean())
+# ---- v10: a few more seeds in the dark pockets next to the existing ones
+rng=np.random.default_rng(7)
+col=np.asarray(Image.open('/tmp/kat2/pal/cut_ref.png')).astype(float)/255
+Hh=np.asarray(Image.open('/tmp/kat2/pal/cut_ref_height.png')).astype(float)/255
+cand=np.argwhere((cav>0.25)&(yel<0.15)&(near>0.5)); rng.shuffle(cand)
+GEL=np.array([0xF4,0xB8,0x60])/255; PODS=np.array([0xB5,0x8A,0x3E])/255
+placed=[]; yy,xx=np.mgrid[0:1024,0:1024]
+existing=np.argwhere(yel>0.5)
+for (y,x) in cand:
+    if len(placed)>=14: break
+    if any((y-py)**2+(x-px)**2<26**2 for py,px in placed): continue
+    if existing.size and ((existing[:,0]-y)**2+(existing[:,1]-x)**2).min()<14**2: continue
+    ang=rng.uniform(0,np.pi); ra,rb=rng.uniform(7,9),rng.uniform(4.5,6)
+    sl=slice(max(0,y-14),y+15), slice(max(0,x-14),x+15)
+    dy=yy[sl]-y; dx=xx[sl]-x
+    u=(dx*np.cos(ang)+dy*np.sin(ang))/ra; v=(-dx*np.sin(ang)+dy*np.cos(ang))/rb
+    r2=u*u+v*v; m=np.clip((1-r2)/0.25,0,1)
+    shade=np.clip(1-r2,0,1)[...,None]
+    seedc=PODS*(1-shade)+GEL*shade
+    hl=np.exp(-((u+0.35)**2+(v+0.35)**2)/0.04)[...,None]*0.5
+    c=col[sl]; col[sl]=c*(1-m[...,None])+np.clip(seedc+hl,0,1)*m[...,None]
+    Hh[sl]=np.maximum(Hh[sl], Hh[sl]*(1-m)+(0.5+0.35*np.sqrt(np.clip(1-r2,0,1)))*m)
+    placed.append((y,x))
+# calmer colours: no extra saturation (v9 had x1.25 baked in above)
+g=(col@np.array([.299,.587,.114]))[...,None]; col=g+(col-g)*0.85
+Image.fromarray((np.clip(col,0,1)*255).astype(np.uint8)).save('/tmp/kat2/pal/cut_ref.png')
+Image.fromarray((np.clip(Hh,0,1)*255).astype(np.uint8)).save('/tmp/kat2/pal/cut_ref_height.png')
+print('added seeds',len(placed))

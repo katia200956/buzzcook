@@ -27,7 +27,7 @@ near=np.clip(near/0.12,0,1)
 cav=d*redish*near
 cav=np.asarray(Image.fromarray((np.clip(cav,0,1)*255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(2))).astype(float)/255
 seed=np.clip((yel-0.25)/0.5,0,1)*near
-H2=0.5+1.6*(fine-big)+0.6*(big-huge)+0.45*seed-0.45*cav
+H2=0.5+1.6*(fine-big)+0.6*(big-huge)+0.45*seed-0.3*cav
 Image.fromarray((np.clip(H2,0,1)*255).astype(np.uint8)).save('/tmp/kat2/pal/cut_ref_height.png')
 Image.fromarray((np.clip(cav,0,1)*255).astype(np.uint8)).save('/tmp/kat2/pal/cut_ref_cavity.png')
 # colour: a touch warmer / less blue, as measured against the reference

@@ -235,7 +235,7 @@ Lk.new(th.outputs["Color"], bump.inputs["Height"]); Lk.new(bump.outputs[0], bsdf
 # wet: glossy where the detail is raised (gel, seeds), a bit less on the flesh
 mr = N.new("ShaderNodeMapRange"); mr.inputs["To Min"].default_value = 0.32; mr.inputs["To Max"].default_value = 0.06
 Lk.new(th.outputs["Color"], mr.inputs["Value"]); Lk.new(mr.outputs[0], bsdf.inputs["Roughness"])
-Lk.new(tc.outputs["Color"], bsdf.inputs["Emission Color"]); bsdf.inputs["Emission Strength"].default_value = 0.17
+Lk.new(tc.outputs["Color"], bsdf.inputs["Emission Color"]); bsdf.inputs["Emission Strength"].default_value = 0.25
 bsdf.inputs["Coat Weight"].default_value = 0.2; bsdf.inputs["Subsurface Weight"].default_value = 0.08
 tex.image = th.image; dsp.uv_layer = "proj"; dsp.strength = 0.0019; dsp.mid_level = 0.5
 # deep gel pockets around the seeds: darker, glassy and see-through
@@ -243,7 +243,7 @@ tcv = N.new("ShaderNodeTexImage"); tcv.image = bpy.data.images.load("/tmp/kat2/p
 tcv.image.colorspace_settings.name = "Non-Color"; Lk.new(uvn.outputs[0], tcv.inputs[0])
 cvr = N.new("ShaderNodeMapRange"); cvr.inputs["From Max"].default_value = 0.45
 Lk.new(tcv.outputs["Color"], cvr.inputs["Value"])
-tw = N.new("ShaderNodeMath"); tw.operation = "MULTIPLY"; tw.inputs[1].default_value = 0.65
+tw = N.new("ShaderNodeMath"); tw.operation = "MULTIPLY"; tw.inputs[1].default_value = 0.3
 Lk.new(cvr.outputs[0], tw.inputs[0]); Lk.new(tw.outputs[0], bsdf.inputs["Transmission Weight"])
 inv = N.new("ShaderNodeMath"); inv.operation = "MULTIPLY_ADD"; inv.inputs[1].default_value = -0.85; inv.inputs[2].default_value = 1.0
 Lk.new(cvr.outputs[0], inv.inputs[0])
@@ -261,15 +261,14 @@ def dents(ob, size, depth, seed):
     sub_i = next(i for i, m in enumerate(ob.modifiers) if m.type == "SUBSURF")
     ob.modifiers.move(len(ob.modifiers) - 1, sub_i + 1)
     return md
-dents(half, 0.014, 0.0022, 1); dents(whole, 0.016, 0.0022, 2)
-md2 = dents(half, 0.006, 0.0009, 3); md2.vertex_group = "cut_face"   # ripples on the cut itself
+# dents removed in v9: Katusha wants the original shape back
 # brighter, neutral backdrop like the reference
 for nd in scene.world.node_tree.nodes:
     if nd.type == "BACKGROUND" and nd.inputs["Strength"].default_value == 1.0:
-        nd.inputs["Color"].default_value = (0.95, 0.95, 0.95, 1)
+        nd.inputs["Color"].default_value = (0.88, 0.88, 0.88, 1)
 scene.view_settings.view_transform = 'Standard'
 scene.view_settings.look = 'None'
-scene.view_settings.exposure = -0.35
+scene.view_settings.exposure = -0.25
 scene.cycles.transmission_bounces = 8
 bpy.ops.wm.save_as_mainfile(filepath=OUT_BLEND)
 lib.render(scene, OUT_JPG)

@@ -46,9 +46,9 @@ def mat_tex(name, base, normal=None, rough=None, rough_scale=1.0, coat=0.0, sss=
     else:
         b.inputs["Roughness"].default_value = rough_scale
     b.inputs["Coat Weight"].default_value = coat
-    b.inputs["Coat Roughness"].default_value = 0.08 if name.startswith("skin") else 0.05
+    b.inputs["Coat Roughness"].default_value = 0.22 if name.startswith("skin") else 0.05
     if name.startswith("skin"):
-        b.inputs["Specular IOR Level"].default_value = 0.3
+        b.inputs["Specular IOR Level"].default_value = 0.22
     if sss:
         b.inputs["Subsurface Weight"].default_value = sss
         b.inputs["Subsurface Radius"].default_value = (1.0, 0.25, 0.12)
@@ -67,8 +67,8 @@ half = halves[0]
 for o in allh:
     if o.type != "MESH": bpy.data.objects.remove(o)
 half.name = "tomato_half"
-m_skin_h = mat_tex("skin", "tomato_bunkatu_hontai.png", "tomato_normal2_for_bake.png", None, rough_scale=0.15,
-                   coat=0.15, sss=0.6, normal_strength=0.4)
+m_skin_h = mat_tex("skin", "tomato_bunkatu_hontai.png", "tomato_normal2_for_bake.png", None, rough_scale=0.32,
+                   coat=0.06, sss=0.5, normal_strength=0.4)
 m_cut = mat_tex("cut", "tomato_cut_danmen.png", "tomato_cut_normal3.jpg", "tomato_cut_roughness3.jpg",
                 rough_scale=0.45, rough_bias=0.04, coat=0.3, sss=0.15, normal_strength=1.2)
 half.data.materials[0] = m_skin_h; half.data.materials[1] = m_cut
@@ -80,7 +80,7 @@ for o in allw:
     if o.type != "MESH": bpy.data.objects.remove(o)
 whole.name = "tomato_whole"
 m_skin_w = mat_tex("skin_whole", "tomato_for_bake.png", "tomato_normal2_for_bake.png", "tomato_roughness.png",
-                   rough_scale=0.26, rough_bias=0.1, coat=0.15, sss=0.6, normal_strength=0.5)
+                   rough_scale=0.42, rough_bias=0.24, coat=0.06, sss=0.5, normal_strength=0.5)
 m_heta_big = mat_tex("calyx_stem", "heta_big.png", None, None, rough_scale=0.65, alpha=True)
 m_heta = mat_tex("calyx", "tomatoheta.png", None, None, rough_scale=0.65, alpha=True)
 for m in (m_heta_big, m_heta):

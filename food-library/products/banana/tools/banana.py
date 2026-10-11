@@ -41,7 +41,7 @@ OFF = Vector((R.uniform(0, 100), R.uniform(0, 100), R.uniform(0, 100)))
 STAR_PHASE = math.pi / 2 + R.uniform(-0.3, 0.3)
 
 MAT_NAMES = ["peel", "peel_cut", "flesh", "flesh_cut", "core", "core_cut", "seed", "seed_cut",
-             "stem", "_int", "_int_peel"]
+             "stem", "puree", "_int", "_int_peel"]
 M = {n: i for i, n in enumerate(MAT_NAMES)}
 CUT = {"peel": M["peel_cut"], "flesh": M["flesh_cut"], "flesh_in": M["flesh_cut"],
        "core": M["core_cut"], "core_in": M["core_cut"], "seeds": M["seed_cut"], "fibers": M["flesh_cut"]}
@@ -59,6 +59,7 @@ def materials():
         lib.make_material("seed", rough=0.45),
         lib.make_material("seed_cut", rough=0.4, coat=0.3),
         lib.make_material("stem", rough=0.8, spec=0.3),
+        lib.make_material("puree", rough=0.32, coat=0.35, coat_rough=0.25, spec=0.4),
         lib.make_material("_int", rough=0.5),
         lib.make_material("_int_peel", rough=0.5),
     ]
@@ -68,10 +69,13 @@ C = {k: srgb(v) for k, v in dict(
     peel="#E8BE2E", peel_hi="#F2CD4A", peel_lo="#D9AA22", peel_green="#B3AE3A",
     neck="#A9A43E", stem="#7E7A3A", stem_end="#4A3424", stem_end_rim="#6E5236",
     tip="#3A2A1E", speck="#8C6A30",
-    peel_cut_out="#E6C653", peel_cut_in="#F1E5C2",
-    flesh="#F0D47A", flesh_hi="#F7E29A", flesh_lo="#E2BF5C", fiber="#F4E3AC", flesh_tip="#8A6A42",
-    cut_edge="#E9C86E", cut_mid="#F4E0A2", cut_in="#F1DB98", ray="#D6B172",
-    core="#CFA466", core_dark="#B88C50", halo="#E7CB8E", seed="#3B2B1D", seed_cut="#4E3925",
+    peel_cut_out="#E2C35A", peel_cut_in="#F2EBD3",
+    flesh="#EEE2BE", flesh_hi="#F6EED6", flesh_lo="#DFCD9C", fiber="#F7F0DC", flesh_tip="#9A7E58",
+    cut_edge="#EADBAF", cut_mid="#F5EDD4", cut_in="#F0E5C3", ray="#D8BF8C",
+    core="#D3B47E", core_dark="#BE9C64", halo="#E9DBB2", seed="#3B2B1D", seed_cut="#4E3925",
+    mash="#EADCB0", mash_dark="#CDB27A", mash_ox="#C7A36A", puree="#E9DBB0", puree_dark="#DCC898",
+    fried="#E2B468", fried_dark="#B47C3A", fried_side="#EBCB8A",
+    baked="#3E2A1C", baked_hi="#6A4A28", baked_lo="#22170F",
 ).items()}
 
 
@@ -512,8 +516,8 @@ def clean(bm, peeled):
     return bm
 
 
-def objects_for(pieces, prefix, info, mats, coll, peeled, sort_key=None):
-    fn = colour_fn(info)
+def objects_for(pieces, prefix, info, mats, coll, peeled, sort_key=None, fn=None):
+    fn = fn or colour_fn(info)
     if sort_key:
         pieces = sorted(pieces, key=sort_key)
     obs, masses = [], []
@@ -602,13 +606,243 @@ def state_cubes(parts, info, mats, coll, step=0.015):
     return objects_for(pieces, "cube", info, mats, coll, peeled=True, sort_key=key)
 
 
+def state_half(parts, info, mats, coll):
+    """Cut across in the middle, peel on."""
+    rng = lib.rng(SEED + 51)
+    s = (S_F0 + S_F1) / 2 + rng.uniform(-0.003, 0.003)
+    no = Euler((0, math.radians(rng.uniform(-2, 2)), math.radians(rng.uniform(-2, 2)))).to_matrix() @ tangent(s)
+    pieces = make_pieces(parts, [(bend(s, 0, 0), no)], SOLID)
+    return objects_for(pieces, "half", info, mats, coll, peeled=False, sort_key=s_key)
+
+
+def state_cross_section(parts, info, mats, coll):
+    """A 25 mm section from the middle, peel on, both faces cut: shows the full cross-section."""
+    rng = lib.rng(SEED + 53)
+    s0 = -0.014
+    planes = [(bend(s, 0, 0), tangent(s)) for s in (s0, s0 + 0.025)]
+    pieces = make_pieces(parts, planes, SOLID)
+    mid = [p for p in pieces if s0 < s_key(p) < s0 + 0.025]
+    return objects_for(mid, "section", info, mats, coll, peeled=False)
+
+
+def state_half_slices(parts, info, mats, coll, thick=0.010):
+    rng = lib.rng(SEED + 57)
+    planes = slice_planes(S_F0 + 0.004, S_F1 - 0.004, thick, rng)
+    planes.append((bend(0, rng.uniform(-0.0005, 0.0005), 0), Vector((0, 1, 0.02))))
+    pieces = make_pieces(parts, planes, FLESH)
+    pieces = [p for p in pieces if any(k in p for k in ("flesh", "flesh_in")) and piece_mass_g(p) > 0.3]
+    key = lambda p: (round(s_key(p), 3), centroid(p).y)
+    return objects_for(pieces, "half_slice", info, mats, coll, peeled=True, sort_key=key)
+
+
+def state_strips(parts, info, mats, coll):
+    """Peeled banana cut lengthwise into four long strips (planes along the curve)."""
+    rng = lib.rng(SEED + 61)
+    planes = [(Vector((0, y + rng.uniform(-0.0006, 0.0006), 0)),
+               Vector((rng.uniform(-0.01, 0.01), 1, rng.uniform(-0.02, 0.02))))
+              for y in (-0.0075, 0.0, 0.0075)]
+    pieces = make_pieces(parts, planes, FLESH)
+    pieces = [p for p in pieces if any(k in p for k in ("flesh", "flesh_in")) and piece_mass_g(p) > 1.0]
+    return objects_for(pieces, "strip", info, mats, coll, peeled=True, sort_key=lambda p: centroid(p).y)
+
+
+def state_diced(parts, info, mats, coll, step=0.005):
+    """Small 5 mm dice: a representative 30 mm portion of the peeled banana (multiply in the app)."""
+    rng = lib.rng(SEED + 67)
+    s0, s1 = -0.012, 0.018
+    chunk = make_pieces(parts, [(bend(s, 0, 0), tangent(s)) for s in (s0, s1)], FLESH)
+    chunk = [p for p in chunk if s0 < s_key(p) < s1][0]
+    sm = (s0 + s1) / 2
+    planes = slice_planes(s0, s1 - step * 0.5, step, rng, tilt_deg=4.0)
+    rad = (bend(sm, 0, -1) - bend(sm, 0, 0)).normalized()     # "up" across the fruit at the middle
+    for k in range(-3, 4):
+        off = k * step + rng.uniform(-0.0006, 0.0006)
+        planes.append((Vector((0, off, 0)), Vector((rng.uniform(-0.04, 0.04), 1, rng.uniform(-0.04, 0.04)))))
+        planes.append((bend(sm, 0, 0) + rad * off, rad + Vector((rng.uniform(-0.04, 0.04), rng.uniform(-0.04, 0.04), 0))))
+    pieces = lib.split_all([chunk], planes, CUT)
+    pieces = [p for p in pieces if any(k in p for k in ("flesh", "flesh_in", "core", "core_in"))
+              and piece_mass_g(p) > 0.03]
+    key = lambda p: (round(s_key(p), 3), round(centroid(p).y, 3), centroid(p).z)
+    return objects_for(pieces, "dice", info, mats, coll, peeled=True, sort_key=key)
+
+
+def mound(radius, height, nu=96, nv=48, lump=0.0, salt=0):
+    off = OFF * (1.0 + salt * 0.37)
+
+    def fn(u, v):
+        d = Vector((math.sin(v) * math.cos(u), math.sin(v) * math.sin(u), math.cos(v)))
+        n = 0.0
+        if lump:
+            n = lump * (noise.noise(d * 2.2 + off) * 0.45 + noise.noise(d * 5.5 + off * 1.3) * 0.3
+                        + noise.noise(d * 13 + off * 1.7) * 0.17 + noise.noise(d * 30 + off * 2.3) * 0.08)
+        r = radius * math.sin(v) * (1 + 0.6 * n)
+        c = math.cos(v)
+        z = max(0.0, height * c * (1 + n)) if c > 0 else 0.0
+        return Vector((r * math.cos(u), r * math.sin(u), z))
+    return lib.grid_shell(fn, nu, nv)
+
+
+def mash_colour(kind):
+    def fn(mat, co, face):
+        n = noise.noise(co * 180 + OFF) * 0.5 + 0.5
+        m = noise.noise(co * 60 + OFF * 2) * 0.5 + 0.5
+        if kind == "mashed":
+            c = lerp(C["mash"], C["mash_dark"], 0.55 * n)
+            c = lerp(c, C["mash_ox"], 0.35 * max(0.0, m - 0.55) * 2)
+            if noise.noise(co * 1400 + OFF * 3) > 0.62:   # broken seed specks
+                c = lerp(c, C["seed"], 0.55)
+            return c
+        return lerp(C["puree"], C["puree_dark"], 0.35 * n)
+    return fn
+
+
+def flesh_volume(parts):
+    return sum(lib.volume(parts[k]) for k in ("flesh", "flesh_in", "core", "core_in"))
+
+
+def state_mashed(parts, info, mats, coll):
+    """Fork-mashed banana: an uneven lumpy heap with soft chunks pressed into it."""
+    vol = flesh_volume(parts)
+    h_r = 0.42
+    r = (vol / (2 / 3 * math.pi * h_r)) ** (1 / 3)
+    v, f = mound(r, r * h_r, nu=160, nv=80, lump=0.3, salt=1)
+    bm = bmesh.new()
+    lib.add_shell(bm, v, f, M["puree"])
+    bm.normal_update()
+    lib.paint(bm, mash_colour("mashed"))
+    obs = [lib.to_object("mash_00", bm, mats, coll, origin="bottom")]
+    masses = [vol * 1e6 * DENSITY_FLESH * 0.85]
+    # a few half-crushed chunks on top (from the 5 mm dice), flattened
+    d_obs, d_m = state_diced(parts, info, mats, coll)
+    rng = lib.rng(SEED + 71)
+    keep = rng.sample(range(len(d_obs)), min(14, len(d_obs)))
+    for i, ob in enumerate(d_obs):
+        if i not in keep:
+            bpy.data.objects.remove(ob)
+            continue
+        a = rng.uniform(0, 2 * math.pi)
+        rr = rng.uniform(0, r * 0.75)
+        ob.data.transform(Matrix.Diagonal((1.15, 1.15, 0.55, 1)))
+        ob.rotation_euler = Euler((rng.uniform(-0.5, 0.5), rng.uniform(-0.5, 0.5), rng.uniform(0, 6.3)))
+        zt = r * h_r * math.sqrt(max(0.0, 1 - (rr / r) ** 2))
+        ob.location = Vector((rr * math.cos(a), rr * math.sin(a), zt - 0.0012))
+        ob.name = f"chunk_{len(obs):02d}"
+        obs.append(ob)
+        masses.append(d_m[i])
+    return obs, masses
+
+
+def state_puree(parts, info, mats, coll):
+    vol = flesh_volume(parts)
+    h_r = 0.36
+    r = (vol / (2 / 3 * math.pi * h_r)) ** (1 / 3)
+    v, f = mound(r, r * h_r, nu=128, nv=56, lump=0.05, salt=2)
+    bm = bmesh.new()
+    lib.add_shell(bm, v, f, M["puree"])
+    bm.normal_update()
+    lib.paint(bm, mash_colour("puree"))
+    return [lib.to_object("puree", bm, mats, coll, origin="bottom")], [vol * 1e6 * DENSITY_FLESH]
+
+
+def fried_fn(info):
+    base = colour_fn(info)
+
+    def fn(mat, co, face):
+        n = noise.noise(co * 300 + OFF) * 0.5 + 0.5
+        if mat in (M["flesh_cut"], M["core_cut"], M["seed_cut"]):
+            s, y, z = unbend(co)
+            rr = math.hypot(y, z) / max(1e-5, flesh_round(s))
+            return lerp(lerp(C["fried"], C["fried_dark"], 0.15 + 0.35 * n), C["fried_dark"], 0.6 * smoothstep(0.75, 1.0, rr))
+        if mat == M["flesh"]:
+            return lerp(C["fried_side"], C["fried"], 0.5 * n)
+        return base(mat, co, face)
+    return fn
+
+
+def baked_fn(info):
+    base = colour_fn(info)
+
+    def fn(mat, co, face):
+        if mat == M["peel"]:
+            n = noise.noise(co * 120 + OFF) * 0.5 + 0.5
+            m = noise.noise(co * 25 + OFF * 2) * 0.5 + 0.5
+            c = lerp(C["baked_lo"], C["baked"], n)
+            return lerp(c, C["baked_hi"], 0.6 * max(0.0, m - 0.5) * 2)
+        return base(mat, co, face)
+    return fn
+
+
+def state_cooked_fried(parts, info, mats, coll):
+    """Pan-fried 10 mm peeled slices: caramelised faces, golden sides, shrunk about 8 %."""
+    rng = lib.rng(SEED + 37)
+    planes = slice_planes(S_F0 + 0.004, S_F1 - 0.004, 0.010, rng)
+    pieces = make_pieces(parts, planes, FLESH)
+    pieces = [p for p in pieces if any(k in p for k in ("flesh", "flesh_in"))]
+    obs, masses = objects_for(pieces, "slice", info, mats, coll, peeled=True, sort_key=s_key,
+                              fn=fried_fn(info))
+    for ob in obs:
+        ob.data.transform(Matrix.Scale(0.93, 4))
+    for ob in obs:
+        mesh_wrinkle(ob, 0.25)
+    return obs, [m * 0.85 for m in masses]
+
+
+def mesh_wrinkle(ob, amount):
+    """Soft sag of a cooked piece: tiny noise displacement along normals (mm scale)."""
+    me = ob.data
+    for v in me.vertices:
+        w = ob.matrix_world @ v.co
+        v.co += v.normal * 0.001 * amount * noise.noise(w * 220 + OFF)
+
+
+def state_cooked_baked(parts, info, mats, coll):
+    """Baked whole in the peel: peel brown-black and slightly shrunk and wrinkled."""
+    bm = bmesh.new()
+    o_v, o_f = info["outer"]
+    lib.add_shell(bm, o_v, o_f, M["peel"])
+    bm.normal_update()
+    lib.paint(bm, baked_fn(info))
+    ob = lib.to_object("baked", bm, mats, coll, origin="bottom")
+    ob.data.transform(Matrix.Diagonal((0.97, 0.94, 0.92, 1)))
+    me = ob.data
+    for v in me.vertices:
+        w = v.co
+        v.co += v.normal * 0.0006 * (noise.noise(Vector((w.x * 90, w.y * 600, w.z * 600)) + OFF) - 0.2)
+    m = piece_mass_g({k: parts[k] for k in SOLID})
+    return [ob], [m * 0.88]
+
+
+def state_parts_peel(parts, info, mats, coll):
+    """The peel as its own geometry: pale fibrous inside, peeled off in one piece (lies around the
+    flesh in the whole fruit, so peeled + parts_peel = whole)."""
+    bm = lib.bm_copy(parts["peel"])
+    for f in bm.faces:
+        if f.material_index == M["_int_peel"]:
+            f.material_index = M["peel_cut"]
+    bm.normal_update()
+    lib.paint(bm, colour_fn(info))
+    m = lib.volume(parts["peel"]) * 1e6 * DENSITY_PEEL
+    return [lib.to_object("peel", bm, mats, coll, origin="bottom")], [m]
+
+
 S = lambda f, *a, **k: (lambda p, i, m, c: f(p, i, m, c, *a, **k))
 
 STATES = {
     "whole": [("whole", S(state_whole))],
     "peeled": [("peeled", S(state_peeled))],
-    "slices": [("slices_peel", S(state_slices_peel)), ("slices_peeled", S(state_slices_peeled))],
+    "half": [("half", S(state_half))],
+    "cross_section": [("cross_section", S(state_cross_section))],
+    "slices": [("slices_5mm", S(state_slices_peeled, thick=0.005)),
+               ("slices_10mm", S(state_slices_peeled, thick=0.010)),
+               ("slices_15mm", S(state_slices_peeled, thick=0.015)),
+               ("slices_peel", S(state_slices_peel))],
+    "half_slices": [("half_slices", S(state_half_slices))],
+    "strips": [("strips", S(state_strips))],
     "cubes": [("cubes", S(state_cubes))],
+    "diced": [("diced", S(state_diced))],
+    "mashed": [("mashed", S(state_mashed)), ("puree", S(state_puree))],
+    "cooked": [("cooked_fried", S(state_cooked_fried)), ("cooked_baked", S(state_cooked_baked))],
+    "parts": [("parts_peel", S(state_parts_peel))],
 }
 
 
@@ -661,6 +895,22 @@ def pose_cut_up(obs, per_row=5, gap=0.006):
         ob.location.z -= zmin
 
 
+def pose_heap(obs, radius):
+    """Loose pile on the board: random spots in a disc, random turns, a few on top."""
+    rng = lib.rng(SEED + 99)
+    for ob in obs:
+        a = rng.uniform(0, 2 * math.pi)
+        r = radius * math.sqrt(rng.uniform(0, 1))
+        ob.rotation_euler = Euler((rng.uniform(0, 6.3), rng.uniform(0, 6.3), rng.uniform(0, 6.3)))
+        ob.location = Vector((r * math.cos(a), r * math.sin(a),
+                              0.004 + 0.012 * max(0.0, 1 - r / radius) * rng.uniform(0, 1)))
+    bpy.context.view_layer.update()
+    for ob in obs:
+        zmin = min((ob.matrix_world @ v.co).z for v in ob.data.vertices)
+        if zmin < 0:   # nothing sinks into the board
+            ob.location.z -= zmin
+
+
 def pose_explode(obs, k):
     c = sum((o.location for o in obs), Vector()) / len(obs)
     for o in obs:
@@ -680,6 +930,10 @@ def frame(scene, obs, elev=24.0, azim=-12.0, res=(1200, 900), samples=64, dist_k
     e, a = math.radians(elev), math.radians(azim)
     cam = c + Vector((math.sin(a) * math.cos(e), -math.cos(a) * math.cos(e), math.sin(e))) * dist
     return lib.studio(scene, cam_loc=tuple(cam), cam_target=tuple(c), res=res, samples=samples)
+
+
+CUT_UP = {"half": 2, "cross_section": 1, "slices_5mm": 7, "slices_10mm": 5, "slices_15mm": 4,
+          "slices_peel": 5, "half_slices": 7, "cubes": 8, "cooked_fried": 5}
 
 
 def main():
@@ -725,9 +979,18 @@ def main():
             print(name, report[name], flush=True)
             if a.preview:
                 os.makedirs(a.preview, exist_ok=True)
-                if name.startswith("slices") or name == "cubes":
-                    pose_cut_up(obs, per_row=5 if name.startswith("slices") else 8)
+                if name in CUT_UP:
+                    pose_cut_up(obs, per_row=CUT_UP[name])
                     frame(scene, obs, elev=48, azim=-8, samples=a.samples, dist_k=2.0)
+                elif name == "diced":
+                    pose_heap(obs, 0.032)
+                    frame(scene, obs, elev=40, azim=-15, samples=a.samples, dist_k=2.0)
+                elif name in ("mashed", "puree"):
+                    frame(scene, obs, elev=35, azim=-10, samples=a.samples, dist_k=2.2)
+                elif name == "strips":
+                    for i, ob in enumerate(obs):
+                        ob.location.y += (i - (len(obs) - 1) / 2) * 0.012
+                    frame(scene, obs, elev=50, azim=-8, samples=a.samples)
                 else:
                     frame(scene, obs, elev=18, azim=-10, samples=a.samples)
                 lib.render(scene, os.path.join(a.preview, f"{ID}_{name}.jpg"))

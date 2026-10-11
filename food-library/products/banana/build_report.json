@@ -30,6 +30,76 @@
    31.2
   ]
  },
+ "half": {
+  "file": "half/banana_half.glb",
+  "pieces": 2,
+  "triangles": 34940,
+  "max_piece_triangles": 20548,
+  "bytes": 730776,
+  "mass_total_g": 132.1,
+  "piece_mass_g": 66.06,
+  "piece_size_mm": [
+   93.4,
+   63.2,
+   36.0
+  ]
+ },
+ "cross_section": {
+  "file": "cross_section/banana_cross_section.glb",
+  "pieces": 1,
+  "triangles": 5554,
+  "max_piece_triangles": 5554,
+  "bytes": 132956,
+  "mass_total_g": 23.6,
+  "piece_mass_g": 23.64,
+  "piece_size_mm": [
+   36.8,
+   36.0,
+   28.4
+  ]
+ },
+ "slices_5mm": {
+  "file": "slices/banana_slices_5mm.glb",
+  "pieces": 29,
+  "triangles": 71370,
+  "max_piece_triangles": 3104,
+  "bytes": 2112576,
+  "mass_total_g": 89.8,
+  "piece_mass_g": 3.1,
+  "piece_size_mm": [
+   28.8,
+   27.9,
+   12.4
+  ]
+ },
+ "slices_10mm": {
+  "file": "slices/banana_slices_10mm.glb",
+  "pieces": 15,
+  "triangles": 52166,
+  "max_piece_triangles": 4552,
+  "bytes": 1432772,
+  "mass_total_g": 89.7,
+  "piece_mass_g": 5.98,
+  "piece_size_mm": [
+   29.3,
+   28.1,
+   16.8
+  ]
+ },
+ "slices_15mm": {
+  "file": "slices/banana_slices_15mm.glb",
+  "pieces": 10,
+  "triangles": 45737,
+  "max_piece_triangles": 5955,
+  "bytes": 1208156,
+  "mass_total_g": 89.7,
+  "piece_mass_g": 8.97,
+  "piece_size_mm": [
+   30.6,
+   28.8,
+   21.5
+  ]
+ },
  "slices_peel": {
   "file": "slices/banana_slices_peel.glb",
   "pieces": 14,
@@ -44,18 +114,32 @@
    19.6
   ]
  },
- "slices_peeled": {
-  "file": "slices/banana_slices_peeled.glb",
-  "pieces": 15,
-  "triangles": 52166,
-  "max_piece_triangles": 4552,
-  "bytes": 1432776,
-  "mass_total_g": 89.7,
-  "piece_mass_g": 5.98,
+ "half_slices": {
+  "file": "half_slices/banana_half_slices.glb",
+  "pieces": 30,
+  "triangles": 62130,
+  "max_piece_triangles": 2806,
+  "bytes": 1806744,
+  "mass_total_g": 89.8,
+  "piece_mass_g": 2.99,
   "piece_size_mm": [
-   29.3,
-   28.1,
-   16.8
+   29.1,
+   17.8,
+   14.0
+  ]
+ },
+ "strips": {
+  "file": "strips/banana_strips.glb",
+  "pieces": 4,
+  "triangles": 41733,
+  "max_piece_triangles": 11706,
+  "bytes": 1030416,
+  "mass_total_g": 89.7,
+  "piece_mass_g": 22.43,
+  "piece_size_mm": [
+   140.0,
+   44.8,
+   8.4
   ]
  },
  "cubes": {
@@ -70,6 +154,90 @@
    18.6,
    17.1,
    14.9
+  ]
+ },
+ "diced": {
+  "file": "diced/banana_diced.glb",
+  "pieces": 194,
+  "triangles": 50318,
+  "max_piece_triangles": 710,
+  "bytes": 2032068,
+  "mass_total_g": 20.7,
+  "piece_mass_g": 0.11,
+  "piece_size_mm": [
+   6.2,
+   5.1,
+   4.5
+  ]
+ },
+ "mashed": {
+  "file": "mashed/banana_mashed.glb",
+  "pieces": 15,
+  "triangles": 28822,
+  "max_piece_triangles": 25280,
+  "bytes": 699836,
+  "mass_total_g": 77.7,
+  "piece_mass_g": 5.18,
+  "piece_size_mm": [
+   12.6,
+   11.2,
+   4.2
+  ]
+ },
+ "puree": {
+  "file": "mashed/banana_puree.glb",
+  "pieces": 1,
+  "triangles": 14080,
+  "max_piece_triangles": 14080,
+  "bytes": 289444,
+  "mass_total_g": 89.7,
+  "piece_mass_g": 89.72,
+  "piece_size_mm": [
+   99.9,
+   99.6,
+   17.9
+  ]
+ },
+ "cooked_fried": {
+  "file": "cooked/banana_cooked_fried.glb",
+  "pieces": 15,
+  "triangles": 52166,
+  "max_piece_triangles": 4552,
+  "bytes": 1382748,
+  "mass_total_g": 76.3,
+  "piece_mass_g": 5.09,
+  "piece_size_mm": [
+   27.2,
+   26.2,
+   15.6
+  ]
+ },
+ "cooked_baked": {
+  "file": "cooked/banana_cooked_baked.glb",
+  "pieces": 1,
+  "triangles": 33216,
+  "max_piece_triangles": 33216,
+  "bytes": 671788,
+  "mass_total_g": 116.3,
+  "piece_mass_g": 116.26,
+  "piece_size_mm": [
+   177.9,
+   66.6,
+   34.0
+  ]
+ },
+ "parts_peel": {
+  "file": "parts/banana_parts_peel.glb",
+  "pieces": 1,
+  "triangles": 58176,
+  "max_piece_triangles": 58176,
+  "bytes": 1172244,
+  "mass_total_g": 42.4,
+  "piece_mass_g": 42.38,
+  "piece_size_mm": [
+   183.3,
+   72.4,
+   36.0
   ]
  }
 }

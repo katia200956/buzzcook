@@ -1,0 +1,75 @@
+{
+ "peel_min_mm": 1.85,
+ "seeds": 175,
+ "length_axis_m": 0.204,
+ "whole": {
+  "file": "whole/banana_whole.glb",
+  "pieces": 1,
+  "triangles": 33216,
+  "max_piece_triangles": 33216,
+  "bytes": 671928,
+  "mass_total_g": 132.1,
+  "piece_mass_g": 132.12,
+  "piece_size_mm": [
+   183.3,
+   72.4,
+   36.0
+  ]
+ },
+ "peeled": {
+  "file": "peeled/banana_peeled.glb",
+  "pieces": 1,
+  "triangles": 32890,
+  "max_piece_triangles": 32890,
+  "bytes": 752708,
+  "mass_total_g": 89.7,
+  "piece_mass_g": 89.74,
+  "piece_size_mm": [
+   144.3,
+   46.7,
+   31.2
+  ]
+ },
+ "slices_peel": {
+  "file": "slices/banana_slices_peel.glb",
+  "pieces": 14,
+  "triangles": 55384,
+  "max_piece_triangles": 10294,
+  "bytes": 1378972,
+  "mass_total_g": 132.1,
+  "piece_mass_g": 9.44,
+  "piece_size_mm": [
+   37.4,
+   36.2,
+   19.6
+  ]
+ },
+ "slices_peeled": {
+  "file": "slices/banana_slices_peeled.glb",
+  "pieces": 15,
+  "triangles": 52166,
+  "max_piece_triangles": 4552,
+  "bytes": 1432776,
+  "mass_total_g": 89.7,
+  "piece_mass_g": 5.98,
+  "piece_size_mm": [
+   29.3,
+   28.1,
+   16.8
+  ]
+ },
+ "cubes": {
+  "file": "cubes/banana_cubes.glb",
+  "pieces": 40,
+  "triangles": 65980,
+  "max_piece_triangles": 2153,
+  "bytes": 1981568,
+  "mass_total_g": 89.6,
+  "piece_mass_g": 2.24,
+  "piece_size_mm": [
+   18.6,
+   17.1,
+   14.9
+  ]
+ }
+}

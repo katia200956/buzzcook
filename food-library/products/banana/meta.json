@@ -1,0 +1,253 @@
+{
+  "id": "banana",
+  "names": {
+    "uk": "Банан",
+    "en": "Banana"
+  },
+  "aliases": [
+    "банани",
+    "бананчик",
+    "bananas"
+  ],
+  "category": "fruit",
+  "dimensions_m": {
+    "x": 0.185,
+    "y": 0.036,
+    "z": 0.036,
+    "length_along_curve": 0.204,
+    "range": {
+      "min": {
+        "x": 0.15,
+        "y": 0.03,
+        "z": 0.03
+      },
+      "max": {
+        "x": 0.23,
+        "y": 0.042,
+        "z": 0.042
+      }
+    }
+  },
+  "mass_g": {
+    "avg": 132.1,
+    "min": 100,
+    "max": 200
+  },
+  "density_g_cm3": 0.96,
+  "edible_parts": [
+    "flesh",
+    "core",
+    "seed"
+  ],
+  "inedible_parts": [
+    "peel",
+    "stem"
+  ],
+  "waste_ratio": 0.32,
+  "states": {
+    "whole": {
+      "status": "built",
+      "files": [
+        {
+          "name": "banana_whole.glb",
+          "lod": 0,
+          "bytes": 671928,
+          "triangles": 33216,
+          "pieces": 1,
+          "piece_mass_g": 132.12,
+          "mass_total_g": 132.1,
+          "piece_size_mm": [
+            183.3,
+            72.4,
+            36.0
+          ]
+        }
+      ],
+      "piece_count": 1,
+      "piece_mass_g": 132.12,
+      "piece_size_mm": {
+        "x": 183.3,
+        "y": 72.4,
+        "z": 36.0
+      }
+    },
+    "peeled": {
+      "status": "built",
+      "files": [
+        {
+          "name": "banana_peeled.glb",
+          "lod": 0,
+          "bytes": 752708,
+          "triangles": 32890,
+          "pieces": 1,
+          "piece_mass_g": 89.74,
+          "mass_total_g": 89.7,
+          "piece_size_mm": [
+            144.3,
+            46.7,
+            31.2
+          ]
+        }
+      ],
+      "piece_count": 1,
+      "piece_mass_g": 89.74,
+      "piece_size_mm": {
+        "x": 144.3,
+        "y": 46.7,
+        "z": 31.2
+      }
+    },
+    "slices": {
+      "status": "built",
+      "files": [
+        {
+          "name": "banana_slices_peel.glb",
+          "lod": 0,
+          "bytes": 1378972,
+          "triangles": 55384,
+          "pieces": 14,
+          "piece_mass_g": 9.44,
+          "mass_total_g": 132.1,
+          "piece_size_mm": [
+            37.4,
+            36.2,
+            19.6
+          ]
+        },
+        {
+          "name": "banana_slices_peeled.glb",
+          "lod": 0,
+          "bytes": 1432776,
+          "triangles": 52166,
+          "pieces": 15,
+          "piece_mass_g": 5.98,
+          "mass_total_g": 89.7,
+          "piece_size_mm": [
+            29.3,
+            28.1,
+            16.8
+          ]
+        }
+      ],
+      "piece_count": 14,
+      "piece_mass_g": 9.44,
+      "piece_size_mm": {
+        "x": 37.4,
+        "y": 36.2,
+        "z": 19.6
+      },
+      "variants": [
+        "peel",
+        "peeled"
+      ],
+      "thickness_mm": 10
+    },
+    "cubes": {
+      "status": "built",
+      "files": [
+        {
+          "name": "banana_cubes.glb",
+          "lod": 0,
+          "bytes": 1981568,
+          "triangles": 65980,
+          "pieces": 40,
+          "piece_mass_g": 2.24,
+          "mass_total_g": 89.6,
+          "piece_size_mm": [
+            18.6,
+            17.1,
+            14.9
+          ]
+        }
+      ],
+      "piece_count": 40,
+      "piece_mass_g": 2.24,
+      "piece_size_mm": {
+        "x": 18.6,
+        "y": 17.1,
+        "z": 14.9
+      },
+      "detail": "шматки 15 мм, кожен розрізаний на чверті вздовж осі"
+    }
+  },
+  "preparation": [
+    "peel",
+    "slice",
+    "cube",
+    "mash"
+  ],
+  "cooking_actions": [
+    {
+      "action": "peel",
+      "state": "whole"
+    },
+    {
+      "action": "slice",
+      "state": "peeled"
+    },
+    {
+      "action": "dice",
+      "state": "peeled"
+    },
+    {
+      "action": "place_in",
+      "state": "slices"
+    }
+  ],
+  "look": "Вигнутий жовтий банан з п'ятьма ледь помітними гранями, зеленуватою шийкою, темним зрізом хвостика і темною кнопкою на кінчику. Шкірка 2.5 мм: жовтий край, бліда внутрішня частина. М'якоть кремово-жовта з поздовжніми борозенками і ниточками; у центрі м'яка трипроменева зірочка з радіальними волокнами і дрібним темним насінням.",
+  "references": [
+    "products/references/banana-slices-2.jpg",
+    "Katusha's BANANA.blend (low-poly shape reference only, geometry not reused)"
+  ],
+  "textures": {
+    "third_party": [],
+    "note": "Без сторонніх текстур: усі кольори у вершинах (COLOR_0), геометрія процедурна."
+  },
+  "materials": [
+    "peel",
+    "peel_cut",
+    "flesh",
+    "flesh_cut",
+    "core",
+    "core_cut",
+    "seed",
+    "seed_cut",
+    "stem"
+  ],
+  "build": {
+    "seed": 2002,
+    "script": "tools/banana.py",
+    "script_version": "1",
+    "built_at": "2026-10-11",
+    "seeds": 175,
+    "peel_min_mm": 1.85
+  },
+  "transitions": [
+    {
+      "from": "whole",
+      "to": "peeled",
+      "op": "peel",
+      "detail": "шкірка знімається як окремий шар"
+    },
+    {
+      "from": "whole",
+      "to": "slices",
+      "variant": "peel",
+      "op": "slice",
+      "detail": "площини 10 мм перпендикулярно до вигнутої осі, кінці з хвостиком і кінчиком"
+    },
+    {
+      "from": "peeled",
+      "to": "slices",
+      "variant": "peeled",
+      "op": "slice",
+      "detail": "ті самі площини по почищеній м'якоті"
+    },
+    {
+      "from": "peeled",
+      "to": "cubes",
+      "op": "dice",
+      "detail": "шматки 15 мм, кожен на 4 частини двома поздовжніми площинами"
+    }
+  ]
+}

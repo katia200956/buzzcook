@@ -50,8 +50,8 @@ for n in ["tomato_bunkatu_hontai.png","tomato_for_bake.png"]:
     red=mix(P["TOMATO"]*np.ones_like(rgb),P["REDORANGE"]*np.ones_like(rgb),sm(k,1.0,1.35)*0.8)
     red=red*np.clip(1+(k-1)*0.35,0.75,1.1)[...,None]
     gr=mix(P["LEAF"]*np.ones_like(rgb),P["STEM"]*np.ones_like(rgb),sm(k,0.6,1.1))
-    # v13: calmer, deeper burgundy skin (Katusha 2026-10-11)
-    save(np.dstack([mix(sat(red,1.05)*np.array([0.74,0.62,0.68]),gr,gm),a[...,3]]),n)
+    # v14: redder skin, glow comes from subsurface in the scene (Katusha 2026-10-11)
+    save(np.dstack([mix(sat(red,1.2)*np.array([0.9,0.6,0.48]),gr,gm),a[...,3]]),n)
 # ---- calyx/stem: leaf green in shadows, stem green in light
 for n in ["heta_big.png","tomatoheta.png"]:
     a=load(n); Lr=lum(a[...,:3]); L2=norm(Lr,a[...,3]>0.5)

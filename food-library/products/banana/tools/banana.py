@@ -20,17 +20,18 @@ sys.path.insert(0, os.path.join(HERE, "..", "..", "..", "tools"))
 
 import bpy  # noqa: E402  (must come before bmesh)
 import bmesh  # noqa: E402
-from mathutils import Euler, Matrix, Vector, noise  # noqa: E402
+from mathutils import Euler, Matrix, Vector, kdtree, noise  # noqa: E402
 
 import lib  # noqa: E402
 from lib import lerp, srgb  # noqa: E402
 
 ID = "banana"
 SEED = 2002
-RC = 0.125                    # radius of the banana's curve (axis), metres
 R_MAX = 0.0180                # peel radius at the widest point (36 mm across)
 PEEL = 0.0025                 # peel thickness in the body
-S_TIP, S_END = -0.092, 0.112  # blossom tip and cut stem end along the axis
+S_TIP, S_END = -0.094, 0.112  # blossom tip and cut stem end along the axis
+STEM_R = 0.0056
+STEM_S = 0.1068               # neck ends, stem begins
 S_F0, S_F1 = -0.084, 0.068    # flesh from blossom end to the neck
 N_RIDGE = 5
 DENSITY_FLESH = 0.96
@@ -39,9 +40,11 @@ DENSITY_PEEL = 0.90
 R = lib.rng(SEED)
 OFF = Vector((R.uniform(0, 100), R.uniform(0, 100), R.uniform(0, 100)))
 STAR_PHASE = math.pi / 2 + R.uniform(-0.3, 0.3)
+RIDGE_PHASE = math.pi / 2 + 0.31
+RIDGE_JITTER = [R.uniform(-0.06, 0.06) for _ in range(5)]
 
 MAT_NAMES = ["peel", "peel_cut", "flesh", "flesh_cut", "core", "core_cut", "seed", "seed_cut",
-             "stem", "puree", "_int", "_int_peel"]
+             "stem", "puree", "_int", "_int_peel", "tip"]
 M = {n: i for i, n in enumerate(MAT_NAMES)}
 CUT = {"peel": M["peel_cut"], "flesh": M["flesh_cut"], "flesh_in": M["flesh_cut"],
        "core": M["core_cut"], "core_in": M["core_cut"], "seeds": M["seed_cut"], "fibers": M["flesh_cut"]}
@@ -62,17 +65,18 @@ def materials():
         lib.make_material("puree", rough=0.32, coat=0.35, coat_rough=0.25, spec=0.4),
         lib.make_material("_int", rough=0.5),
         lib.make_material("_int_peel", rough=0.5),
+        lib.make_material("tip", rough=0.85, spec=0.25),
     ]
 
 
 C = {k: srgb(v) for k, v in dict(
-    peel="#E8BE2E", peel_hi="#F2CD4A", peel_lo="#D9AA22", peel_green="#B3AE3A",
-    neck="#A9A43E", stem="#7E7A3A", stem_end="#4A3424", stem_end_rim="#6E5236",
-    tip="#3A2A1E", speck="#8C6A30",
+    peel="#EEC02A", peel_hi="#F5CF45", peel_lo="#DDA21A", peel_green="#D2C232", ridge="#C38E16",
+    neck="#A8B437", stem="#82983A", stem_dark="#5E6E2C", stem_end="#5A3E26", stem_end_rim="#7A5A36",
+    tip="#2C1F16", tip_rim="#6A4A22", stem_cut="#9C8466", speck="#7A5426",
     peel_cut_out="#E2C35A", peel_cut_in="#F2EBD3",
-    flesh="#EEE2BE", flesh_hi="#F6EED6", flesh_lo="#DFCD9C", fiber="#F7F0DC", flesh_tip="#9A7E58",
-    cut_edge="#EADBAF", cut_mid="#F5EDD4", cut_in="#F0E5C3", ray="#D8BF8C",
-    core="#D3B47E", core_dark="#BE9C64", halo="#E9DBB2", seed="#3B2B1D", seed_cut="#4E3925",
+    flesh="#EFE6CB", flesh_hi="#F7F1E1", flesh_lo="#DCCDA5", fiber="#F5EEDD", flesh_tip="#9A7E58",
+    cut_edge="#EFE5CA", cut_mid="#F6F0E0", cut_in="#F2EAD6", ray="#E4D4B0",
+    core="#E8DAB8", core_dark="#DCCAA2", halo="#F0E7D0", seed="#3A2A1C", seed_cut="#5C4430",
     mash="#EADCB0", mash_dark="#CDB27A", mash_ox="#C7A36A", puree="#E9DBB0", puree_dark="#DCC898",
     fried="#E2B468", fried_dark="#B47C3A", fried_side="#EBCB8A",
     baked="#3E2A1C", baked_hi="#6A4A28", baked_lo="#22170F",
@@ -87,57 +91,127 @@ def smoothstep(a, b, x):
 
 
 def r_body(s):
-    """Round peel radius along the axis: blossom nub, full body, neck, stem."""
-    t = (s + 0.012) / 0.085
-    r = R_MAX * (1 - 0.11 * t * t)
+    """Round peel radius along the axis: blunt blossom end with a small button, full body that is a
+    touch fuller toward the blossom end, a long tapering neck, a short stem and the flared cut end."""
+    t = (s + 0.018) / 0.080
+    r = R_MAX * (1 - 0.06 * t * t - 0.02 * t)
     d = s - S_TIP
-    if d < 0.032:
-        q = 1 - d / 0.032
-        r = r * (0.16 + 0.84 * math.sqrt(max(0.0, 1 - q * q)))
-    w = smoothstep(0.034, 0.093, s)
-    r = lerp(r, 0.0057, w) if w > 0 else r
-    if s > 0.093:
-        r = 0.0057 + 0.0007 * smoothstep(0.104, S_END, s)
+    if d < 0.002:                          # dried blossom button, a small dome
+        q = 1 - d / 0.002
+        return 0.0003 + 0.0014 * math.sqrt(max(0.0, 1 - q * q))
+    if d < 0.026:                          # blunt, slightly conical blossom end
+        x = (d - 0.002) / 0.024
+        r = lerp(0.0016, r, 1 - (1 - x) ** 2.4)
+    w = smoothstep(0.026, 0.098, s)
+    r = lerp(r, STEM_R, w ** 0.8) if w > 0 else r
+    if s > 0.098:
+        r = STEM_R
+    if s > S_END - 0.006:                  # brown cut end of the stem swells into a woody knob
+        q = (s - (S_END - 0.006)) / 0.006
+        r = STEM_R * (1 + 0.28 * math.sin(math.pi * 0.5 * min(1.0, q * 1.25)) ** 1.5)
+        if q > 0.8:                        # rounded rim of the cut
+            r *= 0.82 + 0.18 * math.sqrt(max(0.0, 1 - ((q - 0.8) / 0.2) ** 2))
     return r
 
 
-def ridge(u, s):
-    """Peel ridges: rounded polygon in [-0.5, 0.5], sharper toward the neck."""
+def ridge_a(u, s):
+    """Angle from u to the nearest peel ridge."""
     seg = 2 * math.pi / N_RIDGE
-    a = (u - math.pi / 2) % seg - seg / 2
+    uu = u - RIDGE_PHASE - 0.10 * math.sin(s * 23 + 1.3)
+    k = int(math.floor(uu / seg + 0.5))
+    a = uu - k * seg + RIDGE_JITTER[k % N_RIDGE] * seg
+    return (a + seg / 2) % seg - seg / 2
+
+
+def ridge(u, s):
+    """Peel cross-section in [-0.5, 0.5]: five gently convex faces meeting at soft ridges, the ridges
+    wander a little along the fruit and are not evenly spaced (no fruit is a perfect pentagon)."""
+    seg = 2 * math.pi / N_RIDGE
+    a = ridge_a(u, s)
     poly = math.cos(seg / 2) / math.cos(a)
     x = (poly - math.cos(seg / 2)) / (1 - math.cos(seg / 2))
-    return x ** 0.8 - 0.45
+    crest = math.exp(-(a / 0.075) ** 2)
+    return 0.55 * x ** 1.3 + 0.45 * crest - 0.33
 
 
 def ridge_amp(s):
-    return 0.075 + 0.09 * smoothstep(0.03, 0.09, s)
+    return 0.040 + 0.05 * smoothstep(0.02, 0.085, s) + 0.01 * smoothstep(0.09, 0.10, s)
 
 
-def lift(s):
-    """Neck and stem bend up a little more than the body."""
-    return 4.5 * max(0.0, s - 0.072) ** 2
+def ellipse(u):
+    """Slightly flattened, slightly lop-sided section."""
+    return 1 + 0.035 * math.cos(2 * u) + 0.012 * math.cos(u + 0.7)
 
 
-def bend(s, y, z):
-    """Straight frame (s along axis, y sideways, z up) -> world; convex side down, bottom near 0."""
-    z = z + lift(s)
-    phi = s / RC
-    rr = RC - z
-    return Vector((rr * math.sin(phi), y, RC - rr * math.cos(phi)))
+def kappa(s):
+    """Curvature of the axis: gentle in the body, tighter through the neck, the stem nearly straight."""
+    k = 1 / 0.16 + (1 / 0.22 - 1 / 0.16) * smoothstep(-0.03, -0.09, s)
+    k += (1 / 0.08 - 1 / 0.16) * smoothstep(0.02, 0.07, s) * (1 - smoothstep(0.088, 0.104, s))
+    return k
 
 
-def unbend(p):
-    dx, dz = p.x, p.z - RC
-    phi = math.atan2(dx, -dz)
-    s = phi * RC
-    z = RC - math.hypot(dx, dz)
-    return s, p.y, z - lift(s)
+def _axis_table():
+    n = int(round((S_END - S_TIP) / AXIS_STEP))
+    ss = [S_TIP + i * AXIS_STEP for i in range(n + 1)]
+    th, pos = [0.0], [Vector((0, 0, 0))]
+    for i in range(1, len(ss)):
+        sm = (ss[i - 1] + ss[i]) / 2
+        th_m = th[-1] + kappa(sm) * AXIS_STEP / 2
+        pos.append(pos[-1] + Vector((math.cos(th_m), 0, math.sin(th_m))) * AXIS_STEP)
+        th.append(th[-1] + kappa(sm) * AXIS_STEP)
+    # rotate so the two ends of the body sit at the same height (fruit lying on its convex side)
+    i0, i1 = int((-0.07 - S_TIP) / AXIS_STEP), int((0.05 - S_TIP) / AXIS_STEP)
+    d = pos[i1] - pos[i0]
+    rot = math.atan2(d.z, d.x)
+    R2 = Matrix.Rotation(rot, 3, "Y")
+    pos = [R2 @ p for p in pos]
+    th = [t - rot for t in th]
+    # sideways wander: a real banana is never perfectly planar
+    for i, s in enumerate(ss):
+        pos[i].y += 0.0016 * math.sin((s - S_TIP) / (S_END - S_TIP) * math.pi * 1.3 + 0.4)
+    kd = kdtree.KDTree(len(ss))
+    for i, p in enumerate(pos):
+        kd.insert(p, i)
+    kd.balance()
+    return ss, th, pos, kd
+
+
+AXIS_STEP = 0.0005
+
+
+def _axis_at(s):
+    f = (s - S_TIP) / AXIS_STEP
+    i = max(0, min(len(AX_S) - 2, int(math.floor(f))))
+    t = f - i
+    return AX_P[i].lerp(AX_P[i + 1], t), AX_T[i] * (1 - t) + AX_T[i + 1] * t
 
 
 def tangent(s):
-    phi = s / RC
-    return Vector((math.cos(phi), 0, math.sin(phi)))
+    th = _axis_at(s)[1]
+    return Vector((math.cos(th), 0, math.sin(th)))
+
+
+def normal(s):
+    """Unit vector toward the concave (upper) side of the curve."""
+    th = _axis_at(s)[1]
+    return Vector((-math.sin(th), 0, math.cos(th)))
+
+
+def bend(s, y, z):
+    """Straight frame (s along axis, y sideways, z toward the concave side) -> world."""
+    p, th = _axis_at(s)
+    return p + Vector((0, y, 0)) + Vector((-math.sin(th), 0, math.cos(th))) * z
+
+
+def unbend(p):
+    _, i, _ = AX_KD.find(p)
+    s = AX_S[i] + (p - AX_P[i]).dot(tangent(AX_S[i]))
+    s = AX_S[i] + (p - _axis_at(s)[0]).dot(tangent(s)) if S_TIP < s < S_END else s
+    q = p - _axis_at(s)[0]
+    return s, q.y, q.dot(normal(s))
+
+
+AX_S, AX_T, AX_P, AX_KD = _axis_table()
 
 
 def flesh_round(s):
@@ -162,16 +236,19 @@ def grooves(u, s):
     g = 0.009 * noise.noise(Vector((a.x * 9, a.y * 9, s * 4)) + OFF)
     g += 0.006 * noise.noise(Vector((a.x * 28, a.y * 28, s * 9)) + OFF * 1.3)
     g += 0.004 * noise.noise(Vector((a.x * 90, a.y * 90, s * 160)) + OFF * 1.7)
+    # many narrow lengthwise ribs left by the vascular strands under the peel
+    rib = 1 - abs(noise.noise(Vector((a.x * 7, a.y * 7, s * 2.5)) + OFF * 2.3))
+    g += 0.009 * (rib ** 3 - 0.35)
     return g
 
 
 def r_peel(s, u):
     n = 1 + 0.012 * noise.noise(Vector((math.cos(u) * 2, math.sin(u) * 2, s * 25)) + OFF * 2.1)
-    return r_body(s) * (1 + ridge_amp(s) * ridge(u, s)) * n
+    return r_body(s) * (1 + ridge_amp(s) * ridge(u, s)) * n * ellipse(u)
 
 
 def r_flesh(s, u):
-    return flesh_round(s) * (1 + 0.3 * ridge_amp(s) * ridge(u, s)) * (1 + grooves(u, s)) \
+    return flesh_round(s) * (1 + 0.3 * ridge_amp(s) * ridge(u, s)) * (1 + grooves(u, s)) * ellipse(u) \
         * cap(s, S_F0, S_F1, 0.016, 0.017)
 
 
@@ -266,12 +343,14 @@ SEED_MESH = lib.grid_shell(lambda u, v: Vector((math.sin(v) * math.cos(u), math.
 def build():
     # peel: flat nub at the blossom tip, flat cut at the stem end
     ps = body_rings(S_TIP, S_END, 0.0, 0.0, 0.0012, 0)
-    ps = [s for s in ps if S_TIP + 0.0006 < s < S_END - 0.0006]
+    ps = [s for s in ps if S_TIP + 0.006 < s < S_END - 0.005]
+    ps += [S_TIP + 0.0002 + 0.006 * (i / 20) ** 1.6 for i in range(20)]
+    ps += [S_END - 0.005 + 0.0049 * i / 20 for i in range(21)]
+    ps = sorted(ps)
     o_v, o_f = tube(ps, 96, r_peel, (S_TIP, S_END),
-                    flat=([(S_TIP, 0.45), (S_TIP + 0.0003, 0.85)],
-                          [(S_END - 0.0003, 0.9), (S_END, 0.55)]))
+                    flat=([], [(S_END, 0.75), (S_END, 0.45)]))
     f_s = body_rings(S_F0, S_F1, 0.016, 0.017, 0.00115, 9)
-    f_v, f_f = tube(f_s, 104, r_flesh, (S_F0, S_F1))
+    f_v, f_f = tube(f_s, 144, r_flesh, (S_F0, S_F1))
     m_s = body_rings(MID[0], MID[1], 0.013, 0.014, 0.0025, 6)
     m_v, m_f = tube(m_s, 72, r_mid, MID)
     st_s = body_rings(STAR[0], STAR[1], 0.010, 0.010, 0.0025, 5)
@@ -291,16 +370,16 @@ def build():
     rng = lib.rng(SEED + 3)
     for arm in range(3):
         ua = STAR_PHASE + 2 * math.pi * arm / 3
-        for row in (-1, 1):
+        for row in (-1, 0, 1):
             s = STAR_IN[0] + 0.010 + rng.uniform(0, 0.003)
             while s < STAR_IN[1] - 0.010:
-                u = ua + row * rng.uniform(0.10, 0.16)
+                u = ua + row * rng.uniform(0.42, 0.55)
                 r = rng.uniform(0.0011, 0.0016) * star_scale(s)
                 # semi-axes: specks about 0.9 x 0.55 x 0.4 mm
-                size = Vector((rng.uniform(0.0004, 0.0005), rng.uniform(0.00025, 0.0003),
+                size = Vector((rng.uniform(0.0005, 0.00065), rng.uniform(0.0002, 0.00025),
                                rng.uniform(0.00018, 0.00022))) * min(1.0, star_scale(s))
                 seeds.append((s, u, r, size, rng.uniform(0, math.pi)))
-                s += rng.uniform(0.0028, 0.0042)
+                s += rng.uniform(0.0012, 0.0019)
     seed_shells = []
     for s, u, r, size, spin in seeds:
         c = bend(s, r * math.cos(u), r * math.sin(u))
@@ -407,31 +486,40 @@ def fiber_tube(pts, w, nu=5):
 
 # ------------------------------------------------------------------ colour
 
+def peel_colour(co, s, u, a, rho, face):
+    """Large-scale peel colour (fine freckles, scuffs and texture are added by the photo shader)."""
+    if s > S_END - 0.0012 and abs(face.normal.dot(tangent(s))) > 0.5:
+        # dry fibrous cut end of the stem: dark centre, lighter woody rim, radial fibres
+        f = noise.noise(Vector((a.x * 14, a.y * 14, 0)) + OFF * 6) * 0.5 + 0.5
+        return lerp(lerp(C["stem_end"], C["stem_cut"], (rho / 0.006) ** 0.8), C["stem_end_rim"], 0.6 * f)
+    if s < S_TIP + 0.0026:
+        f = noise.noise(co * 2500 + OFF) * 0.5 + 0.5
+        return lerp(C["tip"], C["tip_rim"], 0.35 * f + 0.6 * smoothstep(S_TIP + 0.0012, S_TIP + 0.0026, s))
+    streak = noise.noise(Vector((a.x * 6, a.y * 6, s * 7)) + OFF) * 0.5 + 0.5
+    blot = noise.noise(co * 60 + OFF * 2) * 0.5 + 0.5
+    c = lerp(C["peel_lo"], C["peel_hi"], 0.35 + 0.3 * streak + 0.2 * (blot - 0.5))
+    # thin darker, slightly greenish lines along the ridges
+    crest = math.exp(-(ridge_a(u, s) / 0.038) ** 2)
+    c = lerp(c, C["ridge"], 0.65 * crest * (1 - smoothstep(0.075, 0.095, s)))
+    # buttery yellow body, greenish yellow toward the neck, green neck, olive stem
+    c = lerp(c, C["peel_green"], 0.55 * smoothstep(0.025, 0.075, s))
+    c = lerp(c, C["neck"], smoothstep(0.060, 0.096, s))
+    c = lerp(c, C["stem"], smoothstep(0.090, 0.106, s))
+    c = lerp(c, C["stem_dark"], 0.5 * crest * smoothstep(0.094, 0.104, s))
+    c = lerp(c, C["stem_end"], smoothstep(S_END - 0.0062, S_END - 0.0035, s))
+    # amber-brown ring around the blossom button
+    c = lerp(c, C["tip_rim"], 0.9 * (1 - smoothstep(S_TIP + 0.0026, S_TIP + 0.0075, s)))
+    return c
+
+
 def colour_fn(info):
     def fn(mat, co, face):
         s, y, z = unbend(co)
         rho = math.hypot(y, z)
         u = math.atan2(z, y)
         a = Vector((math.cos(u), math.sin(u), 0))
-        if mat == M["peel"]:
-            if s > S_END - 0.0004 and abs(face.normal.dot(tangent(s))) > 0.6:
-                return lerp(C["stem_end"], C["stem_end_rim"], (rho / 0.006) ** 3)
-            if s < S_TIP + 0.0012:
-                return C["tip"]
-            streak = noise.noise(Vector((a.x * 9, a.y * 9, s * 10)) + OFF) * 0.5 + 0.5
-            fine = noise.noise(co * 700 + OFF) * 0.5 + 0.5
-            c = lerp(C["peel_lo"], C["peel_hi"], 0.25 + 0.5 * streak + 0.15 * (fine - 0.5))
-            c = lerp(c, C["peel_hi"], 0.35 * max(0.0, ridge(u, s)) * 2)
-            # greenish toward the neck, darker toward the blossom tip
-            c = lerp(c, C["peel_green"], 0.55 * smoothstep(0.035, 0.085, s))
-            c = lerp(c, C["neck"], smoothstep(0.08, 0.095, s))
-            c = lerp(c, C["stem"], smoothstep(0.096, 0.108, s))
-            c = lerp(c, C["tip"], 0.85 * (1 - smoothstep(S_TIP + 0.0012, S_TIP + 0.0045, s)))
-            # a few sugar specks
-            sp = noise.noise(co * 420 + OFF * 4.0)
-            if sp > 0.62 and S_TIP + 0.01 < s < 0.07:
-                c = lerp(c, C["speck"], min(0.7, (sp - 0.62) * 5))
-            return c
+        if mat in (M["peel"], M["stem"], M["tip"]):
+            return peel_colour(co, s, u, a, rho, face)
         if mat == M["peel_cut"]:
             rf = r_flesh(s, u)
             ro = r_peel(s, u)
@@ -441,7 +529,7 @@ def colour_fn(info):
             if face.select:
                 return C["fiber"]
             g = grooves(u, s) / 0.012
-            c = lerp(C["flesh_lo"], C["flesh_hi"], 0.5 + 0.9 * g)
+            c = lerp(C["flesh_lo"], C["flesh_hi"], 0.62 + 0.3 * g)
             c = lerp(c, C["flesh_tip"], 0.8 * (1 - smoothstep(S_F0 + 0.001, S_F0 + 0.006, s)))
             return c
         if mat == M["flesh_cut"]:
@@ -516,6 +604,30 @@ def clean(bm, peeled):
     return bm
 
 
+def finish_peel(bm):
+    """Give the stem and the blossom button their own materials and add a cylindrical UV map
+    (u around the fruit, v along it; 1 unit = one circumference of the body)."""
+    for f in bm.faces:
+        if f.material_index == M["peel"]:
+            s = unbend(f.calc_center_median())[0]
+            if s > STEM_S:
+                f.material_index = M["stem"]
+            elif s < S_TIP + 0.0026:
+                f.material_index = M["tip"]
+    uv = bm.loops.layers.uv.get("UVMap") or bm.loops.layers.uv.new("UVMap")
+    circ = 2 * math.pi * R_MAX
+    for f in bm.faces:
+        cs = []
+        for l in f.loops:
+            s, y, z = unbend(l.vert.co)
+            cs.append((math.atan2(z, y) / (2 * math.pi) % 1.0, (s - S_TIP) / circ))
+        if max(c[0] for c in cs) - min(c[0] for c in cs) > 0.5:
+            cs = [(c[0] + 1 if c[0] < 0.5 else c[0], c[1]) for c in cs]
+        for l, c in zip(f.loops, cs):
+            l[uv].uv = c
+    return bm
+
+
 def objects_for(pieces, prefix, info, mats, coll, peeled, sort_key=None, fn=None):
     fn = fn or colour_fn(info)
     if sort_key:
@@ -525,9 +637,17 @@ def objects_for(pieces, prefix, info, mats, coll, peeled, sort_key=None, fn=None
         masses.append(piece_mass_g(p))
         bm = lib.merge_parts(p, PART_ORDER)
         clean(bm, peeled)
+        finish_peel(bm)
         lib.paint(bm, fn)
         name = f"{prefix}_{i:02d}" if len(pieces) < 100 else f"{prefix}_{i:03d}"
-        obs.append(lib.to_object(name, bm, mats, coll))
+        ob = lib.to_object(name, bm, mats, coll)
+        # axis frame of the piece for the photo shaders (polar coordinates on the cut faces)
+        s = s_key(p)
+        ob["ax"] = tangent(s)[:]
+        ob["nr"] = normal(s)[:]
+        ob["c0"] = (bend(s, 0, 0) - ob.location)[:]
+        ob["rr"] = flesh_round(s)
+        obs.append(ob)
         bm.free()
     return obs, masses
 
@@ -548,7 +668,7 @@ def s_key(p):
 
 
 SOLID = ["peel", "flesh", "flesh_in", "core", "core_in", "seeds"]
-FLESH = ["flesh", "flesh_in", "core", "core_in", "seeds", "fibers"]
+FLESH = ["flesh", "flesh_in", "core", "core_in", "seeds"]
 
 
 def state_whole(parts, info, mats, coll):
@@ -556,9 +676,10 @@ def state_whole(parts, info, mats, coll):
     o_v, o_f = info["outer"]
     lib.add_shell(bm, o_v, o_f, M["peel"])
     bm.normal_update()
+    finish_peel(bm)
     lib.paint(bm, colour_fn(info))
     m = piece_mass_g({k: parts[k] for k in SOLID})
-    return [lib.to_object("whole", bm, mats, coll, origin="bottom")], [m]
+    return [lib.to_object("whole", bm, mats, coll, origin="bottom", smooth_angle=math.radians(80))], [m]
 
 
 def state_peeled(parts, info, mats, coll):
@@ -599,7 +720,7 @@ def state_cubes(parts, info, mats, coll, step=0.015):
         c = bend(s, 0, 0)
         a = math.radians(rng.uniform(-6, 6))
         cuts = [(c + Vector((0, rng.uniform(-0.001, 0.001), 0)), Vector((0, 1, a))),
-                (c, (c - Vector((0, 0, RC))).normalized() * -1 + tangent(s) * a)]
+                (c, normal(s) + tangent(s) * a)]
         pieces += lib.split_all([ch], cuts, CUT)
     pieces = [p for p in pieces if any(k in p for k in ("flesh", "flesh_in")) and piece_mass_g(p) > 0.4]
     key = lambda p: (round(s_key(p), 3), centroid(p).y, centroid(p).z)
@@ -921,6 +1042,11 @@ def pose_explode(obs, k):
 
 def frame(scene, obs, elev=24.0, azim=-12.0, res=(1200, 900), samples=64, dist_k=2.6):
     bpy.context.view_layer.update()
+    # rest the group on the floor (the axis frame puts the belly a little below z = 0)
+    zmin = min((o.matrix_world @ v.co).z for o in obs for v in o.data.vertices)
+    for o in {o.parent or o for o in obs}:
+        o.location.z -= zmin
+    bpy.context.view_layer.update()
     pts = [o.matrix_world @ v.co for o in obs for v in list(o.data.vertices)[::7]]
     lo = Vector((min(p.x for p in pts), min(p.y for p in pts), min(p.z for p in pts)))
     hi = Vector((max(p.x for p in pts), max(p.y for p in pts), max(p.z for p in pts)))
@@ -929,7 +1055,7 @@ def frame(scene, obs, elev=24.0, azim=-12.0, res=(1200, 900), samples=64, dist_k
     dist = size * dist_k
     e, a = math.radians(elev), math.radians(azim)
     cam = c + Vector((math.sin(a) * math.cos(e), -math.cos(a) * math.cos(e), math.sin(e))) * dist
-    return lib.studio(scene, cam_loc=tuple(cam), cam_target=tuple(c), res=res, samples=samples)
+    return lib.studio(scene, bg="#F3F1EE", cam_loc=tuple(cam), cam_target=tuple(c), res=res, samples=samples)
 
 
 CUT_UP = {"half": 2, "cross_section": 1, "slices_5mm": 7, "slices_10mm": 5, "slices_15mm": 4,
@@ -978,6 +1104,8 @@ def main():
                                                for i in range(3)])
             print(name, report[name], flush=True)
             if a.preview:
+                import photo        # photo-real shaders for previews only (GLBs keep vertex colours)
+                photo.photo_materials(mats)
                 os.makedirs(a.preview, exist_ok=True)
                 if name in CUT_UP:
                     pose_cut_up(obs, per_row=CUT_UP[name])

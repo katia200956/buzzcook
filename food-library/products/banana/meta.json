@@ -11,10 +11,10 @@
   ],
   "category": "fruit",
   "dimensions_m": {
-    "x": 0.185,
+    "x": 0.18819999999999998,
     "y": 0.036,
     "z": 0.036,
-    "length_along_curve": 0.204,
+    "length_along_curve": 0.206,
     "range": {
       "min": {
         "x": 0.15,
@@ -29,7 +29,7 @@
     }
   },
   "mass_g": {
-    "avg": 132.1,
+    "avg": 130.4,
     "min": 100,
     "max": 200
   },
@@ -51,24 +51,24 @@
         {
           "name": "banana_whole.glb",
           "lod": 0,
-          "bytes": 671928,
-          "triangles": 33216,
+          "bytes": 963404,
+          "triangles": 39360,
           "pieces": 1,
-          "piece_mass_g": 132.12,
-          "mass_total_g": 132.1,
+          "piece_mass_g": 130.43,
+          "mass_total_g": 130.4,
           "piece_size_mm": [
-            183.3,
-            72.4,
-            36.0
+            188.2,
+            74.0,
+            37.9
           ]
         }
       ],
       "piece_count": 1,
-      "piece_mass_g": 132.12,
+      "piece_mass_g": 130.43,
       "piece_size_mm": {
-        "x": 183.3,
-        "y": 72.4,
-        "z": 36.0
+        "x": 188.2,
+        "y": 74.0,
+        "z": 37.9
       }
     },
     "peeled": {
@@ -77,24 +77,24 @@
         {
           "name": "banana_peeled.glb",
           "lod": 0,
-          "bytes": 752708,
-          "triangles": 32890,
+          "bytes": 945376,
+          "triangles": 42490,
           "pieces": 1,
-          "piece_mass_g": 89.74,
-          "mass_total_g": 89.7,
+          "piece_mass_g": 89.09,
+          "mass_total_g": 89.1,
           "piece_size_mm": [
-            144.3,
-            46.7,
-            31.2
+            146.5,
+            39.7,
+            32.8
           ]
         }
       ],
       "piece_count": 1,
-      "piece_mass_g": 89.74,
+      "piece_mass_g": 89.09,
       "piece_size_mm": {
-        "x": 144.3,
-        "y": 46.7,
-        "z": 31.2
+        "x": 146.5,
+        "y": 39.7,
+        "z": 32.8
       }
     },
     "half": {
@@ -103,24 +103,24 @@
         {
           "name": "banana_half.glb",
           "lod": 0,
-          "bytes": 730776,
-          "triangles": 34940,
+          "bytes": 1045356,
+          "triangles": 41244,
           "pieces": 2,
-          "piece_mass_g": 66.06,
-          "mass_total_g": 132.1,
+          "piece_mass_g": 65.21,
+          "mass_total_g": 130.4,
           "piece_size_mm": [
-            93.4,
-            63.2,
-            36.0
+            94.6,
+            59.5,
+            37.5
           ]
         }
       ],
       "piece_count": 2,
-      "piece_mass_g": 66.06,
+      "piece_mass_g": 65.21,
       "piece_size_mm": {
-        "x": 93.4,
-        "y": 63.2,
-        "z": 36.0
+        "x": 94.6,
+        "y": 59.5,
+        "z": 37.5
       },
       "detail": "поперек навпіл, зі шкіркою"
     },
@@ -130,24 +130,24 @@
         {
           "name": "banana_cross_section.glb",
           "lod": 0,
-          "bytes": 132956,
-          "triangles": 5554,
+          "bytes": 175848,
+          "triangles": 5948,
           "pieces": 1,
-          "piece_mass_g": 23.64,
-          "mass_total_g": 23.6,
+          "piece_mass_g": 23.49,
+          "mass_total_g": 23.5,
           "piece_size_mm": [
-            36.8,
-            36.0,
-            28.4
+            37.4,
+            35.3,
+            27.6
           ]
         }
       ],
       "piece_count": 1,
-      "piece_mass_g": 23.64,
+      "piece_mass_g": 23.49,
       "piece_size_mm": {
-        "x": 36.8,
-        "y": 36.0,
-        "z": 28.4
+        "x": 37.4,
+        "y": 35.3,
+        "z": 27.6
       },
       "detail": "відрізок 25 мм із середини зі шкіркою, обидва торці — зрізи"
     },
@@ -157,66 +157,66 @@
         {
           "name": "banana_slices_10mm.glb",
           "lod": 0,
-          "bytes": 1432772,
-          "triangles": 52166,
+          "bytes": 1617360,
+          "triangles": 54624,
           "pieces": 15,
-          "piece_mass_g": 5.98,
-          "mass_total_g": 89.7,
+          "piece_mass_g": 5.94,
+          "mass_total_g": 89.1,
           "piece_size_mm": [
-            29.3,
-            28.1,
-            16.8
+            29.5,
+            27.5,
+            15.1
           ]
         },
         {
           "name": "banana_slices_5mm.glb",
           "lod": 0,
-          "bytes": 2112576,
-          "triangles": 71370,
+          "bytes": 2393204,
+          "triangles": 74648,
           "pieces": 29,
-          "piece_mass_g": 3.1,
-          "mass_total_g": 89.8,
+          "piece_mass_g": 3.08,
+          "mass_total_g": 89.2,
           "piece_size_mm": [
-            28.8,
-            27.9,
-            12.4
+            29.5,
+            27.0,
+            10.7
           ]
         },
         {
           "name": "banana_slices_15mm.glb",
           "lod": 0,
-          "bytes": 1208156,
-          "triangles": 45737,
+          "bytes": 1355960,
+          "triangles": 47794,
           "pieces": 10,
-          "piece_mass_g": 8.97,
-          "mass_total_g": 89.7,
+          "piece_mass_g": 8.91,
+          "mass_total_g": 89.1,
           "piece_size_mm": [
-            30.6,
-            28.8,
-            21.5
+            30.2,
+            28.7,
+            20.0
           ]
         },
         {
           "name": "banana_slices_peel.glb",
           "lod": 0,
-          "bytes": 1378972,
-          "triangles": 55384,
+          "bytes": 1950988,
+          "triangles": 63848,
           "pieces": 14,
-          "piece_mass_g": 9.44,
-          "mass_total_g": 132.1,
+          "piece_mass_g": 9.32,
+          "mass_total_g": 130.5,
           "piece_size_mm": [
-            37.4,
-            36.2,
-            19.6
+            37.7,
+            35.3,
+            17.7
           ]
         }
       ],
       "piece_count": 15,
-      "piece_mass_g": 5.98,
+      "piece_mass_g": 5.94,
       "piece_size_mm": {
-        "x": 29.3,
-        "y": 28.1,
-        "z": 16.8
+        "x": 29.5,
+        "y": 27.5,
+        "z": 15.1
       },
       "variants": [
         "10mm",
@@ -232,23 +232,23 @@
         {
           "name": "banana_half_slices.glb",
           "lod": 0,
-          "bytes": 1806744,
-          "triangles": 62130,
+          "bytes": 2125136,
+          "triangles": 65642,
           "pieces": 30,
-          "piece_mass_g": 2.99,
-          "mass_total_g": 89.8,
+          "piece_mass_g": 2.97,
+          "mass_total_g": 89.2,
           "piece_size_mm": [
-            29.1,
-            17.8,
+            28.1,
+            16.6,
             14.0
           ]
         }
       ],
       "piece_count": 30,
-      "piece_mass_g": 2.99,
+      "piece_mass_g": 2.97,
       "piece_size_mm": {
-        "x": 29.1,
-        "y": 17.8,
+        "x": 28.1,
+        "y": 16.6,
         "z": 14.0
       },
       "detail": "скибки 10 мм навпіл"
@@ -259,24 +259,24 @@
         {
           "name": "banana_strips.glb",
           "lod": 0,
-          "bytes": 1030416,
-          "triangles": 41733,
+          "bytes": 1129332,
+          "triangles": 42130,
           "pieces": 4,
-          "piece_mass_g": 22.43,
-          "mass_total_g": 89.7,
+          "piece_mass_g": 22.27,
+          "mass_total_g": 89.1,
           "piece_size_mm": [
-            140.0,
-            44.8,
-            8.4
+            142.1,
+            38.2,
+            8.9
           ]
         }
       ],
       "piece_count": 4,
-      "piece_mass_g": 22.43,
+      "piece_mass_g": 22.27,
       "piece_size_mm": {
-        "x": 140.0,
-        "y": 44.8,
-        "z": 8.4
+        "x": 142.1,
+        "y": 38.2,
+        "z": 8.9
       },
       "detail": "почищений банан на 4 поздовжні смужки"
     },
@@ -286,24 +286,24 @@
         {
           "name": "banana_cubes.glb",
           "lod": 0,
-          "bytes": 1981568,
-          "triangles": 65980,
+          "bytes": 2359776,
+          "triangles": 69082,
           "pieces": 40,
-          "piece_mass_g": 2.24,
-          "mass_total_g": 89.6,
+          "piece_mass_g": 2.23,
+          "mass_total_g": 89.2,
           "piece_size_mm": [
-            18.6,
-            17.1,
-            14.9
+            17.9,
+            16.5,
+            15.0
           ]
         }
       ],
       "piece_count": 40,
-      "piece_mass_g": 2.24,
+      "piece_mass_g": 2.23,
       "piece_size_mm": {
-        "x": 18.6,
-        "y": 17.1,
-        "z": 14.9
+        "x": 17.9,
+        "y": 16.5,
+        "z": 15.0
       },
       "detail": "шматки 15 мм, кожен розрізаний на чверті вздовж осі"
     },
@@ -313,24 +313,24 @@
         {
           "name": "banana_diced.glb",
           "lod": 0,
-          "bytes": 2032068,
-          "triangles": 50318,
-          "pieces": 194,
+          "bytes": 2395608,
+          "triangles": 50190,
+          "pieces": 189,
           "piece_mass_g": 0.11,
-          "mass_total_g": 20.7,
+          "mass_total_g": 20.3,
           "piece_size_mm": [
-            6.2,
-            5.1,
-            4.5
+            6.7,
+            5.4,
+            4.1
           ]
         }
       ],
-      "piece_count": 194,
+      "piece_count": 189,
       "piece_mass_g": 0.11,
       "piece_size_mm": {
-        "x": 6.2,
-        "y": 5.1,
-        "z": 4.5
+        "x": 6.7,
+        "y": 5.4,
+        "z": 4.1
       },
       "detail": "кубики ~5 мм, репрезентативна порція 30 мм банана (множити в застосунку)"
     },
@@ -340,15 +340,15 @@
         {
           "name": "banana_mashed.glb",
           "lod": 0,
-          "bytes": 699836,
-          "triangles": 28822,
+          "bytes": 711728,
+          "triangles": 28418,
           "pieces": 15,
-          "piece_mass_g": 5.18,
-          "mass_total_g": 77.7,
+          "piece_mass_g": 5.13,
+          "mass_total_g": 77.0,
           "piece_size_mm": [
-            12.6,
-            11.2,
-            4.2
+            13.0,
+            10.8,
+            4.0
           ]
         },
         {
@@ -357,21 +357,21 @@
           "bytes": 289444,
           "triangles": 14080,
           "pieces": 1,
-          "piece_mass_g": 89.72,
-          "mass_total_g": 89.7,
+          "piece_mass_g": 89.07,
+          "mass_total_g": 89.1,
           "piece_size_mm": [
-            99.9,
-            99.6,
-            17.9
+            99.7,
+            99.4,
+            17.8
           ]
         }
       ],
       "piece_count": 15,
-      "piece_mass_g": 5.18,
+      "piece_mass_g": 5.13,
       "piece_size_mm": {
-        "x": 12.6,
-        "y": 11.2,
-        "z": 4.2
+        "x": 13.0,
+        "y": 10.8,
+        "z": 4.0
       },
       "variants": [
         "mashed",
@@ -385,38 +385,38 @@
         {
           "name": "banana_cooked_fried.glb",
           "lod": 0,
-          "bytes": 1382748,
-          "triangles": 52166,
+          "bytes": 1617380,
+          "triangles": 54624,
           "pieces": 15,
-          "piece_mass_g": 5.09,
-          "mass_total_g": 76.3,
+          "piece_mass_g": 5.05,
+          "mass_total_g": 75.8,
           "piece_size_mm": [
-            27.2,
-            26.2,
-            15.6
+            27.4,
+            25.6,
+            14.1
           ]
         },
         {
           "name": "banana_cooked_baked.glb",
           "lod": 0,
-          "bytes": 671788,
-          "triangles": 33216,
+          "bytes": 790576,
+          "triangles": 39360,
           "pieces": 1,
-          "piece_mass_g": 116.26,
-          "mass_total_g": 116.3,
+          "piece_mass_g": 114.78,
+          "mass_total_g": 114.8,
           "piece_size_mm": [
-            177.9,
-            66.6,
-            34.0
+            182.6,
+            68.1,
+            35.8
           ]
         }
       ],
       "piece_count": 15,
-      "piece_mass_g": 5.09,
+      "piece_mass_g": 5.05,
       "piece_size_mm": {
-        "x": 27.2,
-        "y": 26.2,
-        "z": 15.6
+        "x": 27.4,
+        "y": 25.6,
+        "z": 14.1
       },
       "variants": [
         "fried",
@@ -430,24 +430,24 @@
         {
           "name": "banana_parts_peel.glb",
           "lod": 0,
-          "bytes": 1172244,
-          "triangles": 58176,
+          "bytes": 1485556,
+          "triangles": 73920,
           "pieces": 1,
-          "piece_mass_g": 42.38,
-          "mass_total_g": 42.4,
+          "piece_mass_g": 41.34,
+          "mass_total_g": 41.3,
           "piece_size_mm": [
-            183.3,
-            72.4,
-            36.0
+            188.2,
+            74.0,
+            37.9
           ]
         }
       ],
       "piece_count": 1,
-      "piece_mass_g": 42.38,
+      "piece_mass_g": 41.34,
       "piece_size_mm": {
-        "x": 183.3,
-        "y": 72.4,
-        "z": 36.0
+        "x": 188.2,
+        "y": 74.0,
+        "z": 37.9
       },
       "variants": [
         "peel"
@@ -483,9 +483,14 @@
       "state": "slices"
     }
   ],
-  "look": "Вигнутий жовтий банан з п'ятьма ледь помітними гранями, зеленуватою шийкою, темним зрізом хвостика і темною кнопкою на кінчику. Шкірка 2.5 мм: жовтий край, бліда внутрішня частина. М'якоть кремово-жовта з поздовжніми борозенками і ниточками; у центрі м'яка трипроменева зірочка з радіальними волокнами і дрібним темним насінням.",
+  "look": "Стиглий банан Кавендіш, вигнутий півмісяцем, з п'ятьма м'якими ребрами і тонкими темнішими лініями по них. Шкірка тепла жовта з відтінками, дрібним коричневим ластовинням і восковим відблиском; зеленувата шийка, оливковий хвостик з коричневим волокнистим зрізом, темна суха кнопка на кінчику. М'якоть кремово-біла, ребриста; на зрізі радіальні волокна, світла зірочка і темне насіння в центрі.",
+  "photo_shaders": {
+    "script": "tools/photo.py",
+    "note": "Процедурні PBR-шейдери для рендерів (ластовиння, віск, SSS, радіальні волокна зрізу). У GLB лише кольори вершин COLOR_0 і UV-мапа."
+  },
   "references": [
     "products/references/banana-slices-2.jpg",
+    "products/v2/banana/higgsfield/higgsfield-test.jpg (Higgsfield photos: whole + slice)",
     "Katusha's BANANA.blend (low-poly shape reference only, geometry not reused)"
   ],
   "textures": {
@@ -501,15 +506,16 @@
     "core_cut",
     "seed",
     "seed_cut",
-    "stem"
+    "stem",
+    "tip"
   ],
   "build": {
     "seed": 2002,
     "script": "tools/banana.py",
-    "script_version": "2",
+    "script_version": "3",
     "built_at": "2026-10-11",
-    "seeds": 175,
-    "peel_min_mm": 1.85
+    "seeds": 194,
+    "peel_min_mm": 2.03
   },
   "transitions": [
     {

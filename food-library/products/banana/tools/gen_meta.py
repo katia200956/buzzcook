@@ -29,7 +29,7 @@ meta = {
     "names": {"uk": "Банан", "en": "Banana"},
     "aliases": ["банани", "бананчик", "bananas"],
     "category": "fruit",
-    "dimensions_m": {"x": 0.185, "y": 0.036, "z": 0.036, "length_along_curve": rep["length_axis_m"],
+    "dimensions_m": {"x": rep["whole"]["piece_size_mm"][0] / 1000, "y": 0.036, "z": 0.036, "length_along_curve": rep["length_axis_m"],
                      "range": {"min": {"x": 0.15, "y": 0.03, "z": 0.03},
                                "max": {"x": 0.23, "y": 0.042, "z": 0.042}}},
     "mass_g": {"avg": rep["whole"]["mass_total_g"], "min": 100, "max": 200},
@@ -63,16 +63,21 @@ meta = {
         {"action": "dice", "state": "peeled"},
         {"action": "place_in", "state": "slices"},
     ],
-    "look": ("Вигнутий жовтий банан з п'ятьма ледь помітними гранями, зеленуватою шийкою, темним зрізом "
-             "хвостика і темною кнопкою на кінчику. Шкірка 2.5 мм: жовтий край, бліда внутрішня частина. "
-             "М'якоть кремово-жовта з поздовжніми борозенками і ниточками; у центрі м'яка трипроменева "
-             "зірочка з радіальними волокнами і дрібним темним насінням."),
+    "look": ("Стиглий банан Кавендіш, вигнутий півмісяцем, з п'ятьма м'якими ребрами і тонкими темнішими "
+             "лініями по них. Шкірка тепла жовта з відтінками, дрібним коричневим ластовинням і восковим "
+             "відблиском; зеленувата шийка, оливковий хвостик з коричневим волокнистим зрізом, темна суха "
+             "кнопка на кінчику. М'якоть кремово-біла, ребриста; на зрізі радіальні волокна, світла зірочка "
+             "і темне насіння в центрі."),
+    "photo_shaders": {"script": "tools/photo.py",
+                      "note": "Процедурні PBR-шейдери для рендерів (ластовиння, віск, SSS, радіальні волокна "
+                              "зрізу). У GLB лише кольори вершин COLOR_0 і UV-мапа."},
     "references": ["products/references/banana-slices-2.jpg",
+                   "products/v2/banana/higgsfield/higgsfield-test.jpg (Higgsfield photos: whole + slice)",
                    "Katusha's BANANA.blend (low-poly shape reference only, geometry not reused)"],
     "textures": {"third_party": [], "note": "Без сторонніх текстур: усі кольори у вершинах (COLOR_0), "
                                             "геометрія процедурна."},
-    "materials": ["peel", "peel_cut", "flesh", "flesh_cut", "core", "core_cut", "seed", "seed_cut", "stem"],
-    "build": {"seed": 2002, "script": "tools/banana.py", "script_version": "2",
+    "materials": ["peel", "peel_cut", "flesh", "flesh_cut", "core", "core_cut", "seed", "seed_cut", "stem", "tip"],
+    "build": {"seed": 2002, "script": "tools/banana.py", "script_version": "3",
               "built_at": "2026-10-11", "seeds": rep["seeds"], "peel_min_mm": rep["peel_min_mm"]},
     "transitions": [
         {"from": "whole", "to": "peeled", "op": "peel", "detail": "шкірка (parts_peel) знімається окремою геометрією"},

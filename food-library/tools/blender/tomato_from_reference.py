@@ -230,10 +230,10 @@ th = N.new("ShaderNodeTexImage"); th.image = bpy.data.images.load("/tmp/kat2/pal
 th.image.colorspace_settings.name = "Non-Color"
 Lk.new(uvn.outputs[0], tc.inputs[0]); Lk.new(uvn.outputs[0], th.inputs[0])
 Lk.new(tc.outputs["Color"], bsdf.inputs["Base Color"])
-bump = N.new("ShaderNodeBump"); bump.inputs["Strength"].default_value = 0.6; bump.inputs["Distance"].default_value = 0.0004
+bump = N.new("ShaderNodeBump"); bump.inputs["Strength"].default_value = 0.9; bump.inputs["Distance"].default_value = 0.0004
 Lk.new(th.outputs["Color"], bump.inputs["Height"]); Lk.new(bump.outputs[0], bsdf.inputs["Normal"])
 # wet: glossy where the detail is raised (gel, seeds), a bit less on the flesh
-mr = N.new("ShaderNodeMapRange"); mr.inputs["To Min"].default_value = 0.32; mr.inputs["To Max"].default_value = 0.06
+mr = N.new("ShaderNodeMapRange"); mr.inputs["To Min"].default_value = 0.22; mr.inputs["To Max"].default_value = 0.06
 Lk.new(th.outputs["Color"], mr.inputs["Value"]); Lk.new(mr.outputs[0], bsdf.inputs["Roughness"])
 # v11: no self-glow; the cut is lit like the skin, with contact shading and juicy depth
 ao = N.new("ShaderNodeAmbientOcclusion"); ao.inputs["Distance"].default_value = 0.006; ao.samples = 16

@@ -1,0 +1,387 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "buzzcook/food-library/meta.schema.json",
+  "title": "Buzzcook food product metadata",
+  "type": "object",
+  "required": [
+    "id",
+    "names",
+    "category",
+    "dimensions_m",
+    "mass_g",
+    "density_g_cm3",
+    "edible_parts",
+    "states",
+    "preparation",
+    "cooking_actions",
+    "look",
+    "build"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "names": {
+      "type": "object",
+      "required": [
+        "uk",
+        "en"
+      ],
+      "properties": {
+        "uk": {
+          "type": "string"
+        },
+        "en": {
+          "type": "string"
+        }
+      }
+    },
+    "aliases": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "category": {
+      "enum": [
+        "vegetable",
+        "fruit",
+        "herb",
+        "mushroom",
+        "legume",
+        "grain",
+        "nut",
+        "dairy",
+        "egg",
+        "meat",
+        "fish",
+        "seafood",
+        "bakery",
+        "spice",
+        "other"
+      ]
+    },
+    "dimensions_m": {
+      "type": "object",
+      "description": "Average specimen in metres; x/y/z follow the library axes (Y up).",
+      "required": [
+        "x",
+        "y",
+        "z"
+      ],
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        },
+        "z": {
+          "type": "number"
+        },
+        "range": {
+          "type": "object",
+          "properties": {
+            "min": {
+              "$ref": "#/$defs/vec3"
+            },
+            "max": {
+              "$ref": "#/$defs/vec3"
+            }
+          }
+        }
+      }
+    },
+    "mass_g": {
+      "type": "object",
+      "required": [
+        "avg"
+      ],
+      "properties": {
+        "avg": {
+          "type": "number"
+        },
+        "min": {
+          "type": "number"
+        },
+        "max": {
+          "type": "number"
+        }
+      }
+    },
+    "density_g_cm3": {
+      "type": "number"
+    },
+    "edible_parts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/part"
+      }
+    },
+    "inedible_parts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/part"
+      }
+    },
+    "waste_ratio": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "states": {
+      "type": "object",
+      "propertyNames": {
+        "$ref": "#/$defs/stateId"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "enum": [
+              "planned",
+              "built",
+              "approved"
+            ]
+          },
+          "variants": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "name"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9-]+_[a-z_]+(_[a-z0-9]+)*\\.glb$"
+                },
+                "url": {
+                  "type": "string"
+                },
+                "lod": {
+                  "enum": [
+                    0,
+                    1
+                  ]
+                },
+                "bytes": {
+                  "type": "integer"
+                },
+                "triangles": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "piece_count": {
+            "type": "integer"
+          },
+          "piece_size_mm": {
+            "$ref": "#/$defs/vec3"
+          },
+          "piece_mass_g": {
+            "type": "number"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "preparation": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "cooking_actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "action",
+          "from_state"
+        ],
+        "properties": {
+          "action": {
+            "enum": [
+              "wash",
+              "peel",
+              "cut_half",
+              "quarter",
+              "slice",
+              "strip",
+              "cube",
+              "dice",
+              "chop",
+              "crush",
+              "mash",
+              "grate",
+              "squeeze",
+              "zest",
+              "seed",
+              "core",
+              "stir",
+              "mix",
+              "toss",
+              "pour",
+              "place_in",
+              "fry",
+              "saute",
+              "simmer",
+              "boil",
+              "roast",
+              "grill",
+              "bake",
+              "garnish"
+            ]
+          },
+          "from_state": {
+            "$ref": "#/$defs/stateId"
+          },
+          "to_state": {
+            "$ref": "#/$defs/stateId"
+          }
+        }
+      }
+    },
+    "look": {
+      "type": "string",
+      "description": "Summary of the reference analysis (reference.md)."
+    },
+    "references": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "build": {
+      "type": "object",
+      "required": [
+        "seed"
+      ],
+      "properties": {
+        "seed": {
+          "type": "integer"
+        },
+        "script": {
+          "type": "string"
+        },
+        "script_version": {
+          "type": "string"
+        },
+        "built_at": {
+          "type": "string"
+        }
+      }
+    },
+    "transitions": {
+      "type": "array",
+      "description": "Як стани отримуються один з одного (для анімацій і планування сцени)",
+      "items": {
+        "type": "object",
+        "required": [
+          "from",
+          "to",
+          "op"
+        ],
+        "properties": {
+          "from": {
+            "$ref": "#/$defs/stateId"
+          },
+          "to": {
+            "$ref": "#/$defs/stateId"
+          },
+          "op": {
+            "enum": [
+              "cut",
+              "slice",
+              "chop",
+              "peel",
+              "scoop",
+              "crush",
+              "blend",
+              "cook",
+              "remove_calyx"
+            ]
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "vec3": {
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        },
+        "z": {
+          "type": "number"
+        }
+      }
+    },
+    "part": {
+      "enum": [
+        "skin",
+        "peel",
+        "rind",
+        "pith",
+        "flesh",
+        "gel",
+        "seed",
+        "core",
+        "layer",
+        "vesicle",
+        "calyx",
+        "stem",
+        "crust",
+        "crumb",
+        "meat",
+        "fat",
+        "bone",
+        "yolk",
+        "white",
+        "juice",
+        "zest",
+        "leaf"
+      ]
+    },
+    "stateId": {
+      "enum": [
+        "whole",
+        "half",
+        "quarter",
+        "wedges",
+        "slices",
+        "half_slices",
+        "rings",
+        "strips",
+        "cubes",
+        "diced",
+        "chopped",
+        "mashed",
+        "peeled",
+        "cooked",
+        "parts"
+      ]
+    }
+  }
+}

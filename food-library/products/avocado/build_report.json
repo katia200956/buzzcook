@@ -1,0 +1,170 @@
+{
+ "whole": {
+  "file": "whole/avocado_whole.glb",
+  "pieces": 1,
+  "triangles": 26000,
+  "max_piece_triangles": 26000,
+  "bytes": 1502320,
+  "mass_total_g": 290.4,
+  "piece_mass_g": 290.42,
+  "piece_size_mm": [
+   106.4,
+   73.1,
+   70.1
+  ]
+ },
+ "half": {
+  "file": "half/avocado_half.glb",
+  "pieces": 3,
+  "triangles": 39676,
+  "max_piece_triangles": 18014,
+  "bytes": 1767976,
+  "mass_total_g": 290.4,
+  "piece_mass_g": 96.81,
+  "piece_size_mm": [
+   83.9,
+   58.3,
+   35.4
+  ]
+ },
+ "quarter": {
+  "file": "quarter/avocado_quarter.glb",
+  "pieces": 4,
+  "triangles": 42268,
+  "max_piece_triangles": 12648,
+  "bytes": 1901940,
+  "mass_total_g": 264.8,
+  "piece_mass_g": 66.2,
+  "piece_size_mm": [
+   106.2,
+   36.5,
+   35.1
+  ]
+ },
+ "peeled": {
+  "file": "peeled/avocado_peeled.glb",
+  "pieces": 2,
+  "triangles": 13420,
+  "max_piece_triangles": 6794,
+  "bytes": 287688,
+  "mass_total_g": 224.9,
+  "piece_mass_g": 112.47,
+  "piece_size_mm": [
+   100.9,
+   66.4,
+   33.8
+  ]
+ },
+ "slices_6mm": {
+  "file": "slices/avocado_slices_6mm.glb",
+  "pieces": 23,
+  "triangles": 64893,
+  "max_piece_triangles": 4195,
+  "bytes": 1559504,
+  "mass_total_g": 219.7,
+  "piece_mass_g": 9.55,
+  "piece_size_mm": [
+   83.1,
+   30.2,
+   8.3
+  ]
+ },
+ "cubes": {
+  "file": "cubes/avocado_cubes.glb",
+  "pieces": 92,
+  "triangles": 71682,
+  "max_piece_triangles": 1812,
+  "bytes": 2030820,
+  "mass_total_g": 217.5,
+  "piece_mass_g": 2.36,
+  "piece_size_mm": [
+   16.4,
+   15.0,
+   13.3
+  ]
+ },
+ "diced": {
+  "file": "diced/avocado_diced.glb",
+  "pieces": 297,
+  "triangles": 85438,
+  "max_piece_triangles": 748,
+  "bytes": 3002812,
+  "mass_total_g": 112.7,
+  "piece_mass_g": 0.38,
+  "piece_size_mm": [
+   10.0,
+   8.1,
+   6.6
+  ]
+ },
+ "mashed": {
+  "file": "mashed/avocado_mashed.glb",
+  "pieces": 17,
+  "triangles": 29388,
+  "max_piece_triangles": 25280,
+  "bytes": 709864,
+  "mass_total_g": 196.2,
+  "piece_mass_g": 11.54,
+  "piece_size_mm": [
+   17.8,
+   15.2,
+   6.1
+  ]
+ },
+ "puree": {
+  "file": "mashed/avocado_puree.glb",
+  "pieces": 1,
+  "triangles": 14080,
+  "max_piece_triangles": 14080,
+  "bytes": 289408,
+  "mass_total_g": 224.9,
+  "piece_mass_g": 224.94,
+  "piece_size_mm": [
+   135.9,
+   135.0,
+   24.2
+  ]
+ },
+ "parts_pit": {
+  "file": "parts/avocado_parts_pit.glb",
+  "pieces": 1,
+  "triangles": 3920,
+  "max_piece_triangles": 3920,
+  "bytes": 80028,
+  "mass_total_g": 25.6,
+  "piece_mass_g": 25.62,
+  "piece_size_mm": [
+   38.9,
+   34.7,
+   33.2
+  ]
+ },
+ "parts_pit_cut": {
+  "file": "parts/avocado_parts_pit_cut.glb",
+  "pieces": 2,
+  "triangles": 4992,
+  "max_piece_triangles": 2496,
+  "bytes": 108272,
+  "mass_total_g": 25.6,
+  "piece_mass_g": 12.81,
+  "piece_size_mm": [
+   38.9,
+   34.7,
+   16.6
+  ]
+ },
+ "parts_skin": {
+  "file": "parts/avocado_parts_skin.glb",
+  "pieces": 2,
+  "triangles": 27118,
+  "max_piece_triangles": 13623,
+  "bytes": 1462592,
+  "mass_total_g": 39.9,
+  "piece_mass_g": 19.93,
+  "piece_size_mm": [
+   106.4,
+   70.1,
+   36.5
+  ]
+ }
+}

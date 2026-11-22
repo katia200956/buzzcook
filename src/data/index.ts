@@ -47,6 +47,11 @@ const images: Record<string, number> = {
   'assets/step-3.jpg': require('../../assets/food/step-3.jpg'),
   'assets/step-4.jpg': require('../../assets/food/step-4.jpg'),
   'assets/step-5.jpg': require('../../assets/food/step-5.jpg'),
+  'assets/syrnyky-plate.webp': require('../../assets/syrnyky/plate.webp'),
+  'assets/syrnyky-1.webp': require('../../assets/syrnyky/s1.webp'),
+  'assets/syrnyky-2.webp': require('../../assets/syrnyky/s2.webp'),
+  'assets/syrnyky-3.webp': require('../../assets/syrnyky/s3.webp'),
+  'assets/syrnyky-4.webp': require('../../assets/syrnyky/s4.webp'),
 };
 
 export const img = (path: string) => images[path];
@@ -60,6 +65,13 @@ const cutouts: Record<string, number[]> = {
     require('../../assets/steps/c8.png'),
     require('../../assets/steps/c9.png'),
   ],
+  syrnyky: [
+    require('../../assets/syrnyky/s1.webp'),
+    require('../../assets/syrnyky/s2.webp'),
+    require('../../assets/syrnyky/s3.webp'),
+    require('../../assets/syrnyky/s4.webp'),
+    require('../../assets/syrnyky/plate.webp'),
+  ],
 };
 
 export const stepCutout = (id: string, i: number) => cutouts[id]?.[i];
@@ -67,6 +79,7 @@ export const stepCutout = (id: string, i: number) => cutouts[id]?.[i];
 // Dishes that have a background-free photo of the finished plate; the belt shows it as is.
 const plateCutouts: Record<string, number> = {
   salat: require('../../assets/steps/c9.png'),
+  syrnyky: require('../../assets/syrnyky/plate.webp'),
 };
 
 export const plateCutout = (id: string) => plateCutouts[id];
@@ -84,9 +97,29 @@ const clips: Record<string, number[]> = {
 
 export const stepClip = (id: string, i: number) => clips[id]?.[i];
 
+// Photo steps: one background-free photo per step, all shot with the same plate, bowl and pan,
+// plus a small code-drawn effect so the step feels alive without paying for video.
+export type Fx = 'mash' | 'sprinkle' | 'settle' | 'sizzle' | 'drizzle';
+export type PhotoStep = { src: number; aspect: number; fx: Fx };
+
+const photoSteps: Record<string, PhotoStep[]> = {
+  syrnyky: [
+    { src: require('../../assets/syrnyky/s1.webp'), aspect: 900 / 676, fx: 'mash' },
+    { src: require('../../assets/syrnyky/s2.webp'), aspect: 900 / 765, fx: 'sprinkle' },
+    { src: require('../../assets/syrnyky/s3.webp'), aspect: 900 / 450, fx: 'settle' },
+    { src: require('../../assets/syrnyky/s4.webp'), aspect: 900 / 755, fx: 'sizzle' },
+    { src: require('../../assets/syrnyky/plate.webp'), aspect: 896 / 883, fx: 'drizzle' },
+  ],
+};
+
+export const photoStep = (id: string, i: number) => photoSteps[id]?.[i];
+// The finished dish for the recipe card: the last photo step, if the recipe has them.
+export const heroPhoto = (id: string) => photoSteps[id]?.[photoSteps[id].length - 1];
+
 // Kitchen tools per dish, shown on the recipe card ("інструменти" in the Figma card).
 const tools: Record<string, string[]> = {
   salat: ['дошка', 'ніж', 'сковорода', 'миска'],
+  syrnyky: ['миска', 'виделка', 'сито', 'сковорода', 'лопатка', 'кришка'],
   tost: ['тостер', 'каструля', 'виделка'],
   omlet: ['сковорода', 'віничок', 'миска'],
   yogurt: ['миска', 'ложка'],

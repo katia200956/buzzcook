@@ -12,7 +12,8 @@ import { useScale } from '../../components/scale';
 import { useStore } from '../../components/store';
 import { StageScene } from '../../components/StageScene';
 import { StepVideo } from '../../components/StepVideo';
-import { byId, img, nextInPlan, stepClip, stepCutout } from '../../data';
+import { PhotoFx } from '../../components/PhotoFx';
+import { byId, img, nextInPlan, photoStep, stepClip, stepCutout } from '../../data';
 import { stepScene } from '../../data/scenes';
 import { font, fontMedium, ForceDark, useTheme } from '../../theme';
 
@@ -156,10 +157,16 @@ function Cook() {
               const cut = stepCutout(r.id, i);
               const clip = stepClip(r.id, i);
               const scene = stepScene(r.id, i);
+              const photo = photoStep(r.id, i);
               return (
                 <View key={i} style={{ height: pageH, flexDirection: 'row', alignItems: 'center', paddingBottom: 90 * k }}>
                   <Animated.View style={[{ width: 240 * k, height: 300 * k, marginLeft: -34 * k }, art]}>
-                    {scene ? (
+                    {photo ? (
+                      // One background-free photo per step (same plate, bowl and pan throughout) with a small live effect.
+                      <View style={{ position: 'absolute', left: 44 * k, top: 0, bottom: 0, justifyContent: 'center' }}>
+                        <PhotoFx step={photo} width={196 * k} active={page === i} />
+                      </View>
+                    ) : scene ? (
                       // The column hangs 34pt off the left edge; keep the whole scene on screen.
                       <View style={{ position: 'absolute', left: 34 * k, top: 47 * k }}>
                         <StageScene layers={scene} size={206 * k} active={page === i} />

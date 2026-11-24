@@ -17,7 +17,7 @@ export function Page({ children }: { children: ReactNode }) {
       >
         {children}
       </ScrollView>
-      <Header logo={false} onMenu={() => setMenu(true)} />
+      <Header onMenu={() => setMenu(true)} />
       <Menu open={menu} onClose={() => setMenu(false)} />
     </Screen>
   );

@@ -25,14 +25,33 @@
       "expo-font",
       "expo-router",
       "expo-image",
-      "expo-video"
+      "expo-video",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Buzzcook використовує камеру, щоб сканувати штрихкоди продуктів для щоденника калорій.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Buzzcook відкриває фото чека або страви, щоб додати продукти в холодильник чи порахувати калорії.",
+          "cameraPermission": "Buzzcook використовує камеру, щоб сфотографувати чек або страву."
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#F6F1E8"
+        }
+      ],
+      "expo-notifications"
     ],
     "scheme": "buzzcook",
     "experiments": {
       "typedRoutes": true
-    },
-    "splash": {
-      "backgroundColor": "#F6F1E8"
     }
   }
 }

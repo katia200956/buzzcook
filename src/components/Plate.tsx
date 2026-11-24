@@ -1,5 +1,6 @@
 import { Image } from 'expo-image';
-import { View } from 'react-native';
+import { Text, View } from 'react-native';
+import { font } from '../theme';
 import { img, plateCutout, Recipe } from '../data';
 
 // A dish on the belt: two soft plate shadows under a round photo, placed as in the
@@ -25,12 +26,21 @@ export function Plate({ recipe, size }: { recipe: Recipe; size: number }) {
       />
       {/* The photos have a white studio background; zoom in slightly so only the plate shows. */}
       <View style={{ position: 'absolute', width: size, height: size, borderRadius: size / 2, overflow: 'hidden' }}>
-        <Image
-          source={img(recipe.img)}
-          style={{ width: size, height: size, transform: [{ scale: 1.1 }] }}
-          contentFit="cover"
-          transition={200}
-        />
+        {img(recipe.img) ? (
+          <Image
+            source={img(recipe.img)}
+            style={{ width: size, height: size, transform: [{ scale: 1.1 }] }}
+            contentFit="cover"
+            transition={200}
+          />
+        ) : (
+          // Trial dishes have no photo yet: an empty warm plate with the dish's first word.
+          <View style={{ width: size, height: size, backgroundColor: '#5E554C', alignItems: 'center', justifyContent: 'center', padding: size * 0.2 }}>
+            <Text style={{ fontFamily: font, fontSize: Math.max(10, size * 0.11), color: 'rgba(255,255,255,0.8)', textAlign: 'center' }} numberOfLines={2}>
+              {recipe.name.split(' ')[0].toLowerCase()}
+            </Text>
+          </View>
+        )}
         {/* Darken the white plate so it sits on the black belt like the dark bowls in Figma:
             a dim over the whole photo plus a heavier shaded rim. */}
         <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.14)' } as any} />

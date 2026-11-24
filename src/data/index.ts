@@ -47,6 +47,11 @@ const images: Record<string, number> = {
   'assets/step-3.jpg': require('../../assets/food/step-3.jpg'),
   'assets/step-4.jpg': require('../../assets/food/step-4.jpg'),
   'assets/step-5.jpg': require('../../assets/food/step-5.jpg'),
+  'assets/syrnyky-plate.webp': require('../../assets/syrnyky/plate.webp'),
+  'assets/syrnyky-1.webp': require('../../assets/syrnyky/s1.webp'),
+  'assets/syrnyky-2.webp': require('../../assets/syrnyky/s2.webp'),
+  'assets/syrnyky-3.webp': require('../../assets/syrnyky/s3.webp'),
+  'assets/syrnyky-4.webp': require('../../assets/syrnyky/s4.webp'),
 };
 
 export const img = (path: string) => images[path];
@@ -60,6 +65,13 @@ const cutouts: Record<string, number[]> = {
     require('../../assets/steps/c8.png'),
     require('../../assets/steps/c9.png'),
   ],
+  syrnyky: [
+    require('../../assets/syrnyky/s1.webp'),
+    require('../../assets/syrnyky/s2.webp'),
+    require('../../assets/syrnyky/s3.webp'),
+    require('../../assets/syrnyky/s4.webp'),
+    require('../../assets/syrnyky/plate.webp'),
+  ],
 };
 
 export const stepCutout = (id: string, i: number) => cutouts[id]?.[i];
@@ -67,6 +79,7 @@ export const stepCutout = (id: string, i: number) => cutouts[id]?.[i];
 // Dishes that have a background-free photo of the finished plate; the belt shows it as is.
 const plateCutouts: Record<string, number> = {
   salat: require('../../assets/steps/c9.png'),
+  syrnyky: require('../../assets/syrnyky/plate.webp'),
 };
 
 export const plateCutout = (id: string) => plateCutouts[id];
@@ -84,9 +97,29 @@ const clips: Record<string, number[]> = {
 
 export const stepClip = (id: string, i: number) => clips[id]?.[i];
 
+// Photo steps: one background-free photo per step, all shot with the same plate, bowl and pan,
+// plus a small code-drawn effect so the step feels alive without paying for video.
+export type Fx = 'mash' | 'sprinkle' | 'settle' | 'sizzle' | 'drizzle';
+export type PhotoStep = { src: number; aspect: number; fx: Fx };
+
+const photoSteps: Record<string, PhotoStep[]> = {
+  syrnyky: [
+    { src: require('../../assets/syrnyky/s1.webp'), aspect: 900 / 676, fx: 'mash' },
+    { src: require('../../assets/syrnyky/s2.webp'), aspect: 900 / 765, fx: 'sprinkle' },
+    { src: require('../../assets/syrnyky/s3.webp'), aspect: 900 / 450, fx: 'settle' },
+    { src: require('../../assets/syrnyky/s4.webp'), aspect: 900 / 755, fx: 'sizzle' },
+    { src: require('../../assets/syrnyky/plate.webp'), aspect: 896 / 883, fx: 'drizzle' },
+  ],
+};
+
+export const photoStep = (id: string, i: number) => photoSteps[id]?.[i];
+// The finished dish for the recipe card: the last photo step, if the recipe has them.
+export const heroPhoto = (id: string) => photoSteps[id]?.[photoSteps[id].length - 1];
+
 // Kitchen tools per dish, shown on the recipe card ("інструменти" in the Figma card).
 const tools: Record<string, string[]> = {
   salat: ['дошка', 'ніж', 'сковорода', 'миска'],
+  syrnyky: ['миска', 'виделка', 'сито', 'сковорода', 'лопатка', 'кришка'],
   tost: ['тостер', 'каструля', 'виделка'],
   omlet: ['сковорода', 'віничок', 'миска'],
   yogurt: ['миска', 'ложка'],
@@ -115,4 +148,44 @@ export const nextInPlan = (plan: PlanItem[], id: string) => {
   const i = list.findIndex((p) => p.recipe === id);
   if (i < 0) return undefined;
   return list[(i + 1) % list.length];
+};
+
+// Weeks start on Monday. A week is keyed by its Monday as yyyy-mm-dd in local time.
+// The plan screen shows last week, this week and next week only.
+export const WEEK_RANGE = [-1, 0, 1] as const;
+
+export const weekStart = (offset = 0, now = new Date()) => {
+  const d = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  d.setDate(d.getDate() - ((d.getDay() + 6) % 7) + offset * 7);
+  return d;
+};
+
+const pad = (n: number) => String(n).padStart(2, '0');
+export const weekKey = (offset = 0, now = new Date()) => {
+  const d = weekStart(offset, now);
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+};
+
+export const weekDates = (offset = 0, now = new Date()) =>
+  DAYS.map((_, i) => {
+    const d = weekStart(offset, now);
+    d.setDate(d.getDate() + i);
+    return d;
+  });
+
+// The calorie diary keys a day as yyyy-mm-dd in local time, like the plan keys a week.
+export const dayKey = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+// Diary sections: the plan's three meals plus snacks.
+export const DIARY_MEALS = [...MEALS, 'Перекус'];
+
+export const MONTHS = ['січня', 'лютого', 'березня', 'квітня', 'травня', 'червня', 'липня', 'серпня', 'вересня', 'жовтня', 'листопада', 'грудня'];
+export const shortDate = (d: Date) => `${d.getDate()}.${pad(d.getMonth() + 1)}`;
+// "6–12 жовтня", or "29 вересня – 5 жовтня" when the week spans two months.
+export const weekLabel = (offset = 0, now = new Date()) => {
+  const ds = weekDates(offset, now);
+  const a = ds[0];
+  const b = ds[6];
+  return a.getMonth() === b.getMonth()
+    ? `${a.getDate()}–${b.getDate()} ${MONTHS[b.getMonth()]}`
+    : `${a.getDate()} ${MONTHS[a.getMonth()]} – ${b.getDate()} ${MONTHS[b.getMonth()]}`;
 };

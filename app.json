@@ -46,7 +46,8 @@
         {
           "backgroundColor": "#F6F1E8"
         }
-      ]
+      ],
+      "expo-notifications"
     ],
     "scheme": "buzzcook",
     "experiments": {

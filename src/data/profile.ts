@@ -14,9 +14,11 @@ export type Profile = {
   aim: Aim;
   diets: Diet[];
   allergies: Allergy[];
+  budget: number; // hryvnias a week for dinners
+  maxTime: number; // minutes a dish may take, 0 = no limit
 };
 
-export const emptyProfile: Profile = { activity: 'light', aim: 'keep', diets: [], allergies: [] };
+export const emptyProfile: Profile = { activity: 'light', aim: 'keep', diets: [], allergies: [], budget: 600, maxTime: 40 };
 
 export const ACTIVITY: [Activity, string, string, number][] = [
   ['rest', 'мало руху', 'сидяча робота, без спорту', 1.2],

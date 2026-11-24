@@ -5,7 +5,11 @@ import { Page } from '../../components/Page';
 import { Plate } from '../../components/Plate';
 import { Lock } from '../../components/Premium';
 import { useScale } from '../../components/scale';
-import { NormCard } from '../../components/ProfileForm';
+import { Chip, NormCard } from '../../components/ProfileForm';
+import { SavingsCard } from '../../components/Savings';
+import { askReminders } from '../../components/reminders';
+import { uah } from '../../data/prices';
+import { BUDGETS, TIMES } from '../../data/weekplan';
 import { ThemeMode, useStore } from '../../components/store';
 import { ALLERGIES, DIETS } from '../../data/profile';
 import { byId } from '../../data';
@@ -20,13 +24,38 @@ const themes: [ThemeMode, string][] = [
 export default function Profile() {
   const k = useScale();
   const t = useTheme();
-  const { saved, themeMode, setThemeMode, user, signOut, premium, showPaywall, profile } = useStore();
+  const { saved, themeMode, setThemeMode, user, signOut, premium, showPaywall, profile, setProfile, remind, setRemind } = useStore();
   const txt = { fontFamily: font, fontSize: 20 * k, lineHeight: 24 * k, color: t.text };
   const list = saved.map(byId).filter((r) => !!r);
 
   return (
     <Page>
       <Text style={[txt, { fontFamily: fontMedium, fontSize: 28 * k, lineHeight: 32 * k }]}>профіль</Text>
+
+      <View style={{ marginTop: 16 * k }}>
+        <SavingsCard />
+      </View>
+
+      <Text style={[txt, { opacity: 0.6, marginTop: 20 * k, marginBottom: 8 * k }]}>вечері</Text>
+      <Text style={[txt, { fontSize: 18 * k, color: t.textSoft }]}>бюджет на тиждень</Text>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 * k, marginTop: 4 * k }}>
+        {BUDGETS.map((b) => (
+          <Chip key={b} on={profile.budget === b} label={uah(b)} onPress={() => setProfile({ budget: b })} />
+        ))}
+      </View>
+      <Text style={[txt, { fontSize: 18 * k, color: t.textSoft, marginTop: 10 * k }]}>час на вечерю</Text>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 * k, marginTop: 4 * k }}>
+        {TIMES.map(([m, label]) => (
+          <Chip key={m} on={profile.maxTime === m} label={label} onPress={() => setProfile({ maxTime: m })} />
+        ))}
+      </View>
+      <View style={{ flexDirection: 'row', marginTop: 10 * k }}>
+        <Chip
+          on={remind}
+          label="нагадування о 17:00 і підсумок у неділю"
+          onPress={async () => setRemind(remind ? false : await askReminders().catch(() => false))}
+        />
+      </View>
 
       <Text style={[txt, { opacity: 0.6, marginTop: 20 * k, marginBottom: 8 * k }]}>акаунт</Text>
       <Text style={txt}>{user ? `увійшла через ${user.name}` : 'ти ще не увійшла'}</Text>

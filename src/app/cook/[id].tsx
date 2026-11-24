@@ -14,6 +14,8 @@ import { StageScene } from '../../components/StageScene';
 import { StepVideo } from '../../components/StepVideo';
 import { PhotoFx } from '../../components/PhotoFx';
 import { byId, img, nextInPlan, photoStep, stepClip, stepCutout } from '../../data';
+import { uah } from '../../data/prices';
+import { SavingsCard } from '../../components/Savings';
 import { stepScene } from '../../data/scenes';
 import { font, fontMedium, ForceDark, useTheme } from '../../theme';
 
@@ -39,7 +41,7 @@ function Cook() {
   const insets = useSafeAreaInsets();
   const k = useScale();
   const t = useTheme();
-  const { done, setDone, plan, premium, showPaywall, cookedDish } = useStore();
+  const { done, setDone, plan, premium, showPaywall, cookedDish, savings } = useStore();
   const [y] = useState(() => new Animated.Value(0));
   const [pageH, setPageH] = useState(0);
   const pager = useRef<ComponentRef<typeof ScrollView>>(null);
@@ -59,6 +61,8 @@ function Cook() {
   if (!r || !steps.length) return null;
   const txt = { fontFamily: font, fontSize: 20 * k, lineHeight: 24 * k, color: t.text };
   const next = nextInPlan(plan, r.id);
+  // What this dinner saved, from the record made when the last step was done.
+  const mine = [...savings].reverse().find((x) => x.recipe === r.id);
   const nextRecipe = next && byId(next.recipe);
 
   const go = (i: number) => {
@@ -210,6 +214,17 @@ function Cook() {
               <Plate recipe={r} size={200 * k} />
               <Text style={[txt, { fontFamily: fontMedium, fontSize: 56 * k, lineHeight: 60 * k, marginTop: 12 * k }]}>смачного!</Text>
               <Text style={txt}>{r.name.toLowerCase()} готовий.</Text>
+              {mine && (
+                <Text style={[txt, { textAlign: 'center' }]}>
+                  у доставці ≈ {uah(mine.delivery)}, вдома ≈ {uah(mine.home)}
+                  {mine.portions > 1 ? ` за ${mine.portions} порції` : ''}.
+                </Text>
+              )}
+              {mine && (
+                <View style={{ alignSelf: 'stretch' }}>
+                  <SavingsCard compact />
+                </View>
+              )}
               {nextRecipe && (
                 <Pressable onPress={() => router.replace(`/recipe/${nextRecipe.id}`)} style={{ alignSelf: 'stretch', marginTop: 16 * k }}>
                   <Glass radius={15} style={{ padding: 18 * k }}>

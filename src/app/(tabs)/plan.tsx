@@ -18,6 +18,7 @@ import { useScale } from '../../components/scale';
 import { Slot, useStore } from '../../components/store';
 import { byId, DAYS, MEALS, Recipe, recipes, shortDate, weekDates, weekKey, weekLabel } from '../../data';
 import { font, fontMedium, sage, useTheme } from '../../theme';
+import { uah } from '../../data/prices';
 
 const SHORT = ['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'нд'];
 const HEADS = ['сніданок', 'обід', 'вечеря'];
@@ -50,7 +51,7 @@ export default function Plan() {
   const t = useTheme();
   const insets = useSafeAreaInsets();
   const { height: winH } = useWindowDimensions();
-  const { planOf, premium, swapMeals, resetPlan, setMeal, liked, toggleLiked, saved, toggleSaved } = useStore();
+  const { planOf, premium, swapMeals, resetPlan, setMeal, liked, toggleLiked, saved, toggleSaved, planWeek, profile } = useStore();
   const [offset, setOffset] = useState(0);
   const [open, setOpen] = useState<{ slot: Slot; pick: boolean } | null>(null);
   const [swapFrom, setSwapFrom] = useState<Slot | null>(null);
@@ -301,6 +302,18 @@ export default function Plan() {
           </Animated.View>
         </GestureDetector>
 
+        {offset === 0 && (
+          <Pressable
+            onPress={() => {
+              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+              planWeek();
+            }}
+            accessibilityRole="button"
+            style={({ pressed }) => ({ alignSelf: 'center', marginTop: 18 * k, backgroundColor: sage, borderRadius: 100, paddingHorizontal: 22 * k, height: 46 * k, justifyContent: 'center', transform: [{ scale: pressed ? 0.97 : 1 }] })}
+          >
+            <Text style={{ fontFamily: fontMedium, fontSize: 22 * k, color: '#FFFFFF' }}>скласти вечері в {uah(profile.budget)} з того, що вдома</Text>
+          </Pressable>
+        )}
         <Pressable onPress={() => resetPlan(week)} hitSlop={8} style={{ alignSelf: 'center', marginTop: 14 * k }} accessibilityRole="button">
           <Text style={{ fontFamily: font, fontSize: 18 * k, color: t.textSoft }}>повернути план за замовчуванням</Text>
         </Pressable>

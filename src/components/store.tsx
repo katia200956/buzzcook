@@ -1,16 +1,21 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
-import { defaultPlan, PlanItem, Recipe, sortPlan, weekKey } from '../data';
+import { byId, DAYS, defaultPlan, PlanItem, Recipe, recipes, sortPlan, weekKey } from '../data';
 import { dailyNorm, emptyProfile, Profile } from '../data/profile';
 import { Pick, rank } from '../data/recommend';
 import { buildList, FridgeItem, guessKey, haveOf, INGREDIENTS, mealsAhead, needOf, ShopItem, slotId, takeOut } from '../data/pantry';
 import type { Food } from '../data/foods';
+import { deliveryPrice, portionCost } from '../data/prices';
+import { makeWeek, Week } from '../data/weekplan';
 
 export type ThemeMode = 'system' | 'light' | 'dark';
 export type Provider = 'apple' | 'google' | 'email';
 export type Slot = { week: string; day: string; meal: string };
 // One line of the calorie diary. Calories and macros are stored with the entry, so a past day
 // keeps its numbers even if a recipe or product is changed later.
+// One dinner cooked at home instead of ordered: what it cost and what delivery would have cost.
+export type Saving = { at: number; recipe: string; portions: number; home: number; delivery: number };
+
 export type Entry = {
   id: string;
   meal: string; // one of DIARY_MEALS
@@ -46,6 +51,8 @@ type State = {
   cookLog: { id: string; at: number }[];
   skipped: Record<string, number>;
   bought: Record<string, number>;
+  savings: Saving[];
+  remind: boolean; // the 17:00 reminder and the Sunday summary
 };
 
 type Store = State & {
@@ -81,11 +88,15 @@ type Store = State & {
   finishOnboarding: () => void;
   rank: (list: Recipe[]) => Pick[];
   addBought: (items: Omit<FridgeItem, 'id'>[]) => void;
+  previewWeek: () => Week; // dinners for this week from the profile's budget, time and the fridge
+  planWeek: () => Week; // the same, written into this week's plan with a fresh shopping list
+  setRemind: (on: boolean) => void;
+  savedSince: (from: number) => { saved: number; dinners: number };
 };
 
 const Ctx = createContext<Store | null>(null);
 const KEY = 'buzzcook:v2';
-const initial: State = { saved: [], done: {}, themeMode: 'system', plans: {}, liked: [], premium: false, guest: false, diary: {}, goal: 2000, products: {}, fridge: [], shop: [], cooked: {}, profile: emptyProfile, onboarded: false, cookLog: [], skipped: {}, bought: {} };
+const initial: State = { saved: [], done: {}, themeMode: 'system', plans: {}, liked: [], premium: false, guest: false, diary: {}, goal: 2000, products: {}, fridge: [], shop: [], cooked: {}, profile: emptyProfile, onboarded: false, cookLog: [], skipped: {}, bought: {}, savings: [], remind: false };
 
 const names: Record<Provider, string> = { apple: 'Apple ID', google: 'Google', email: 'e-mail' };
 const countBought = (bought: Record<string, number>, items: { key?: string }[]) => {
@@ -111,6 +122,43 @@ function load(raw: any): State {
   s.profile = { ...emptyProfile, ...raw.profile };
   return s;
 }
+
+// Recounts the list from the plan and the fridge. Items typed in by hand stay; ticked ones are already at home.
+function withList(s: State, offset: 0 | 1): State {
+  const w0 = weekKey(0);
+  const thisNeed = needOf(mealsAhead(weekPlan(s, w0), s.cooked[w0] ?? [], true));
+  const have = (key: string) => haveOf(s.fridge, key);
+  let list;
+  if (offset === 0) list = buildList(thisNeed, have);
+  else {
+    // Next week gets what is left at home after this week's meals.
+    const w1 = weekKey(1);
+    const left = (key: string) => (INGREDIENTS[key].unit === 'є' ? have(key) : Math.max(0, have(key) - (thisNeed[key] ?? 0)));
+    list = buildList(needOf(mealsAhead(weekPlan(s, w1), s.cooked[w1] ?? [], false)), left);
+  }
+  const mine = s.shop.filter((x) => !x.key && !x.done);
+  return { ...s, shop: [...list.map((x) => ({ ...x, id: newId(), done: false })), ...mine] };
+}
+
+const rankFor = (s: State, list: Recipe[]) =>
+  rank(
+    list,
+    {
+      liked: s.liked,
+      saved: s.saved,
+      cookLog: s.cookLog,
+      eaten: Object.values(s.diary).flatMap((d) => d.filter((e) => e.kind === 'recipe').map((e) => e.ref)),
+      skipped: s.skipped,
+      bought: s.bought,
+      fridge: s.fridge,
+      norm: dailyNorm(s.profile),
+    },
+    s.profile,
+  );
+
+// This week's dinners from today on.
+const weekFor = (s: State) =>
+  makeWeek(rankFor(s, recipes), { budget: s.profile.budget, maxTime: s.profile.maxTime, fridge: s.fridge, fromDay: (new Date().getDay() + 6) % 7 });
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<State>(initial);
@@ -193,22 +241,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     updateFridge: (id, patch) => setState((s) => ({ ...s, fridge: s.fridge.map((f) => (f.id === id ? { ...f, ...patch } : f)) })),
     removeFridge: (id) => setState((s) => ({ ...s, fridge: s.fridge.filter((f) => f.id !== id) })),
     // Recounts the list from the plan and the fridge. Items typed in by hand stay; ticked ones are already at home.
-    makeList: (offset) =>
-      setState((s) => {
-        const w0 = weekKey(0);
-        const thisNeed = needOf(mealsAhead(weekPlan(s, w0), s.cooked[w0] ?? [], true));
-        const have = (key: string) => haveOf(s.fridge, key);
-        let list;
-        if (offset === 0) list = buildList(thisNeed, have);
-        else {
-          // Next week gets what is left at home after this week's meals.
-          const w1 = weekKey(1);
-          const left = (key: string) => (INGREDIENTS[key].unit === 'є' ? have(key) : Math.max(0, have(key) - (thisNeed[key] ?? 0)));
-          list = buildList(needOf(mealsAhead(weekPlan(s, w1), s.cooked[w1] ?? [], false)), left);
-        }
-        const mine = s.shop.filter((x) => !x.key && !x.done);
-        return { ...s, shop: [...list.map((x) => ({ ...x, id: newId(), done: false })), ...mine] };
-      }),
+    makeList: (offset) => setState((s) => withList(s, offset)),
     // A ticked item goes into the fridge; unticking takes it back out.
     toggleShop: (id) =>
       setState((s) => {
@@ -225,16 +258,23 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setState((s) => ({ ...s, shop: [...s.shop, { id: newId(), name, qty: 0, unit: 'є', sec: (INGREDIENTS[guessKey(name) ?? '']?.sec ?? 'інше'), done: false }] })),
     removeShop: (id) => setState((s) => ({ ...s, shop: s.shop.filter((x) => x.id !== id) })),
     // A finished dish uses its ingredients up and marks its next uncooked slot in this week's plan.
+    // A dish that makes two portions also covers its next slot in the plan (tonight and tomorrow),
+    // so both count as dinners not ordered.
     cookedDish: (recipe) =>
       setState((s) => {
         const w = weekKey(0);
         const done = s.cooked[w] ?? [];
-        const slot = sortPlan(weekPlan(s, w)).find((p) => p.recipe === recipe && !done.includes(slotId(p)));
+        const open = sortPlan(weekPlan(s, w)).filter((p) => p.recipe === recipe && !done.includes(slotId(p)));
+        const serv = byId(recipe)?.serv ?? 1;
+        const slots = open.slice(0, serv >= 2 ? 2 : 1);
+        const portions = Math.max(1, slots.length);
+        const saving: Saving = { at: Date.now(), recipe, portions, home: portionCost(recipe) * portions, delivery: deliveryPrice(recipe) * portions };
         return {
           ...s,
           fridge: takeOut(s.fridge, recipe),
-          cooked: slot ? { ...s.cooked, [w]: [...done, slotId(slot)] } : s.cooked,
+          cooked: slots.length ? { ...s.cooked, [w]: [...done, ...slots.map(slotId)] } : s.cooked,
           cookLog: [...s.cookLog, { id: recipe, at: Date.now() }].slice(-100),
+          savings: [...s.savings, saving].slice(-500),
         };
       }),
     // Body numbers set the diary's daily goal; the norm follows every change.
@@ -244,21 +284,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         return { ...s, profile, goal: dailyNorm(profile) ?? s.goal };
       }),
     finishOnboarding: () => setState((s) => ({ ...s, onboarded: true })),
-    rank: (list) =>
-      rank(
-        list,
-        {
-          liked: state.liked,
-          saved: state.saved,
-          cookLog: state.cookLog,
-          eaten: Object.values(state.diary).flatMap((d) => d.filter((e) => e.kind === 'recipe').map((e) => e.ref)),
-          skipped: state.skipped,
-          bought: state.bought,
-          fridge: state.fridge,
-          norm: dailyNorm(state.profile),
-        },
-        state.profile,
-      ),
+    rank: (list) => rankFor(state, list),
     // Products from a receipt: into the fridge, and anything on the shopping list is ticked off as bought.
     addBought: (items) =>
       setState((s) => {
@@ -270,6 +296,23 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           bought: countBought(s.bought, items),
         };
       }),
+    previewWeek: () => weekFor(state),
+    planWeek: () => {
+      const week = weekFor(state);
+      setState((s) => {
+        // Days that have passed keep what was on them; from today on, the new dinners.
+        const w = weekKey(0);
+        const today = (new Date().getDay() + 6) % 7;
+        const past = weekPlan(s, w).filter((p) => DAYS.indexOf(p.day) < today);
+        return withList({ ...s, plans: { ...s.plans, [w]: [...past, ...week.plan] } }, 0);
+      });
+      return week;
+    },
+    setRemind: (remind) => setState((s) => ({ ...s, remind })),
+    savedSince: (from) => {
+      const list = state.savings.filter((x) => x.at >= from);
+      return { saved: list.reduce((a, x) => a + Math.max(0, x.delivery - x.home), 0), dinners: list.reduce((a, x) => a + x.portions, 0) };
+    },
   };
 
   return <Ctx.Provider value={store}>{children}</Ctx.Provider>;

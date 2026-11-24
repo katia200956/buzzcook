@@ -1,10 +1,11 @@
 import { AlumniSansSC_400Regular, AlumniSansSC_500Medium } from '@expo-google-fonts/alumni-sans-sc';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Paywall } from '../components/Premium';
+import { useReminders, useReminderTaps } from '../components/reminders';
 import { StoreProvider } from '../components/store';
 import { useTheme } from '../theme';
 
@@ -24,8 +25,12 @@ export default function RootLayout() {
   );
 }
 
+const openUrl = (url: string) => router.push(url as any);
+
 function Root() {
   const t = useTheme();
+  useReminders();
+  useReminderTaps(openUrl);
   return (
     <>
       <StatusBar style={t.mode === 'dark' ? 'light' : 'dark'} />

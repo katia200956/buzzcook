@@ -8,7 +8,7 @@ const light = {
   // v2: the same light/shade rhythm, warmed from grey to a soft clay so the food reads warmer.
   bg: ['#7E7266', '#DCD3C6', '#DCD3C6', '#7E7266'] as const,
   text: '#000000',
-  textSoft: 'rgba(0,0,0,0.55)',
+  textSoft: 'rgba(0,0,0,0.62)', // 4.5:1 on the clay background
   glass: 'rgba(255,255,255,0.10)',
   glassStrong: 'rgba(255,255,255,0.22)',
   border: 'rgba(255,255,255,0.55)',

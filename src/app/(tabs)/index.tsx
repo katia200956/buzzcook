@@ -1,32 +1,33 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Animated, Text, View } from 'react-native';
 import { Belt } from '../../components/Belt';
 import { DishRow } from '../../components/DishRow';
 import { Header } from '../../components/Header';
 import { Menu } from '../../components/Menu';
 import { Screen } from '../../components/Screen';
+import { useStore } from '../../components/store';
 import { useScale } from '../../components/scale';
 import { recipes } from '../../data';
 import { font } from '../../theme';
 
 export default function Home() {
   const k = useScale();
-  const [q, setQ] = useState('');
   const [menu, setMenu] = useState(false);
+  const [q, setQ] = useState('');
   const [scrollY] = useState(() => new Animated.Value(0));
+  const { rank } = useStore();
 
-  // The belt is a feed of every dish; a query narrows it.
-  const rows = useMemo(() => {
-    const n = q.trim().toLowerCase();
-    return recipes.filter(
-      (r) =>
-        !n ||
-        r.name.toLowerCase().includes(n) ||
-        r.cat.toLowerCase().includes(n) ||
-        r.tags.some((x) => x.includes(n)) ||
-        r.ing.some(([, x]) => x.toLowerCase().includes(n)),
-    );
-  }, [q]);
+  // The belt is a feed of the dishes this person can eat, best match first; a query narrows it.
+  const ranked = rank(recipes);
+  const n = q.trim().toLowerCase();
+  const rows = ranked.filter(
+    ({ r }) =>
+      !n ||
+      r.name.toLowerCase().includes(n) ||
+      r.cat.toLowerCase().includes(n) ||
+      r.tags.some((x) => x.includes(n)) ||
+      r.ing.some(([, x]) => x.toLowerCase().includes(n)),
+  );
 
   return (
     <Screen>
@@ -37,8 +38,8 @@ export default function Home() {
         onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: true })}
         scrollEventThrottle={16}
       >
-        {rows.map((r) => (
-          <DishRow key={r.id} recipe={r} />
+        {rows.map(({ r, why }) => (
+          <DishRow key={r.id} recipe={r} note={why} />
         ))}
         {rows.length === 0 && (
           <View style={{ marginLeft: 40 * k, width: 180 * k }}>
@@ -46,7 +47,7 @@ export default function Home() {
           </View>
         )}
       </Animated.ScrollView>
-      <Header query={q} onQuery={setQ} onLogo={() => setQ('')} onMenu={() => setMenu(true)} />
+      <Header query={q} onQuery={setQ} onMenu={() => setMenu(true)} />
       <Menu open={menu} onClose={() => setMenu(false)} />
     </Screen>
   );

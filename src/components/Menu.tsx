@@ -28,7 +28,7 @@ export function Menu({ open, onClose }: { open: boolean; onClose: () => void }) 
     ['стрічка страв', '/'],
     ['план тижня', '/plan'],
     ['етапи готовки', '/process'],
-    ['список покупок', '/cart'],
+    ['холодильник і покупки', '/cart'],
     ['профіль', '/profile'],
   ];
 

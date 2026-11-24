@@ -1,7 +1,7 @@
 import { Image } from 'expo-image';
-import { router, useLocalSearchParams } from 'expo-router';
+import { Redirect, router, useLocalSearchParams } from 'expo-router';
 import * as Speech from 'expo-speech';
-import { useEffect, useRef, useState } from 'react';
+import { ComponentRef, useEffect, useRef, useState } from 'react';
 import { Animated, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Glass } from '../../components/Glass';
@@ -12,7 +12,8 @@ import { useScale } from '../../components/scale';
 import { useStore } from '../../components/store';
 import { StageScene } from '../../components/StageScene';
 import { StepVideo } from '../../components/StepVideo';
-import { byId, img, nextInPlan, stepClip, stepCutout } from '../../data';
+import { PhotoFx } from '../../components/PhotoFx';
+import { byId, img, nextInPlan, photoStep, stepClip, stepCutout } from '../../data';
 import { stepScene } from '../../data/scenes';
 import { font, fontMedium, ForceDark, useTheme } from '../../theme';
 
@@ -22,6 +23,9 @@ import { font, fontMedium, ForceDark, useTheme } from '../../theme';
 // for the "етапи готовки" tab.
 // Cooking always runs on the black stage, whatever the app theme is.
 export default function CookScreen() {
+  const { ready, user, guest } = useStore();
+  // Opened from a link before signing in: go through the sign-in screen like the tabs do.
+  if (ready && !user && !guest) return <Redirect href="/login" />;
   return (
     <ForceDark.Provider value>
       <Cook />
@@ -35,10 +39,10 @@ function Cook() {
   const insets = useSafeAreaInsets();
   const k = useScale();
   const t = useTheme();
-  const { done, setDone, plan, premium, showPaywall } = useStore();
+  const { done, setDone, plan, premium, showPaywall, cookedDish } = useStore();
   const [y] = useState(() => new Animated.Value(0));
   const [pageH, setPageH] = useState(0);
-  const pager = useRef<ScrollView>(null);
+  const pager = useRef<ComponentRef<typeof ScrollView>>(null);
   const steps = r?.steps ?? [];
   const startAt = Math.min(done[id] ?? 0, steps.length);
   const [page, setPage] = useState(startAt);
@@ -62,6 +66,8 @@ function Cook() {
     pager.current?.scrollTo({ y: i * pageH, animated: true });
   };
   const finishStep = () => {
+    // The dish is ready: its ingredients leave the fridge (once, not on every revisit).
+    if (page + 1 === steps.length && (done[r.id] ?? 0) < steps.length) cookedDish(r.id);
     setDone(r.id, Math.max(done[r.id] ?? 0, page + 1));
     go(page + 1);
   };
@@ -81,15 +87,15 @@ function Cook() {
           </Text>
           <Pressable
             onPress={() => (premium ? setAudio((a) => !a) : showPaywall(true))}
-            accessibilityRole="switch"
-            accessibilityState={{ checked: audio }}
+            role="switch"
+            aria-checked={audio}
             accessibilityLabel={premium ? 'Озвучувати кроки' : 'Озвучування кроків: доступно в premium'}
           >
             <Glass radius={100} strong={audio} style={{ width: 44 * k, height: 44 * k, alignItems: 'center', justifyContent: 'center' }}>
               <Image source={require('../../../assets/icons/speaker.svg')} style={{ width: 22 * k, height: 22 * k, opacity: premium ? (audio ? 1 : 0.6) : 0.35 }} />
               {!premium && (
                 <View pointerEvents="none" style={{ position: 'absolute', right: -2 * k, bottom: -2 * k, width: 20 * k, height: 20 * k, borderRadius: 10 * k, backgroundColor: '#18181B', alignItems: 'center', justifyContent: 'center' }}>
-                  <Lock size={11} color="#FFFFFF" />
+                  <Lock still size={11} color="#FFFFFF" />
                 </View>
               )}
             </Glass>
@@ -156,10 +162,16 @@ function Cook() {
               const cut = stepCutout(r.id, i);
               const clip = stepClip(r.id, i);
               const scene = stepScene(r.id, i);
+              const photo = photoStep(r.id, i);
               return (
                 <View key={i} style={{ height: pageH, flexDirection: 'row', alignItems: 'center', paddingBottom: 90 * k }}>
                   <Animated.View style={[{ width: 240 * k, height: 300 * k, marginLeft: -34 * k }, art]}>
-                    {scene ? (
+                    {photo ? (
+                      // One background-free photo per step (same plate, bowl and pan throughout) with a small live effect.
+                      <View style={{ position: 'absolute', left: 44 * k, top: 0, bottom: 0, justifyContent: 'center' }}>
+                        <PhotoFx step={photo} width={196 * k} active={page === i} />
+                      </View>
+                    ) : scene ? (
                       // The column hangs 34pt off the left edge; keep the whole scene on screen.
                       <View style={{ position: 'absolute', left: 34 * k, top: 47 * k }}>
                         <StageScene layers={scene} size={206 * k} active={page === i} />

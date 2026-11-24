@@ -52,7 +52,7 @@ export function Sheet({ open, onClose, children }: { open: boolean; onClose: () 
   return (
     <Modal visible={open || leaving} transparent animationType="none" onRequestClose={close} statusBarTranslucent>
       <Animated.View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.4)', opacity: dim }]}>
-        <Pressable style={StyleSheet.absoluteFill} onPress={close} accessibilityLabel="Закрити" />
+        <Pressable style={StyleSheet.absoluteFill} onPress={close} accessibilityRole="button" accessibilityLabel="Закрити" />
       </Animated.View>
       <Animated.View
         {...pan.panHandlers}

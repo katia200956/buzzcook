@@ -8,9 +8,18 @@ import { useStore } from './store';
 const lock = require('../../assets/icons/lock.svg');
 
 // A plain padlock in place of a premium value (calories, audio). Tapping it opens the paywall.
-export function Lock({ label, size = 14, color = 'rgba(255,255,255,0.7)' }: { label?: string; size?: number; color?: string }) {
+// Inside something that is already a button, pass `still` so buttons don't nest.
+export function Lock({ label, size = 14, color = 'rgba(255,255,255,0.7)', still }: { label?: string; size?: number; color?: string; still?: boolean }) {
   const k = useScale();
   const { showPaywall } = useStore();
+  if (still) {
+    return (
+      <View style={[s.lock, { gap: 4 * k }]}>
+        <Image source={lock} style={{ width: size * k, height: size * k }} tintColor={color} />
+        {label ? <Text style={{ fontFamily: font, fontSize: (size + 2) * k, color }}>{label}</Text> : null}
+      </View>
+    );
+  }
   return (
     <Pressable
       onPress={() => showPaywall(true)}
@@ -26,7 +35,7 @@ export function Lock({ label, size = 14, color = 'rgba(255,255,255,0.7)' }: { la
 }
 
 const perks: [string, string][] = [
-  ['калорії', 'ккал і білки, жири, вуглеводи для кожної страви та дня'],
+  ['калорії', 'щоденник їжі за день, ккал і білки, жири, вуглеводи для кожної страви'],
   ['аудіо', 'озвучення кроків, поки руки зайняті готуванням'],
 ];
 

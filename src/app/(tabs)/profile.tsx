@@ -5,7 +5,9 @@ import { Page } from '../../components/Page';
 import { Plate } from '../../components/Plate';
 import { Lock } from '../../components/Premium';
 import { useScale } from '../../components/scale';
+import { NormCard } from '../../components/ProfileForm';
 import { ThemeMode, useStore } from '../../components/store';
+import { ALLERGIES, DIETS } from '../../data/profile';
 import { byId } from '../../data';
 import { font, fontMedium, sage, useTheme } from '../../theme';
 
@@ -18,7 +20,7 @@ const themes: [ThemeMode, string][] = [
 export default function Profile() {
   const k = useScale();
   const t = useTheme();
-  const { saved, themeMode, setThemeMode, user, signOut, premium, showPaywall } = useStore();
+  const { saved, themeMode, setThemeMode, user, signOut, premium, showPaywall, profile } = useStore();
   const txt = { fontFamily: font, fontSize: 20 * k, lineHeight: 24 * k, color: t.text };
   const list = saved.map(byId).filter((r) => !!r);
 
@@ -41,6 +43,19 @@ export default function Profile() {
         </Glass>
       </Pressable>
 
+      <Text style={[txt, { opacity: 0.6, marginTop: 20 * k }]}>про тебе</Text>
+      <NormCard p={profile} />
+      {(profile.diets.length > 0 || profile.allergies.length > 0) && (
+        <Text style={[txt, { marginTop: 8 * k }]}>
+          {[...DIETS.filter(([d]) => profile.diets.includes(d)).map(([, l]) => l), ...ALLERGIES.filter(([a]) => profile.allergies.includes(a)).map(([, l]) => `без: ${l}`)].join(' · ')}
+        </Text>
+      )}
+      <Pressable onPress={() => router.push('/onboarding?edit=1')} accessibilityRole="button" style={{ alignSelf: 'flex-start', marginTop: 8 * k }}>
+        <Glass radius={100} style={{ paddingHorizontal: 16 * k, height: 34 * k, justifyContent: 'center' }}>
+          <Text style={txt}>змінити дані</Text>
+        </Glass>
+      </Pressable>
+
       <Text style={[txt, { opacity: 0.6, marginTop: 20 * k, marginBottom: 8 * k }]}>premium</Text>
       <Pressable onPress={() => showPaywall(true)} accessibilityRole="button" style={{ flexDirection: 'row', alignItems: 'center', gap: 10 * k }}>
         {premium ? (
@@ -48,7 +63,7 @@ export default function Profile() {
             <Text style={[txt, { color: '#FFFFFF' }]}>увімкнено</Text>
           </View>
         ) : (
-          <Lock size={16} color={t.text} />
+          <Lock still size={16} color={t.text} />
         )}
         <Text style={[txt, { flex: 1 }]}>калорії та аудіо кроків</Text>
       </Pressable>

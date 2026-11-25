@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { font, fontMedium, sage } from '../theme';
+import { SavedBadge } from './Cost';
 import { Glass } from './Glass';
 import { Plaque } from './Plaque';
 import { useScale } from './scale';
@@ -24,6 +25,9 @@ export function Header({
   const { premium, showPaywall } = useStore();
 
   return (
+    <>
+    {/* The money saved so far, glowing quietly under the menu button on every main screen. */}
+    <SavedBadge top={top + 60 * k} right={18 * k} />
     <View style={[s.row, { top, left: 18 * k, width: 368 * k, height: 52 * k }]} pointerEvents="box-none">
       {/* Premium calorie diary in the black ring circle (where the logo was). On free it carries a lock and opens the paywall. */}
       <Pressable
@@ -63,6 +67,7 @@ export function Header({
         </Glass>
       </Pressable>
     </View>
+    </>
   );
 }
 

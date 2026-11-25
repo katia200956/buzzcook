@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { Platform } from 'react-native';
 import { byId, DAYS, weekDates, weekKey } from '../data';
 import { haveOf, INGREDIENTS, needsOf, slotId } from '../data/pantry';
-import { uah } from '../data/prices';
+import { currentPlace, uah } from '../data/prices';
 import { DINNER } from '../data/weekplan';
 import { useStore } from './store';
 
@@ -77,7 +77,7 @@ export function useReminders() {
             content: {
               title: 'Підсумок тижня',
               body: dinners
-                ? `${dinners} вечер${dinners === 1 ? 'я' : dinners < 5 ? 'і' : 'ь'} вдома замість доставки: ${uah(saved)} зекономлено.`
+                ? `${dinners} вечер${dinners === 1 ? 'я' : dinners < 5 ? 'і' : 'ь'} вдома ${currentPlace().instead}: ${uah(saved)} зекономлено.`
                 : 'Цього тижня ще жодної вечері вдома. Подивись план на наступний.',
               data: { url: '/plan' },
             },

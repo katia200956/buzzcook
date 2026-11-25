@@ -11,17 +11,18 @@ import { useScale } from '../components/scale';
 import { useStore } from '../components/store';
 import { byId } from '../data';
 import { dailyNorm } from '../data/profile';
-import { deliveryPrice, portionCost, uah } from '../data/prices';
+import { currentPlace, outPrice, PLACES, portionCost, uah } from '../data/prices';
 import { BUDGETS, TIMES } from '../data/weekplan';
 import { font, fontMedium, sage, useTheme } from '../theme';
 
-// First launch: three questions and the week's dinners are ready, about a minute in all.
+// First launch: four questions and the week's dinners are ready, about a minute in all.
 // The calorie questions wait in the profile for whoever wants them.
 const START = [
-  { title: 'вечеря за хвилину', sub: 'три питання, і план вечерь на тиждень готовий. дешевше за доставку, і нічого не пропадає.' },
+  { title: 'вечеря за хвилину', sub: 'чотири питання, і план вечерь на тиждень готовий. дешевше за доставку, і нічого не пропадає.' },
   { title: 'скільки на тиждень?', sub: 'бюджет на продукти для вечерь, для тебе одного. я вкладу план у цю суму.' },
   { title: 'чого не їси?', sub: 'страви з цим зникнуть зовсім. можна нічого не вибирати.' },
   { title: 'скільки часу на вечерю?', sub: 'разом із нарізкою і готуванням.' },
+  { title: 'а коли не готуєш?', sub: 'де ти зазвичай їси. з цим я порівнюватиму, скільки ти зекономив.' },
   { title: 'твій тиждень', sub: 'страва на дві порції — це вечеря сьогодні і завтра. будь-яку можна замінити в плані.' },
 ];
 
@@ -135,6 +136,13 @@ export default function Onboarding() {
                     ))}
                   </View>
                 )}
+                {step === 4 && (
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 * k, marginTop: 24 * k }}>
+                    {PLACES.map((p) => (
+                      <Chip key={p.id} on={profile.eatOut === p.id} label={p.label} onPress={() => setProfile({ eatOut: p.id })} />
+                    ))}
+                  </View>
+                )}
                 {week && (
                   <View style={{ marginTop: 20 * k, gap: 6 * k }}>
                     {week.plan.length === 0 && (
@@ -157,7 +165,7 @@ export default function Onboarding() {
                       <Glass radius={15} style={{ padding: 16 * k, marginTop: 12 * k }}>
                         <Text style={[txt, { fontFamily: fontMedium, fontSize: 26 * k }]}>продукти ≈ {uah(week.cost)}</Text>
                         <Text style={[txt, { fontSize: 19 * k }]}>
-                          у доставці ці {week.dinners} вечер{week.dinners < 5 ? 'і' : 'ь'} коштували б ≈ {uah(week.plan.reduce((a, p) => a + deliveryPrice(p.recipe), 0))}
+                          {currentPlace().at} ці {week.dinners} вечер{week.dinners < 5 ? 'і' : 'ь'} коштували б ≈ {uah(week.plan.reduce((a, p) => a + outPrice(p.recipe), 0))}
                         </Text>
                         <Text style={[txt, { fontSize: 19 * k, color: sage }]}>економія ≈ {uah(week.saved)}</Text>
                         {week.fromFridge.length > 0 && (

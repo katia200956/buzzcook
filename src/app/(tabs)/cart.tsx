@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
-import { KeyboardAvoidingView, LayoutAnimation, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, LayoutAnimation, Platform, Pressable, Share, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Glass } from '../../components/Glass';
 import { Page } from '../../components/Page';
 import { ReceiptSheet } from '../../components/Receipt';
@@ -10,6 +10,8 @@ import { useScale } from '../../components/scale';
 import { useStore } from '../../components/store';
 import { dayKey } from '../../data';
 import { expiryLabel, FridgeItem, fmtQty, guessKey, INGREDIENTS, Section, SECTIONS, ShopItem, Unit } from '../../data/pantry';
+import { uah } from '../../data/prices';
+import { itemKcal, itemPrice, shareText, totals } from '../../data/shoplist';
 import { font, fontMedium, sage, useTheme } from '../../theme';
 
 const white = '#FFFFFF';
@@ -78,7 +80,7 @@ function Button({ label, onPress, ghost }: { label: string; onPress: () => void;
 function FridgeList() {
   const k = useScale();
   const t = useTheme();
-  const { fridge, addFridge } = useStore();
+  const { fridge, addFridge, premium, showPaywall } = useStore();
   const [edit, setEdit] = useState<FridgeItem | 'new' | null>(null);
   const [scan, setScan] = useState(false);
   const [receipt, setReceipt] = useState(false);
@@ -101,7 +103,7 @@ function FridgeList() {
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 * k, marginTop: 12 * k }}>
         <Button label="+ додати" onPress={() => setEdit('new')} />
         <Button label="▥ штрихкод" ghost onPress={() => setScan(true)} />
-        <Button label="чек" ghost onPress={() => setReceipt(true)} />
+        <Button label="чек" ghost onPress={() => (premium ? setReceipt(true) : showPaywall(true))} />
       </View>
 
       {!fridge.length && (
@@ -302,9 +304,16 @@ function ItemSheet({ item, onClose }: { item: FridgeItem | 'new' | null; onClose
 function ShopList() {
   const k = useScale();
   const t = useTheme();
-  const { shop, makeList, toggleShop, addShop, removeShop } = useStore();
+  const { shop, makeList, toggleShop, addShop, removeShop, premium, showPaywall } = useStore();
   const [week, setWeek] = useState<0 | 1>(0);
   const [typed, setTyped] = useState('');
+  const [receipt, setReceipt] = useState(false);
+  const sum = totals(shop);
+  const share = () => {
+    buzz();
+    // The system share sheet lists Telegram, Viber, WhatsApp, Messages and the rest.
+    Share.share({ message: shareText(shop) }).catch(() => {});
+  };
   const txt = { fontFamily: font, fontSize: 20 * k, lineHeight: 26 * k, color: t.text };
   const left = shop.filter((x) => !x.done).length;
   const bought = shop.length - left;
@@ -343,6 +352,28 @@ function ShopList() {
         страви, які ще попереду, мінус те, що вже є в холодильнику
       </Text>
 
+      {shop.length > 0 && (
+        <Glass radius={22} style={{ marginTop: 16 * k, padding: 16 * k, gap: 4 * k }}>
+          <Text style={[txt, { opacity: 0.6, fontSize: 18 * k }]}>{sum.left < sum.all ? 'залишилось купити' : 'тиждень обійдеться'}</Text>
+          <Text style={[txt, { fontFamily: fontMedium, fontSize: 34 * k, lineHeight: 38 * k }]}>~{uah(sum.left)}</Text>
+          {sum.left < sum.all && <Text style={[txt, { fontSize: 16 * k, opacity: 0.6 }]}>увесь список ~{uah(sum.all)}</Text>}
+          {premium ? (
+            sum.kcal > 0 && <Text style={[txt, { fontSize: 16 * k, opacity: 0.6 }]}>у списку ~{Math.round(sum.kcal).toLocaleString('uk-UA')} ккал</Text>
+          ) : (
+            <Pressable onPress={() => showPaywall(true)} accessibilityRole="button" hitSlop={6}>
+              <Text style={[txt, { fontSize: 16 * k, color: sage }]}>калорійність продуктів · Buzzcook+</Text>
+            </Pressable>
+          )}
+          {sum.unpriced > 0 && (
+            <Text style={[txt, { fontSize: 14 * k, lineHeight: 17 * k, opacity: 0.5 }]}>без спецій, олії й того, що дописано вручну</Text>
+          )}
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 * k, marginTop: 8 * k }}>
+            <Button label="поділитися" onPress={share} />
+            <Button label={premium ? 'сфоткати чек' : 'чек · Buzzcook+'} ghost onPress={() => (premium ? setReceipt(true) : showPaywall(true))} />
+          </View>
+        </Glass>
+      )}
+
       {groups.map(([sec, list]) => (
         <View key={sec} style={{ marginTop: 18 * k }}>
           <Text style={[txt, { opacity: 0.6 }]}>{sec}</Text>
@@ -359,8 +390,18 @@ function ShopList() {
                 style={{ flex: 1, flexDirection: 'row', gap: 10 * k, paddingVertical: 3 * k }}
               >
                 <Text style={[txt, { width: 18 * k }]}>{x.done ? '✓' : '○'}</Text>
-                <Text style={[txt, { flex: 1 }, x.done && { opacity: 0.45, textDecorationLine: 'line-through' }]}>{x.name.toLowerCase()}</Text>
-                <Text style={[txt, { opacity: x.done ? 0.45 : 0.8 }]}>{fmtQty(x.qty, x.unit)}</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={[txt, x.done && { opacity: 0.45, textDecorationLine: 'line-through' }]}>{x.name.toLowerCase()}</Text>
+                  {premium && itemKcal(x) !== null && (
+                    <Text style={[txt, { fontSize: 14 * k, lineHeight: 17 * k, opacity: 0.5 }]}>~{itemKcal(x)} ккал</Text>
+                  )}
+                </View>
+                <View style={{ alignItems: 'flex-end' }}>
+                  <Text style={[txt, { opacity: x.done ? 0.45 : 0.8 }]}>{fmtQty(x.qty, x.unit)}</Text>
+                  {itemPrice(x) !== null && (
+                    <Text style={[txt, { fontSize: 15 * k, lineHeight: 18 * k, opacity: x.done ? 0.35 : 0.55 }]}>~{uah(itemPrice(x)!)}</Text>
+                  )}
+                </View>
               </Pressable>
               {!x.key && !x.done && (
                 <Pressable onPress={() => removeShop(x.id)} hitSlop={10} accessibilityRole="button" accessibilityLabel={`Видалити: ${x.name}`}>
@@ -388,6 +429,7 @@ function ShopList() {
         style={[txt, { marginTop: 18 * k, height: 40 * k, outlineStyle: 'none' } as any]}
       />
       {bought > 0 && <Text style={[txt, { fontSize: 16 * k, opacity: 0.6, marginTop: 6 * k }]}>куплене вже в холодильнику</Text>}
+      <ReceiptSheet open={receipt} onClose={() => setReceipt(false)} />
     </>
   );
 }

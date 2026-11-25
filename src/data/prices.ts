@@ -18,7 +18,7 @@ const PRICE: Record<string, number> = {
   buckwheat: 60, bulgur: 90, lentils: 110, beans: 80, lavash: 18, ricenoodles: 240,
 };
 
-const lineCost = (key: string, n: number) => {
+export const lineCost = (key: string, n: number) => {
   const ing = INGREDIENTS[key];
   if (!ing) return 0;
   if (ing.unit === 'є') return STAPLE;

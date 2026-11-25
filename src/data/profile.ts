@@ -1,3 +1,4 @@
+import type { Place } from './prices';
 // The person behind the plan: body numbers for the calorie norm, and what they can't or won't eat.
 export type Sex = 'f' | 'm';
 export type Activity = 'rest' | 'light' | 'mid' | 'high' | 'max';
@@ -16,9 +17,10 @@ export type Profile = {
   allergies: Allergy[];
   budget: number; // hryvnias a week for dinners
   maxTime: number; // minutes a dish may take, 0 = no limit
+  eatOut: Place; // where they eat when they don't cook: what the savings are counted against
 };
 
-export const emptyProfile: Profile = { activity: 'light', aim: 'keep', diets: [], allergies: [], budget: 600, maxTime: 40 };
+export const emptyProfile: Profile = { activity: 'light', aim: 'keep', diets: [], allergies: [], budget: 600, maxTime: 40, eatOut: 'delivery' };
 
 export const ACTIVITY: [Activity, string, string, number][] = [
   ['rest', 'мало руху', 'сидяча робота, без спорту', 1.2],

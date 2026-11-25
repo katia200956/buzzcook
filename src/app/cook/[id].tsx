@@ -14,7 +14,7 @@ import { StageScene } from '../../components/StageScene';
 import { StepVideo } from '../../components/StepVideo';
 import { PhotoFx } from '../../components/PhotoFx';
 import { byId, img, nextInPlan, photoStep, stepClip, stepCutout } from '../../data';
-import { uah } from '../../data/prices';
+import { placeOf, uah } from '../../data/prices';
 import { SavingsCard } from '../../components/Savings';
 import { stepScene } from '../../data/scenes';
 import { font, fontMedium, ForceDark, useTheme } from '../../theme';
@@ -216,7 +216,7 @@ function Cook() {
               <Text style={txt}>{r.name.toLowerCase()} готовий.</Text>
               {mine && (
                 <Text style={[txt, { textAlign: 'center' }]}>
-                  у доставці ≈ {uah(mine.delivery)}, вдома ≈ {uah(mine.home)}
+                  {placeOf(mine.place ?? 'delivery').at} ≈ {uah(mine.delivery)}, вдома ≈ {uah(mine.home)}
                   {mine.portions > 1 ? ` за ${mine.portions} порції` : ''}.
                 </Text>
               )}

@@ -14,8 +14,12 @@ RANDOM_SEED = 2026  # однаковий набір ресторанів при 
 
 OVERPASS_URLS = [
     "https://overpass-api.de/api/interpreter",
+    "https://overpass.private.coffee/api/interpreter",
+    "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
     "https://overpass.kumi.systems/api/interpreter",
 ]
+OVERPASS_ROUNDS = 3          # скільки разів пройти по всіх серверах
+OVERPASS_WAIT = [30, 90]     # пауза між колами, секунд
 
 USER_AGENT = "BuzzcookMenuBot/0.1 (test research; respects robots.txt)"
 REQUEST_TIMEOUT = 20          # секунд на один запит

@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 import logging
 import random
+import time
 
 from . import config, http
 
@@ -35,17 +36,26 @@ def _first(tags: dict, keys: list[str]) -> str:
 
 
 def fetch_all() -> list[dict]:
+    """Пробує кілька безкоштовних серверів Overpass по черзі, кілька кіл з паузою.
+    Сервери часто перевантажені (502/504), тому один збій не означає, що дані недоступні."""
     last_err = None
-    for url in config.OVERPASS_URLS:
-        try:
-            r = http.post(url, {"data": QUERY})
-            r.raise_for_status()
-            elements = r.json().get("elements", [])
-            log.info("Overpass %s: %d закладів", url, len(elements))
-            return elements
-        except Exception as e:  # noqa: BLE001
-            last_err = e
-            log.warning("Overpass %s не відповів: %s", url, e)
+    for round_no in range(config.OVERPASS_ROUNDS):
+        for url in config.OVERPASS_URLS:
+            try:
+                r = http.post(url, {"data": QUERY})
+                r.raise_for_status()
+                elements = r.json().get("elements", [])
+                if not elements:
+                    raise ValueError("порожня відповідь")
+                log.info("Overpass %s: %d закладів", url, len(elements))
+                return elements
+            except Exception as e:  # noqa: BLE001
+                last_err = e
+                log.warning("Overpass %s не відповів: %s", url, e)
+        if round_no < config.OVERPASS_ROUNDS - 1:
+            wait = config.OVERPASS_WAIT[min(round_no, len(config.OVERPASS_WAIT) - 1)]
+            log.info("Усі сервери зайняті, чекаю %d с і пробую ще раз...", wait)
+            time.sleep(wait)
     raise RuntimeError(f"OpenStreetMap недоступний: {last_err}")
 
 

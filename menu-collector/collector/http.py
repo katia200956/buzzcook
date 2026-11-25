@@ -75,4 +75,4 @@ def get(url: str, stream: bool = False, check_robots: bool = True) -> requests.R
 
 def post(url: str, data: dict) -> requests.Response:
     _wait(url)
-    return _session.post(url, data=data, timeout=180)
+    return _session.post(url, data=data, timeout=(15, 120))

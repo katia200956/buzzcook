@@ -4,7 +4,7 @@ import { Animated, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Plate } from '../components/Plate';
 import { Glass } from '../components/Glass';
-import { BodyFields, Chip, FoodFields, GoalFields, NormCard } from '../components/ProfileForm';
+import { BodyFields, Chip, FoodFields, GoalFields, MealTimeFields, NormCard } from '../components/ProfileForm';
 import { askReminders } from '../components/reminders';
 import { Screen } from '../components/Screen';
 import { useScale } from '../components/scale';
@@ -22,6 +22,7 @@ const START = [
   { title: 'скільки на тиждень?', sub: 'бюджет на продукти для вечерь, для тебе одного. я вкладу план у цю суму.' },
   { title: 'чого не їси?', sub: 'страви з цим зникнуть зовсім. можна нічого не вибирати.' },
   { title: 'скільки часу на вечерю?', sub: 'разом із нарізкою і готуванням.' },
+  { title: 'коли ти їси?', sub: 'перед кожною їжею нагадаю, що готувати. а о 17:00 напишу, що купити на завтра. змінити можна в профілі.' },
   { title: 'твій тиждень', sub: 'страва на дві порції — це вечеря сьогодні і завтра. будь-яку можна замінити в плані.' },
 ];
 
@@ -135,6 +136,7 @@ export default function Onboarding() {
                     ))}
                   </View>
                 )}
+                {step === 4 && <MealTimeFields />}
                 {week && (
                   <View style={{ marginTop: 20 * k, gap: 6 * k }}>
                     {week.plan.length === 0 && (
@@ -166,7 +168,7 @@ export default function Onboarding() {
                       </Glass>
                     )}
                     <View style={{ flexDirection: 'row', marginTop: 12 * k }}>
-                      <Chip on={remind} label="нагадувати о 17:00, що на вечерю" onPress={() => setRemindLocal(!remind)} />
+                      <Chip on={remind} label="нагадувати, що готувати і що купити" onPress={() => setRemindLocal(!remind)} />
                     </View>
                   </View>
                 )}

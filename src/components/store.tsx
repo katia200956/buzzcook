@@ -52,7 +52,7 @@ type State = {
   skipped: Record<string, number>;
   bought: Record<string, number>;
   savings: Saving[];
-  remind: boolean; // the 17:00 reminder and the Sunday summary
+  remind: boolean; // all reminders: before each meal, the evening shopping one and the Sunday summary
 };
 
 type Store = State & {

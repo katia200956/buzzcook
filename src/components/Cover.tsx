@@ -3,6 +3,7 @@ import { Pressable, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 import { img, plateCutout, Recipe } from '../data';
 import { portionCost, uah } from '../data/prices';
+import { swipeRecipe } from '../data/swipe';
 import { display, font, fontMedium, shelf, useTheme } from '../theme';
 import { Plate } from './Plate';
 import { useScale } from './scale';
@@ -13,6 +14,10 @@ import { useScale } from './scale';
 export function Dish({ recipe, size }: { recipe: Recipe; size: number }) {
   const cut = plateCutout(recipe.id);
   const photo = img(recipe.img);
+  // Photo-swipe recipes show the very plate their recipe ends with. It is shot on the same dark grey
+  // as the strip and tiles, so the frame melts into them; crop to the square around the plate.
+  const hero = swipeRecipe(recipe.id)?.hero;
+  if (hero) return <Image source={hero} style={{ width: size, height: size, transform: [{ scale: 1.12 }] }} contentFit="cover" contentPosition="center" transition={200} />;
   if (cut) return <Image source={cut} style={{ width: size, height: size, transform: [{ scale: 0.9 }] }} contentFit="contain" transition={200} />;
   if (!photo) return <Plate recipe={recipe} size={size} />;
   // The studio photos have a white background around a round plate: crop to the plate itself.

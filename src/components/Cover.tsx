@@ -16,6 +16,16 @@ export function Dish({ recipe, size }: { recipe: Recipe; size: number }) {
   const photo = img(recipe.img);
   // Photo-swipe recipes show the very plate their recipe ends with. It is shot on the same dark grey
   // as the strip and tiles, so the frame melts into them; crop to the square around the plate.
+  // A background-free plate of the photo recipe's last frame, where we have one: it lies on any
+  // background with its own shadow, like the cut-out dishes.
+  const own = HERO_CUT[recipe.id];
+  if (own)
+    return (
+      <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
+        <View style={{ position: 'absolute', width: size * 0.94, height: size * 0.94, borderRadius: size, backgroundColor: '#000', opacity: 0.35, transform: [{ translateY: size * 0.035 }], boxShadow: `0px ${size * 0.04}px ${size * 0.08}px rgba(0,0,0,0.9)` } as any} />
+        <Image source={own} style={{ width: size, height: size }} contentFit="contain" transition={200} />
+      </View>
+    );
   const hero = swipeRecipe(recipe.id)?.hero;
   if (hero) return <Image source={hero} style={{ width: size, height: size, transform: [{ scale: 1.12 }] }} contentFit="cover" contentPosition="center" transition={200} />;
   if (cut) return <Image source={cut} style={{ width: size, height: size, transform: [{ scale: 0.9 }] }} contentFit="contain" transition={200} />;
@@ -29,6 +39,10 @@ export function Dish({ recipe, size }: { recipe: Recipe; size: number }) {
     </View>
   );
 }
+
+const HERO_CUT: Record<string, number> = {
+  pasta: require('../../assets/recipes/pasta/cut.png'),
+};
 
 const LEVEL: Record<string, number> = { легко: 1, середньо: 3, складно: 5 };
 

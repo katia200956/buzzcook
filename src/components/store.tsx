@@ -55,7 +55,7 @@ type State = {
   savings: Saving[];
   myPrices: Record<string, number>; // ingredient prices the person typed in, per kg / litre / piece
   myOut: Record<string, number>; // what one portion of a dish costs them out, typed in
-  remind: boolean; // the 17:00 reminder and the Sunday summary
+  remind: boolean; // all reminders: before each meal, the evening shopping one and the Sunday summary
 };
 
 type Store = State & {

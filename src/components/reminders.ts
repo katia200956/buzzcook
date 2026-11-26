@@ -1,18 +1,22 @@
 import * as Notifications from 'expo-notifications';
 import { useEffect } from 'react';
 import { Platform } from 'react-native';
-import { byId, DAYS, weekDates, weekKey } from '../data';
-import { haveOf, INGREDIENTS, needsOf, slotId } from '../data/pantry';
+import { byId, DAYS, dayKey, MEALS, weekDates, weekKey } from '../data';
+import { buildList, haveOf, needOf, slotId } from '../data/pantry';
 import { currentPlace, uah } from '../data/prices';
-import { DINNER } from '../data/weekplan';
+import { DEFAULT_MEAL_TIMES, hhmm } from '../data/profile';
 import { useStore } from './store';
 
-// One reminder a day at 17:00, when people start thinking about ordering delivery, naming
-// tonight's dinner; and a Sunday 19:00 summary of what the week saved. Local notifications only
-// (they work in Expo Go too). Everything is rescheduled whenever the plan, fridge or savings change,
-// so the texts stay true.
+// Three kinds of local notifications (they work in Expo Go too), each its own message:
+// - before every planned meal, an hour or an hour and a half ahead (the person picks), naming the dish;
+//   a tap opens the recipe with everything it needs;
+// - at 17:00, what to buy for tomorrow's meals that is not at home; a tap opens the shopping list;
+// - on Sunday at 19:00, what the week saved.
+// Everything is rescheduled whenever the plan, fridge, meal times or savings change, so the texts stay true.
 const ON = Platform.OS !== 'web';
 const TAG = 'buzzcook';
+const SHOP_HOUR = 17;
+const DAYS_AHEAD = 7; // iOS keeps at most 64 scheduled; 7 days × (3 meals + 1) + 1 stays well under
 
 if (ON) {
   Notifications.setNotificationHandler({
@@ -33,16 +37,35 @@ async function cancelOurs() {
   await Promise.all(all.filter((n) => n.identifier.startsWith(TAG)).map((n) => Notifications.cancelScheduledNotificationAsync(n.identifier)));
 }
 
-const at = (d: Date, h: number) => {
+const at = (d: Date, minutes: number) => {
   const x = new Date(d);
-  x.setHours(h, 0, 0, 0);
+  x.setHours(0, minutes, 0, 0);
   return x;
 };
+const dayName = (d: Date) => DAYS[(d.getDay() + 6) % 7];
+const MEAL_WORD: Record<string, string> = { Сніданок: 'сніданок', Обід: 'обід', Вечеря: 'вечеря' };
+const leadWords = (m: number) => (m === 90 ? 'півтори години' : m === 60 ? 'годину' : `${m} хв`);
+
+// "Через годину вечеря: паста з куркою" / body says when to start so it is ready on time.
+export function mealText(meal: string, recipe: { name: string; total: number }, mealAt: number, lead: number) {
+  const startAt = mealAt - recipe.total;
+  return {
+    title: `Через ${leadWords(lead)} ${MEAL_WORD[meal] ?? meal.toLowerCase()}: ${recipe.name.toLowerCase()}`,
+    body: `${recipe.total} хв. Почни о ${hhmm(Math.max(0, startAt))}, щоб встигнути до ${hhmm(mealAt)}. Що треба, є в рецепті.`,
+  };
+}
+
+// "Купи на завтра: сметана, яйця, кріп" or nothing when everything is at home.
+export function shopText(names: string[]) {
+  const shown = names.slice(0, 4).join(', ');
+  const more = names.length > 4 ? ` і ще ${names.length - 4}` : '';
+  return { title: 'Купи на завтра', body: `${shown}${more}. Відкрий список, там кількість.` };
+}
 
 export function useReminders() {
-  const { ready, remind, plan, cooked, fridge, savings, savedSince } = useStore();
-  const w = weekKey(0);
-  const done = cooked[w];
+  const { ready, remind, planOf, plans, cooked, fridge, savings, savedSince, profile } = useStore();
+  const times = { ...DEFAULT_MEAL_TIMES, ...profile.mealTimes };
+  const lead = profile.lead || 60;
 
   useEffect(() => {
     if (!ON || !ready) return;
@@ -51,25 +74,46 @@ export function useReminders() {
         await cancelOurs();
         if (!remind) return;
         const now = new Date();
-        const dates = weekDates(0);
-        for (let i = 0; i < DAYS.length; i++) {
-          const when = at(dates[i], 17);
-          if (when <= now) continue;
-          const p = plan.find((x) => x.day === DAYS[i] && x.meal === DINNER) ?? plan.find((x) => x.day === DAYS[i]);
-          const r = p && byId(p.recipe);
-          if (!p || !r || (done ?? []).includes(slotId(p))) continue;
-          const missing = needsOf(r.id).filter(([key, n]) => INGREDIENTS[key] && INGREDIENTS[key].unit !== 'є' && haveOf(fridge, key) < n - 0.01).length;
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const dayMeals = (d: Date) => {
+          const w = weekKey(0, d);
+          const done = cooked[w] ?? [];
+          return planOf(w).filter((p) => p.day === dayName(d) && !done.includes(slotId(p)) && byId(p.recipe));
+        };
+
+        for (let i = 0; i <= DAYS_AHEAD; i++) {
+          const d = new Date(today);
+          d.setDate(d.getDate() + i);
+
+          // Before each meal of this day.
+          for (const p of dayMeals(d)) {
+            const r = byId(p.recipe)!;
+            const mealAt = times[p.meal] ?? DEFAULT_MEAL_TIMES.Вечеря;
+            const when = at(d, mealAt - lead);
+            if (when <= now) continue;
+            await Notifications.scheduleNotificationAsync({
+              identifier: `${TAG}-meal-${dayKey(d)}-${MEALS.indexOf(p.meal)}`,
+              content: { ...mealText(p.meal, r, mealAt, lead), data: { url: `/recipe/${r.id}` } },
+              trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: when },
+            });
+          }
+
+          // At 17:00, what tomorrow's meals still need.
+          const shopAt = at(d, SHOP_HOUR * 60);
+          if (shopAt <= now || i === DAYS_AHEAD) continue;
+          const next = new Date(d);
+          next.setDate(next.getDate() + 1);
+          const missing = buildList(needOf(dayMeals(next)), (key) => haveOf(fridge, key)).map((x) => x.name.toLowerCase());
+          if (missing.length === 0) continue;
           await Notifications.scheduleNotificationAsync({
-            identifier: `${TAG}-day-${i}`,
-            content: {
-              title: `Сьогодні в плані: ${r.name.toLowerCase()}`,
-              body: `${r.total} хв. ${missing ? `Треба докупити ${missing} ${missing === 1 ? 'продукт' : 'продукти'}.` : 'Усе є в холодильнику.'}`,
-              data: { url: `/recipe/${r.id}` },
-            },
-            trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: when },
+            identifier: `${TAG}-shop-${dayKey(d)}`,
+            content: { ...shopText(missing), data: { url: '/cart' } },
+            trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: shopAt },
           });
         }
-        const sunday = at(dates[6], 19);
+
+        const dates = weekDates(0);
+        const sunday = at(dates[6], 19 * 60);
         if (sunday > now) {
           const { saved, dinners } = savedSince(at(dates[0], 0).getTime());
           await Notifications.scheduleNotificationAsync({
@@ -89,9 +133,9 @@ export function useReminders() {
       }
     }, 800);
     return () => clearTimeout(timer);
-    // savedSince reads savings, which is listed.
+    // planOf reads plans and savedSince reads savings, both listed; times are listed by value.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready, remind, plan, done, fridge, savings, w]);
+  }, [ready, remind, plans, cooked, fridge, savings, times.Сніданок, times.Обід, times.Вечеря, lead]);
 }
 
 // Opens the screen a tapped reminder points to.

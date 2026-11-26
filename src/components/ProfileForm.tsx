@@ -1,7 +1,8 @@
 import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { ACTIVITY, AIMS, ALLERGIES, dailyNorm, DIETS, macroNorm, Profile } from '../data/profile';
+import { MEALS } from '../data';
+import { ACTIVITY, AIMS, ALLERGIES, dailyNorm, DEFAULT_MEAL_TIMES, DIETS, hhmm, LEADS, macroNorm, Profile } from '../data/profile';
 import { font, fontMedium, sage, useTheme } from '../theme';
 import { useScale } from './scale';
 import { useStore } from './store';
@@ -168,6 +169,62 @@ export function FoodFields() {
       <Text style={[st.txt, { fontSize: 15 * st.k, lineHeight: 18 * st.k, color: st.t.textSoft, marginTop: 8 * st.k }]}>
         страви з цим я не показуватиму зовсім. склад перевіряй на упаковці.
       </Text>
+    </View>
+  );
+}
+
+// When each meal is eaten (half-hour steps) and how early its reminder comes.
+const MEAL_RANGE: Record<string, [number, number]> = { Сніданок: [5 * 60, 12 * 60], Обід: [11 * 60, 17 * 60], Вечеря: [16 * 60, 23 * 60] };
+
+export function MealTimeFields() {
+  const st = useStyles();
+  const { k, t } = st;
+  const { profile, setProfile } = useStore();
+  const times = { ...DEFAULT_MEAL_TIMES, ...profile.mealTimes };
+  const set = (meal: string, m: number) => setProfile({ mealTimes: { ...times, [meal]: m } });
+  const btn = { width: 44 * k, height: 44 * k, borderRadius: 22 * k, borderWidth: 1, borderColor: t.textSoft, alignItems: 'center' as const, justifyContent: 'center' as const };
+  return (
+    <View style={{ marginTop: 10 * k }}>
+      {MEALS.map((meal) => {
+        const [lo, hi] = MEAL_RANGE[meal];
+        const m = times[meal];
+        return (
+          <View key={meal} style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 8 * k }}>
+            <Text style={[st.txt, { flex: 1 }]}>{meal.toLowerCase()}</Text>
+            <Pressable
+              onPress={() => {
+                buzz();
+                set(meal, Math.max(lo, m - 30));
+              }}
+              accessibilityRole="button"
+              accessibilityLabel={`${meal} раніше`}
+              style={btn}
+            >
+              <Text style={[st.txt, { fontSize: 26 * k, lineHeight: 28 * k }]}>−</Text>
+            </Pressable>
+            <Text style={[st.txt, { fontFamily: fontMedium, fontSize: 26 * k, width: 86 * k, textAlign: 'center' }]} accessibilityLabel={`${meal} о ${hhmm(m)}`}>
+              {hhmm(m)}
+            </Text>
+            <Pressable
+              onPress={() => {
+                buzz();
+                set(meal, Math.min(hi, m + 30));
+              }}
+              accessibilityRole="button"
+              accessibilityLabel={`${meal} пізніше`}
+              style={btn}
+            >
+              <Text style={[st.txt, { fontSize: 26 * k, lineHeight: 28 * k }]}>+</Text>
+            </Pressable>
+          </View>
+        );
+      })}
+      <Text style={st.label}>нагадувати про страву</Text>
+      <View style={{ flexDirection: 'row', gap: 8 * k }}>
+        {LEADS.map(([m, label]) => (
+          <Chip key={m} on={(profile.lead || 60) === m} label={label} onPress={() => setProfile({ lead: m })} />
+        ))}
+      </View>
     </View>
   );
 }

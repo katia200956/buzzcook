@@ -18,9 +18,18 @@ export type Profile = {
   budget: number; // hryvnias a week for dinners
   maxTime: number; // minutes a dish may take, 0 = no limit
   eatOut: Place; // where they eat when they don't cook: what the savings are counted against
+  mealTimes: Record<string, number>; // when each meal is eaten, minutes after midnight, keyed by MEALS
+  lead: number; // minutes before a meal its reminder comes: 60 or 90
 };
 
-export const emptyProfile: Profile = { activity: 'light', aim: 'keep', diets: [], allergies: [], budget: 600, maxTime: 40, eatOut: 'delivery' };
+export const DEFAULT_MEAL_TIMES: Record<string, number> = { Сніданок: 8 * 60, Обід: 13 * 60, Вечеря: 19 * 60 };
+export const LEADS: [number, string][] = [
+  [60, 'за годину'],
+  [90, 'за півтори'],
+];
+export const hhmm = (m: number) => `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`;
+
+export const emptyProfile: Profile = { activity: 'light', aim: 'keep', diets: [], allergies: [], budget: 600, maxTime: 40, eatOut: 'delivery', mealTimes: DEFAULT_MEAL_TIMES, lead: 60 };
 
 export const ACTIVITY: [Activity, string, string, number][] = [
   ['rest', 'мало руху', 'сидяча робота, без спорту', 1.2],

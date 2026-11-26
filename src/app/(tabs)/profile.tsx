@@ -5,7 +5,7 @@ import { Page } from '../../components/Page';
 import { Plate } from '../../components/Plate';
 import { Lock } from '../../components/Premium';
 import { useScale } from '../../components/scale';
-import { Chip, NormCard } from '../../components/ProfileForm';
+import { Chip, MealTimeFields, NormCard } from '../../components/ProfileForm';
 import { SavingsCard } from '../../components/Savings';
 import { askReminders } from '../../components/reminders';
 import { PLACES, uah } from '../../data/prices';
@@ -55,13 +55,19 @@ export default function Profile() {
           <Chip key={p.id} on={profile.eatOut === p.id} label={p.label} onPress={() => setProfile({ eatOut: p.id })} />
         ))}
       </View>
-      <View style={{ flexDirection: 'row', marginTop: 10 * k }}>
+
+      <Text style={[txt, { opacity: 0.6, marginTop: 20 * k, marginBottom: 8 * k }]}>нагадування</Text>
+      <View style={{ flexDirection: 'row' }}>
         <Chip
           on={remind}
-          label="нагадування о 17:00 і підсумок у неділю"
+          label={remind ? 'увімкнено' : 'вимкнено'}
           onPress={async () => setRemind(remind ? false : await askReminders().catch(() => false))}
         />
       </View>
+      <Text style={[txt, { fontSize: 17 * k, color: t.textSoft, marginTop: 6 * k }]}>
+        перед кожною їжею, що готувати; о 17:00, що купити на завтра; у неділю, скільки зекономлено.
+      </Text>
+      <MealTimeFields />
 
       <Text style={[txt, { opacity: 0.6, marginTop: 20 * k, marginBottom: 8 * k }]}>акаунт</Text>
       <Text style={txt}>{user ? `увійшла через ${user.name}` : 'ти ще не увійшла'}</Text>

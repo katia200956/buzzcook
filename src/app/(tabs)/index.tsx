@@ -38,7 +38,7 @@ export default function Home() {
 
   // Shelves, each from the ranked feed so the best match always comes first.
   const top = ranked.slice(0, 6);
-  const photo = ['syrnyky', 'tost', 'pasta'].map((id) => recipes.find((r) => r.id === id)).filter((r) => !!r && !!swipeRecipe(r.id)) as Recipe[];
+  const photo = ['syrnyky', 'tost', 'pasta', 'omlet'].map((id) => recipes.find((r) => r.id === id)).filter((r) => !!r && !!swipeRecipe(r.id)) as Recipe[];
   const quick = ranked.filter(({ r }) => r.total <= 20).map(({ r }) => r);
   const fromHome = ranked
     .map(({ r }) => {

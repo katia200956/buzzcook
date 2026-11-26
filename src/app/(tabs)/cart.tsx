@@ -1,6 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
 import { KeyboardAvoidingView, LayoutAnimation, Platform, Pressable, Share, StyleSheet, Text, TextInput, View } from 'react-native';
+import { FridgeStage } from '../../components/FridgeStage';
 import { Glass } from '../../components/Glass';
 import { Page } from '../../components/Page';
 import { ReceiptSheet } from '../../components/Receipt';
@@ -105,6 +106,8 @@ function FridgeList() {
         <Button label="▥ штрихкод" ghost onPress={() => setScan(true)} />
         <Button label="чек" ghost onPress={() => (premium ? setReceipt(true) : showPaywall(true))} />
       </View>
+
+      <FridgeStage />
 
       {!fridge.length && (
         <Text style={[txt, { opacity: 0.6, marginTop: 16 * k }]}>тут буде все, що є вдома. постав галочку в покупках, і продукт з’явиться тут сам.</Text>

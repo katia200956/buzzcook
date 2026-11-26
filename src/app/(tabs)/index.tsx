@@ -3,7 +3,7 @@ import { ReactNode, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Header } from '../../components/Header';
-import { CoverArt, CoverTile } from '../../components/Cover';
+import { CoverTile, Dish, StripDish } from '../../components/Cover';
 import { Menu } from '../../components/Menu';
 import { Screen } from '../../components/Screen';
 import { useStore } from '../../components/store';
@@ -11,7 +11,7 @@ import { useScale } from '../../components/scale';
 import { Recipe, recipes } from '../../data';
 import { haveOf, needsOf } from '../../data/pantry';
 import { swipeRecipe } from '../../data/swipe';
-import { font, fontMedium, useTheme } from '../../theme';
+import { font, fontMedium, shelf, useTheme } from '../../theme';
 
 const CATS: [string, string][] = [
   ['Сніданок', 'сніданки'],
@@ -51,7 +51,7 @@ export default function Home() {
     .slice(0, 10);
   const liked = recipes.filter((r) => saved.includes(r.id));
   const side = 20 * k;
-  const big = 300 * k;
+  const big = 250 * k;
   const tile = 150 * k;
 
   return (
@@ -61,7 +61,7 @@ export default function Home() {
           <View style={{ paddingHorizontal: side, marginTop: 14 * k }}>
             {found.map(({ r }) => (
               <Pressable key={r.id} onPress={() => router.push(`/recipe/${r.id}`)} style={({ pressed }) => ({ flexDirection: 'row', alignItems: 'center', gap: 12 * k, paddingVertical: 7 * k, opacity: pressed ? 0.6 : 1 })}>
-                <CoverArt recipe={r} size={56 * k} radius={8 * k} />
+                <Dish recipe={r} size={56 * k} />
                 <View style={{ flex: 1, borderBottomWidth: 0.5, borderBottomColor: t.textSoft, paddingBottom: 8 * k }}>
                   <Text numberOfLines={1} style={{ fontFamily: fontMedium, fontSize: 20 * k, color: t.text }}>{r.name}</Text>
                   <Text style={{ fontFamily: font, fontSize: 16 * k, color: t.textSoft }}>
@@ -75,14 +75,14 @@ export default function Home() {
         ) : (
           <>
             <Shelf title="найкраще для тебе" sub="за твоїм профілем і холодильником" band>
-              {top.map(({ r, why }) => (
-                <Feature key={r.id} r={r} width={big} note={why ?? meta(r)} />
+              {top.map(({ r }) => (
+                <StripDish key={r.id} recipe={r} width={big} />
               ))}
             </Shelf>
             {!!photo.length && (
               <Shelf title="нове: фото-рецепти" sub="кожен крок як на фото, з таймерами">
                 {photo.map((r) => (
-                  <CoverTile key={r.id} recipe={r} size={tile * 1.25} sub={meta(r)} />
+                  <CoverTile key={r.id} recipe={r} size={tile} sub={meta(r)} />
                 ))}
               </Shelf>
             )}
@@ -140,8 +140,8 @@ function Shelf({ title, sub, band, children }: { title: string; sub?: string; ba
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        style={band ? { backgroundColor: '#0B0B0B' } : undefined}
-        contentContainerStyle={{ paddingHorizontal: 20 * k, gap: 12 * k, paddingVertical: band ? 16 * k : 0 }}
+        style={band ? { backgroundColor: shelf } : undefined}
+        contentContainerStyle={{ paddingHorizontal: 20 * k, gap: (band ? 28 : 12) * k, paddingVertical: band ? 18 * k : 0 }}
         decelerationRate="fast"
       >
         {children}
@@ -150,23 +150,3 @@ function Shelf({ title, sub, band, children }: { title: string; sub?: string; ba
   );
 }
 
-// The big top card: a wide cover with the reason above it, like the "Top Picks" row.
-function Feature({ r, width, note }: { r: Recipe; width: number; note: string }) {
-  const k = useScale();
-  return (
-    <Pressable onPress={() => router.push(`/recipe/${r.id}`)} accessibilityRole="button" accessibilityLabel={`${r.name}. ${note}`} style={({ pressed }) => ({ width, transform: [{ scale: pressed ? 0.98 : 1 }] })}>
-      <Text numberOfLines={1} style={{ fontFamily: font, fontSize: 15 * k, letterSpacing: 0.8 * k, color: 'rgba(255,255,255,0.6)', marginBottom: 4 * k }}>
-        {note.toUpperCase()}
-      </Text>
-      <View style={{ borderRadius: 14 * k, overflow: 'hidden', backgroundColor: '#1C1C1E' }}>
-        <CoverArt recipe={r} size={width} radius={0} />
-        <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: 14 * k, backgroundColor: 'rgba(17,17,17,0.86)' }}>
-          <Text numberOfLines={1} style={{ fontFamily: fontMedium, fontSize: 26 * k, lineHeight: 28 * k, color: '#FFFFFF' }}>{r.name}</Text>
-          <Text style={{ fontFamily: font, fontSize: 17 * k, color: 'rgba(255,255,255,0.7)' }}>
-            {r.total} хв · {r.kcal} ккал · {r.diff.toLowerCase()}
-          </Text>
-        </View>
-      </View>
-    </Pressable>
-  );
-}

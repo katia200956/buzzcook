@@ -1,4 +1,5 @@
 import { AlumniSansSC_400Regular, AlumniSansSC_500Medium } from '@expo-google-fonts/alumni-sans-sc';
+import { Unbounded_500Medium } from '@expo-google-fonts/unbounded';
 import { useFonts } from 'expo-font';
 import { router, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -13,6 +14,7 @@ export default function RootLayout() {
   const [loaded] = useFonts({
     AlumniSansSC_400Regular,
     AlumniSansSC_500Medium,
+    Unbounded_500Medium,
   });
   if (!loaded) return <View style={{ flex: 1, backgroundColor: '#232323' }} />;
 

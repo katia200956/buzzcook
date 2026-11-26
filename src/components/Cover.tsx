@@ -1,34 +1,82 @@
-import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { Pressable, Text, View } from 'react-native';
+import { Image } from 'expo-image';
 import { img, plateCutout, Recipe } from '../data';
-import { swipeRecipe } from '../data/swipe';
-import { font, fontMedium, useTheme } from '../theme';
+import { portionCost, uah } from '../data/prices';
+import { display, font, fontMedium, shelf, useTheme } from '../theme';
+import { Plate } from './Plate';
 import { useScale } from './scale';
 
-// Album-art style cover for a recipe, as in Apple Music: a square with soft rounded corners.
-// Swipe recipes use their plated hero, cut-out dishes stand on near-black, the rest use their photo.
-export function CoverArt({ recipe, size, radius = 10 }: { recipe: Pick<Recipe, 'id' | 'name'> & { img?: string }; size: number; radius?: number }) {
-  const sw = swipeRecipe(recipe.id);
+// Dishes on the home screen are shown as cut-outs: the background-free plate where there is one,
+// otherwise the round plate cropped from the photo, with a soft shadow. Same size everywhere, so
+// every dish reads at the same scale.
+export function Dish({ recipe, size }: { recipe: Recipe; size: number }) {
   const cut = plateCutout(recipe.id);
-  const photo = recipe.img ? img(recipe.img) : undefined;
-  const src = sw?.hero ?? cut ?? photo;
-  const onBlack = !!(sw || cut);
+  const photo = img(recipe.img);
+  if (cut) return <Image source={cut} style={{ width: size, height: size, transform: [{ scale: 0.9 }] }} contentFit="contain" transition={200} />;
+  if (!photo) return <Plate recipe={recipe} size={size} />;
+  // The studio photos have a white background around a round plate: crop to the plate itself.
   return (
-    <View style={{ width: size, height: size, borderRadius: radius, overflow: 'hidden', backgroundColor: '#1C1C1E', alignItems: 'center', justifyContent: 'center' }}>
-      {src ? (
-        <Image source={src} style={{ width: size, height: size, transform: [{ scale: onBlack ? 0.92 : 1.08 }] }} contentFit={onBlack ? 'contain' : 'cover'} transition={200} />
-      ) : (
-        <Text style={{ fontFamily: fontMedium, fontSize: Math.max(12, size * 0.13), color: '#FFFFFF', textAlign: 'center', paddingHorizontal: size * 0.1 }} numberOfLines={3}>
-          {recipe.name.toLowerCase()}
-        </Text>
-      )}
+    <View style={{ width: size, height: size, borderRadius: size / 2, boxShadow: `0px ${size * 0.05}px ${size * 0.1}px rgba(0,0,0,0.6)` } as any}>
+      <View style={{ width: size, height: size, borderRadius: size / 2, overflow: 'hidden' }}>
+        <Image source={photo} style={{ width: size, height: size, transform: [{ scale: 1.16 }] }} contentFit="cover" transition={200} />
+      </View>
     </View>
   );
 }
 
-// A tile in a horizontal shelf: cover on top, title and a grey subtitle under it.
-export function CoverTile({ recipe, size, sub }: { recipe: Pick<Recipe, 'id' | 'name'> & { img?: string }; size: number; sub?: string }) {
+const LEVEL: Record<string, number> = { легко: 1, середньо: 3, складно: 5 };
+
+// Five little bars, as many lit as the dish is hard.
+export function Level({ diff, color = '#FFFFFF' }: { diff: string; color?: string }) {
+  const k = useScale();
+  const n = LEVEL[diff.toLowerCase()] ?? 1;
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 2 * k }} accessibilityLabel={`складність ${n} з 5`}>
+      {[0, 1, 2, 3, 4].map((i) => (
+        <View key={i} style={{ width: 3 * k, height: (6 + i * 2) * k, borderRadius: 1, backgroundColor: color, opacity: i < n ? 1 : 0.25 }} />
+      ))}
+    </View>
+  );
+}
+
+// One dish on the dark strip: minutes top left, difficulty top right, the cut-out dish, its name
+// under it, and calories and the portion's cost at the bottom.
+export function StripDish({ recipe, width }: { recipe: Recipe; width: number }) {
+  const k = useScale();
+  const soft = 'rgba(255,255,255,0.6)';
+  const meta = { fontFamily: fontMedium, fontSize: 18 * k, lineHeight: 20 * k, color: '#FFFFFF' };
+  return (
+    <Pressable
+      onPress={() => router.push(`/recipe/${recipe.id}`)}
+      accessibilityRole="button"
+      accessibilityLabel={`${recipe.name}, ${recipe.total} хвилин, ${recipe.diff.toLowerCase()}`}
+      style={({ pressed }) => ({ width, alignItems: 'center', transform: [{ scale: pressed ? 0.97 : 1 }] })}
+    >
+      <View style={{ alignSelf: 'stretch', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Text style={meta}>{recipe.total} хв</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 * k }}>
+          <Text style={meta}>{recipe.diff.toLowerCase()}</Text>
+          <Level diff={recipe.diff} />
+        </View>
+      </View>
+      <View style={{ marginTop: 10 * k }}>
+        <Dish recipe={recipe} size={width * 0.82} />
+      </View>
+      <Text numberOfLines={2} style={{ fontFamily: display, fontSize: 17 * k, lineHeight: 22 * k, color: '#FFFFFF', textAlign: 'center', marginTop: 14 * k }}>
+        {recipe.name}
+      </Text>
+      <View style={{ alignSelf: 'stretch', flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 * k }}>
+        <Text style={[meta, { color: soft }]}>{recipe.kcal} ккал</Text>
+        <Text style={[meta, { color: soft }]}>≈ {uah(portionCost(recipe.id))}</Text>
+      </View>
+    </Pressable>
+  );
+}
+
+// A tile in a lower shelf: a dark grey square with the dish at the same scale as everywhere,
+// the name under it in the display face, and a short grey line.
+export function CoverTile({ recipe, size, sub }: { recipe: Recipe; size: number; sub?: string }) {
   const k = useScale();
   const t = useTheme();
   return (
@@ -38,15 +86,26 @@ export function CoverTile({ recipe, size, sub }: { recipe: Pick<Recipe, 'id' | '
       accessibilityLabel={sub ? `${recipe.name}, ${sub}` : recipe.name}
       style={({ pressed }) => ({ width: size, transform: [{ scale: pressed ? 0.97 : 1 }] })}
     >
-      <CoverArt recipe={recipe} size={size} radius={10 * k} />
-      <Text numberOfLines={1} style={{ fontFamily: fontMedium, fontSize: 18 * k, lineHeight: 21 * k, color: t.text, marginTop: 6 * k }}>
+      <View style={{ width: size, height: size, borderRadius: 14 * k, backgroundColor: shelf, alignItems: 'center', justifyContent: 'center' }}>
+        <Dish recipe={recipe} size={size * 0.78} />
+      </View>
+      <Text numberOfLines={2} style={{ fontFamily: display, fontSize: 14 * k, lineHeight: 18 * k, color: t.text, marginTop: 8 * k }}>
         {recipe.name}
       </Text>
       {!!sub && (
-        <Text numberOfLines={1} style={{ fontFamily: font, fontSize: 16 * k, lineHeight: 18 * k, color: t.textSoft }}>
+        <Text numberOfLines={1} style={{ fontFamily: font, fontSize: 16 * k, lineHeight: 18 * k, color: t.textSoft, marginTop: 2 * k }}>
           {sub}
         </Text>
       )}
     </Pressable>
+  );
+}
+
+// Square cover used on the recipe page: the same cut-out dish on the dark grey square.
+export function CoverArt({ recipe, size, radius = 10 }: { recipe: Recipe; size: number; radius?: number }) {
+  return (
+    <View style={{ width: size, height: size, borderRadius: radius, backgroundColor: shelf, alignItems: 'center', justifyContent: 'center' }}>
+      <Dish recipe={recipe} size={size * 0.8} />
+    </View>
   );
 }

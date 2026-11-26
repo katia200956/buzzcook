@@ -42,6 +42,10 @@ export const bgStops = [0, 0.13942, 0.86058, 1] as const;
 
 export const font = 'AlumniSansSC_400Regular';
 export const fontMedium = 'AlumniSansSC_500Medium';
+// Dish names on the home shelves: the display face of the recipe pages ("Сирники", "Тости з авокадо").
+export const display = 'Unbounded_500Medium';
+// The dish strip and tiles stay this dark grey in both themes.
+export const shelf = '#1F1F21';
 
 // Screens inside <ForceDark.Provider value> always use the dark palette.
 export const ForceDark = createContext(false);

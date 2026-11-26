@@ -445,7 +445,7 @@ const pasta: SwipeRecipe = {
   ],
 };
 
-// Omelette with spinach and feta, in a pan or in the oven. The last frame is the app's omelette
+// Omelette with spinach and feta, in a pan. The last frame is the app's omelette
 // photo itself, set on the recipe's dark grey; every step before it leads to that plate.
 const omlet: SwipeRecipe = {
   id: 'omlet',
@@ -454,16 +454,13 @@ const omlet: SwipeRecipe = {
   portion: "1 порція · 3 яйця",
   price: "≈48 ₴",
   lead: "Ніжний усередині, золотистий зверху, зі шпинатом і солоною фетою. Секрет у слабкому вогні: швидкий омлет стає гумовим.",
-  modes: [
-    { key: 'pan', label: 'Сковорідка', time: '12 хв' },
-    { key: 'oven', label: 'Духовка', time: '18 хв' },
-  ],
+  modes: [{ key: 'pan', label: 'Сковорідка', time: '12 хв' }],
   ing: [
     { name: "Яйця", qty: "3 шт" },
     { name: "Молодий шпинат", qty: "40 г" },
     { name: "Фета", qty: "30 г" },
     { name: "Помідори черрі", qty: "5 шт" },
-    { name: "Вершкове масло", qty: { pan: "1 ч. л.", oven: "1 ч. л. + змастити форму" } },
+    { name: "Вершкове масло", qty: "1 ч. л." },
     { name: "Цибуля-різанець", qty: "кілька стебел" },
     { name: "Сіль, чорний перець", qty: "дрібка" },
   ],
@@ -481,8 +478,6 @@ const omlet: SwipeRecipe = {
     pan2: { src: require('../../assets/recipes/omlet/pan2.jpg'), heat: 0.5 },
     pan3: { src: require('../../assets/recipes/omlet/pan3.jpg'), heat: 0.4 },
     pan4: { src: require('../../assets/recipes/omlet/pan4.jpg'), heat: 0.3 },
-    oven1: { src: require('../../assets/recipes/omlet/oven1.jpg'), glow: true },
-    oven2: { src: require('../../assets/recipes/omlet/oven2.jpg'), heat: 0.4 },
     plate1: { src: require('../../assets/recipes/omlet/plate1.jpg'), heat: 0.2 },
     plate2: { src: require('../../assets/recipes/omlet/plate2.jpg') },
   },
@@ -542,32 +537,6 @@ const omlet: SwipeRecipe = {
         p: "Підведи лопаткою порожню половину і накрий нею фету одним рухом.",
         d: "**Готово, коли** вийшов півмісяць, а з краю видно шпинат і фету.",
         tip: "Не тримай довше на вогні: омлет доходить сам, поки ти перекладаєш його на тарілку.",
-      },
-    ],
-    oven: [
-      {
-        f: 'pan1',
-        t: "Прогрій шпинат",
-        p: "Духовку на 180 °C. У маленькій сковорідці, що можна ставити в духовку, розтопи масло і прогрій шпинат 1 хвилину.",
-        d: "**Готово, коли** шпинат зів'яв, а рідина випарувалась.",
-        tip: "Немає такої сковорідки? Переклади шпинат у змащену маслом форму 15–18 см.",
-        timer: 60,
-      },
-      {
-        f: 'oven1',
-        t: "Влий яйця і в духовку",
-        p: "Влий яйця на шпинат, посип фетою одну половину і постав на середню полицю.",
-        d: "**Готово, коли** омлет піднявся, а центр не тремтить, якщо злегка струснути.",
-        tip: "У духовці омлет пишніший і рівний, ніж на вогні, і його не треба перевертати.",
-        timer: 600,
-        dur: 5000,
-      },
-      {
-        f: 'oven2',
-        t: "Дістань і склади",
-        p: "Обережно, ручка гаряча. Підведи край лопаткою і склади навпіл.",
-        d: "**Готово, коли** верх золотистий, а всередині ніжно.",
-        tip: "Через 2 хвилини після духовки омлет трохи осяде, це нормально.",
       },
     ],
   },

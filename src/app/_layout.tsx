@@ -1,4 +1,5 @@
 import { AlumniSansSC_400Regular, AlumniSansSC_500Medium } from '@expo-google-fonts/alumni-sans-sc';
+import { Manrope_400Regular, Manrope_700Bold } from '@expo-google-fonts/manrope';
 import { Unbounded_500Medium } from '@expo-google-fonts/unbounded';
 import { useFonts } from 'expo-font';
 import { router, Stack } from 'expo-router';
@@ -15,6 +16,8 @@ export default function RootLayout() {
     AlumniSansSC_400Regular,
     AlumniSansSC_500Medium,
     Unbounded_500Medium,
+    Manrope_400Regular,
+    Manrope_700Bold,
   });
   if (!loaded) return <View style={{ flex: 1, backgroundColor: '#232323' }} />;
 

@@ -4,11 +4,16 @@ import { ComponentRef, useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Easing, NativeScrollEvent, NativeSyntheticEvent, Pressable, ScrollView, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Equip, SwipeRecipe, SwipeStep, swipeSteps } from '../../data/swipe';
-import { font, fontMedium } from '../../theme';
+import { display } from '../../theme';
+
 import { useScale } from '../scale';
 import { Rich } from './Rich';
 import { Steam } from './Steam';
 import { BG } from './SwipeCard';
+
+// The recipe pages keep the look of the original recipe prototypes: Unbounded for titles, Manrope for text.
+const body400 = 'Manrope_400Regular';
+const body700 = 'Manrope_700Bold';
 
 const LINE = '#3a3a3c';
 const MUTED = '#a3a3a1';
@@ -52,9 +57,9 @@ export function SwipeCook({ r, mode }: { r: SwipeRecipe; mode: Equip }) {
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 * k }}>
           <Pressable onPress={back} accessibilityLabel="Назад до рецепта" hitSlop={8}
             style={{ width: 40 * k, height: 40 * k, borderRadius: 100, borderWidth: 1, borderColor: LINE, alignItems: 'center', justifyContent: 'center' }}>
-            <Text style={{ fontFamily: fontMedium, fontSize: 26 * k, color: FG, marginTop: -3 * k }}>‹</Text>
+            <Text style={{ fontFamily: body700, fontSize: 22 * k, color: FG, marginTop: -3 * k }}>‹</Text>
           </Pressable>
-          <Text style={{ flex: 1, fontFamily: fontMedium, fontSize: 30 * k, lineHeight: 32 * k, color: FG }}>{r.name}</Text>
+          <Text style={{ flex: 1, fontFamily: display, fontSize: 20 * k, lineHeight: 25 * k, color: FG }}>{r.name}</Text>
         </View>
         <View style={{ flexDirection: 'row', gap: 4 }}>
           {steps.map((_, i) => (
@@ -85,7 +90,7 @@ export function SwipeCook({ r, mode }: { r: SwipeRecipe; mode: Equip }) {
       <View style={{ position: 'absolute', left: 16 * k, right: 16 * k, bottom: insets.bottom + 16 * k }}>
         <Pressable onPress={next} accessibilityLabel={idx === steps.length - 1 ? 'До рецепта' : 'Далі'}
           style={({ pressed }) => ({ borderRadius: 14 * k, backgroundColor: FG, paddingVertical: 14 * k, alignItems: 'center', opacity: pressed ? 0.85 : 1 })}>
-          <Text style={{ fontFamily: fontMedium, fontSize: 24 * k, color: INK }}>{idx === steps.length - 1 ? 'До рецепта' : 'Далі'}</Text>
+          <Text style={{ fontFamily: body700, fontSize: 16 * k, color: INK }}>{idx === steps.length - 1 ? 'До рецепта' : 'Далі'}</Text>
         </Pressable>
       </View>
     </View>
@@ -140,7 +145,7 @@ function StepPane({ r, s, prev, i, n, w, h, cur, arrived }: { r: SwipeRecipe; s:
     };
   }, [cur, s.timer]);
 
-  const body = { fontFamily: font, fontSize: 20 * k, lineHeight: 24 * k, color: '#d6d6d4' };
+  const body = { fontFamily: body400, fontSize: 15 * k, lineHeight: 21 * k, color: '#d6d6d4' };
   const scale = breathe.interpolate({ inputRange: [0, 1], outputRange: [1, 1.035] });
   const ty = Animated.add(
     breathe.interpolate({ inputRange: [0, 1], outputRange: [0, -4] }),
@@ -162,20 +167,20 @@ function StepPane({ r, s, prev, i, n, w, h, cur, arrived }: { r: SwipeRecipe; s:
         <Steam width={w} height={h} heat={frame.heat ?? 0} glow={frame.glow} active={cur} cy={cy} />
       </View>
       <View style={{ gap: 4 * k }}>
-        <Text style={{ fontFamily: font, fontSize: 15 * k, letterSpacing: 1.4 * k, color: MUTED }}>{i + 1} / {n}</Text>
-        <Text style={{ fontFamily: fontMedium, fontSize: 26 * k, lineHeight: 28 * k, color: FG }}>{s.t}</Text>
+        <Text style={{ fontFamily: body700, fontSize: 11 * k, letterSpacing: 1.2 * k, color: MUTED }}>{i + 1} / {n}</Text>
+        <Text style={{ fontFamily: display, fontSize: 18 * k, lineHeight: 23 * k, color: FG }}>{s.t}</Text>
         <Text style={body}>{s.p}</Text>
         {!!s.d && (
           <Text style={[body, { color: MUTED }]}>
-            <Rich text={s.d} style={{}} bold={{ color: FG, fontFamily: fontMedium }} />
-            {s.timer ? <Text style={{ color: FG, fontFamily: fontMedium }}>  {fmt(left)}</Text> : null}
+            <Rich text={s.d} style={{}} bold={{ color: FG, fontFamily: body700 }} />
+            {s.timer ? <Text style={{ color: FG, fontFamily: body700 }}>  {fmt(left)}</Text> : null}
           </Text>
         )}
       </View>
       <View style={{ borderTopWidth: 1, borderTopColor: LINE, paddingTop: 12 * k, flexDirection: 'row', gap: 10 * k }}>
         <Text style={{ fontSize: 16 * k, color: FG }}>💡</Text>
         <View style={{ flex: 1 }}>
-          <Text style={{ fontFamily: fontMedium, fontSize: 14 * k, letterSpacing: 1.2 * k, color: MUTED }}>НА ЩО ДИВИТИСЬ</Text>
+          <Text style={{ fontFamily: body700, fontSize: 11 * k, letterSpacing: 1.2 * k, color: MUTED }}>НА ЩО ДИВИТИСЬ</Text>
           <Text style={[body, { color: FG }]}>{s.tip}</Text>
         </View>
       </View>

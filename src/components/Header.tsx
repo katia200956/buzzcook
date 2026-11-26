@@ -27,7 +27,7 @@ export function Header({
   return (
     <>
     {/* The money saved so far, glowing quietly under the menu button on every main screen. */}
-    <SavedBadge top={top + 60 * k} right={18 * k} />
+    <SavedBadge top={top + 74 * k} right={18 * k} />
     <View style={[s.row, { top, left: 18 * k, width: 368 * k, height: 52 * k }]} pointerEvents="box-none">
       {/* Premium calorie diary in the black ring circle (where the logo was). On free it carries a lock and opens the paywall. */}
       <Pressable

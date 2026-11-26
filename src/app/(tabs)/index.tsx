@@ -56,7 +56,7 @@ export default function Home() {
 
   return (
     <Screen>
-      <ScrollView contentContainerStyle={{ paddingTop: Math.max(insets.top + 6, 59 * k) + 96 * k, paddingBottom: 160 * k }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={{ paddingTop: Math.max(insets.top + 6, 59 * k) + 112 * k, paddingBottom: 160 * k }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         {n ? (
           <View style={{ paddingHorizontal: side, marginTop: 14 * k }}>
             {found.map(({ r }) => (

@@ -12,7 +12,7 @@ export function Page({ children }: { children: ReactNode }) {
   return (
     <Screen>
       <ScrollView
-        contentContainerStyle={{ paddingTop: 150 * k, paddingBottom: 230 * k, paddingLeft: 20 * k, paddingRight: 20 * k }}
+        contentContainerStyle={{ paddingTop: 166 * k, paddingBottom: 230 * k, paddingLeft: 20 * k, paddingRight: 20 * k }}
         showsVerticalScrollIndicator={false}
       >
         {children}

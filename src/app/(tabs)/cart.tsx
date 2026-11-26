@@ -364,7 +364,7 @@ function ShopList() {
             sum.kcal > 0 && <Text style={[txt, { fontSize: 16 * k, opacity: 0.6 }]}>у списку ~{Math.round(sum.kcal).toLocaleString('uk-UA')} ккал</Text>
           ) : (
             <Pressable onPress={() => showPaywall(true)} accessibilityRole="button" hitSlop={6}>
-              <Text style={[txt, { fontSize: 16 * k, color: sage }]}>калорійність продуктів · Buzzcook+</Text>
+              <Text style={[txt, { fontSize: 16 * k, color: t.textSoft }]}>калорійність продуктів · Buzzcook+</Text>
             </Pressable>
           )}
           {sum.unpriced > 0 && (

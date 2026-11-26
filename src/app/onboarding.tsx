@@ -169,7 +169,7 @@ export default function Onboarding() {
                         <Text style={[txt, { fontSize: 19 * k }]}>
                           {currentPlace().at} ці {week.dinners} вечер{week.dinners < 5 ? 'і' : 'ь'} коштували б ≈ {uah(week.plan.reduce((a, p) => a + outPrice(p.recipe), 0))}
                         </Text>
-                        <Text style={[txt, { fontSize: 19 * k, color: sage }]}>економія ≈ {uah(week.saved)}</Text>
+                        <Text style={[txt, { fontSize: 19 * k, color: t.text }]}>економія ≈ {uah(week.saved)}</Text>
                         {week.fromFridge.length > 0 && (
                           <Text style={[txt, { fontSize: 17 * k, color: t.textSoft }]}>використає те, що скоро зіпсується: {week.fromFridge.join(', ')}</Text>
                         )}

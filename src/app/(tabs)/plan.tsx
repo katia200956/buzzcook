@@ -225,7 +225,7 @@ export default function Plan() {
         </View>
 
         {swapFrom && (
-          <Plaque radius={16 * k} style={{ marginBottom: 10 * k, borderWidth: 1.5, borderColor: sage }}>
+          <Plaque radius={16 * k} style={{ marginBottom: 10 * k, borderWidth: 1.5, borderColor: '#FFFFFF' }}>
             <View style={[s.row, { paddingHorizontal: 14 * k, paddingVertical: 10 * k, gap: 10 * k }]}>
               <Text style={[txt, { flex: 1, fontSize: 18 * k, lineHeight: 21 * k }]}>
                 обери клітинку, з якою поміняти «{fromRecipe?.name.toLowerCase()}»
@@ -333,7 +333,7 @@ export default function Plan() {
           entering={FadeInDown.duration(200)}
           style={{ position: 'absolute', left: 14 * k, right: 14 * k, bottom: tabBarTop + 12 * k, zIndex: 20 }}
         >
-          <Plaque radius={22 * k} style={{ borderWidth: 1.5, borderColor: sage }}>
+          <Plaque radius={22 * k} style={{ borderWidth: 1.5, borderColor: '#FFFFFF' }}>
             <View style={[s.row, { alignItems: 'center', paddingHorizontal: 14 * k, paddingTop: 10 * k, gap: 8 * k }]}>
               <Text numberOfLines={1} style={[txt, { flex: 1, fontFamily: fontMedium, fontSize: 19 * k }]}>
                 {selRecipe.name}
@@ -480,7 +480,7 @@ function PlanCell(props: {
         style={[
           s.cell,
           { paddingVertical: 8 * k, paddingHorizontal: 4 * k, borderLeftWidth: 1, borderColor: line },
-          selected && { borderWidth: 2, borderColor: sage, transform: [{ scale: 1.04 }], zIndex: 2 },
+          selected && { borderWidth: 2, borderColor: '#FFFFFF', transform: [{ scale: 1.04 }], zIndex: 2 },
           dimmed && { opacity: 0.3 },
           target,
         ]}

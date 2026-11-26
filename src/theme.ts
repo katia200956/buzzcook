@@ -6,23 +6,26 @@ import { useStore } from './components/store';
 const light = {
   mode: 'light' as const,
   // v2: the same light/shade rhythm, warmed from grey to a soft clay so the food reads warmer.
-  bg: ['#7E7266', '#DCD3C6', '#DCD3C6', '#7E7266'] as const,
+  // v3 (Apple Music look): only near-black and white. A flat white page with light grey controls;
+  // the tab bar and the round header buttons are near-black capsules (Glass "ink").
+  bg: ['#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF'] as const,
   text: '#000000',
-  textSoft: 'rgba(0,0,0,0.62)', // 4.5:1 on the clay background
-  glass: 'rgba(255,255,255,0.10)',
-  glassStrong: 'rgba(255,255,255,0.22)',
-  border: 'rgba(255,255,255,0.55)',
+  textSoft: 'rgba(0,0,0,0.55)',
+  glass: 'rgba(0,0,0,0.05)',
+  glassStrong: 'rgba(0,0,0,0.11)',
+  border: 'rgba(0,0,0,0.10)',
   blurTint: 'light' as const,
   logoBg: '#000000',
   accent: '#000000',
 };
 
-// v2 accent for the main call to action: sage from the design brief (white text 5.8:1).
-export const sage = '#5B6B45';
+// Main call to action. v3: the app uses only near-black and white, so the old sage accent is now
+// near-black (white text on it reads in both themes; in dark mode buttons carry a light rim).
+export const sage = '#1C1C1E';
 
 const dark = {
   mode: 'dark' as const,
-  bg: ['#000000', '#232323', '#232323', '#000000'] as const,
+  bg: ['#0B0B0B', '#0B0B0B', '#0B0B0B', '#0B0B0B'] as const,
   text: '#FFFFFF',
   textSoft: 'rgba(255,255,255,0.55)',
   glass: 'rgba(255,255,255,0.06)',

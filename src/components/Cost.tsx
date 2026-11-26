@@ -143,7 +143,7 @@ export function PriceSheet({ recipe, open, onClose }: { recipe: string; open: bo
 
           <View style={{ marginTop: 14 * k, padding: 14 * k, borderRadius: 16 * k, backgroundColor: t.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.6)' }}>
             <Text style={txt}>вдома {uah(home)} · {place.at} {uah(out)}</Text>
-            <Text style={[txt, { fontFamily: fontMedium, color: sage }]}>економія {uah(saved)} на порції</Text>
+            <Text style={[txt, { fontFamily: fontMedium }]}>економія {uah(saved)} на порції</Text>
           </View>
 
           {anyMine && (

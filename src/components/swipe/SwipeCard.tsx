@@ -29,7 +29,7 @@ export function SwipeCard({ r }: { r: SwipeRecipe }) {
 
   return (
     <View style={{ flex: 1, backgroundColor: BG }}>
-      <ScrollView contentContainerStyle={{ paddingTop: insets.top + 8 * k, paddingHorizontal: 16 * k, paddingBottom: 150 * k }} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={{ paddingTop: insets.top + 8 * k, paddingHorizontal: 16 * k, paddingBottom: 230 * k }} showsVerticalScrollIndicator={false}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 * k }}>
           <Pressable onPress={back} accessibilityLabel="До списку рецептів" hitSlop={8}
             style={{ width: 40 * k, height: 40 * k, borderRadius: 100, borderWidth: 1, borderColor: LINE, alignItems: 'center', justifyContent: 'center' }}>

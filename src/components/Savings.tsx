@@ -1,7 +1,7 @@
 import { Text, View } from 'react-native';
 import { weekStart } from '../data';
 import { currentPlace, uah } from '../data/prices';
-import { font, fontMedium, sage, useTheme } from '../theme';
+import { font, fontMedium, useTheme } from '../theme';
 import { Glass } from './Glass';
 import { useScale } from './scale';
 import { useStore } from './store';
@@ -18,7 +18,7 @@ export function SavingsCard({ compact }: { compact?: boolean }) {
   return (
     <Glass radius={15} style={{ padding: 16 * k }}>
       <Text style={[txt, { fontSize: 18 * k, color: t.textSoft }]}>зекономлено цього тижня</Text>
-      <Text style={[txt, { fontFamily: fontMedium, fontSize: 40 * k, lineHeight: 44 * k, color: sage }]}>{uah(week.saved)}</Text>
+      <Text style={[txt, { fontFamily: fontMedium, fontSize: 40 * k, lineHeight: 44 * k, color: t.text }]}>{uah(week.saved)}</Text>
       <Text style={[txt, { fontSize: 19 * k }]}>
         {week.dinners ? `${week.dinners} вечер${week.dinners === 1 ? 'я' : week.dinners < 5 ? 'і' : 'ь'} вдома ${currentPlace().instead}` : 'приготуй вечерю з плану, і тут з’явиться перша сума'}
       </Text>

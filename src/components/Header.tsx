@@ -62,7 +62,7 @@ export function Header({
       </Plaque>
 
       <Pressable onPress={onMenu} accessibilityRole="button" accessibilityLabel="Меню">
-        <Glass radius={15} style={{ width: 52 * k, height: 52 * k, alignItems: 'center', justifyContent: 'center' }}>
+        <Glass ink radius={15} style={{ width: 52 * k, height: 52 * k, alignItems: 'center', justifyContent: 'center' }}>
           <Image source={require('../../assets/figma/menu.svg')} style={{ width: 35 * k, height: 35 * k }} />
         </Glass>
       </Pressable>
@@ -74,7 +74,7 @@ export function Header({
 const s = StyleSheet.create({
   row: { position: 'absolute', zIndex: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   kcal: { borderRadius: 100, backgroundColor: '#000000', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.45)', boxShadow: '0px 2px 8px 2px rgba(0,0,0,0.15)' },
-  ring: { borderRadius: 100, borderWidth: 2, borderColor: sage, alignItems: 'center', justifyContent: 'center' },
+  ring: { borderRadius: 100, borderWidth: 2, borderColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center' },
   badge: { position: 'absolute', borderRadius: 100, backgroundColor: sage, alignItems: 'center', justifyContent: 'center' },
   input: { flex: 1, fontFamily: font, color: '#FFFFFF', paddingVertical: 0, position: 'relative', zIndex: 1, outlineStyle: 'none' } as any,
 });

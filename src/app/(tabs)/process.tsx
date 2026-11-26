@@ -48,7 +48,7 @@ export default function Process() {
       })}
       {!finished && (
         <Pressable onPress={() => router.push(`/cook/${r.id}`)} style={{ alignSelf: 'flex-start', marginTop: 12 * k }}>
-          <Glass radius={100} style={{ paddingHorizontal: 22 * k, height: 44 * k, justifyContent: 'center' }}>
+          <Glass ink radius={100} style={{ paddingHorizontal: 22 * k, height: 44 * k, justifyContent: 'center' }}>
             <Text style={{ fontFamily: font, fontSize: 28 * k, color: '#FFFFFF' }}>продовжити</Text>
           </Glass>
         </Pressable>

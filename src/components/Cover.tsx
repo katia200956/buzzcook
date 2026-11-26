@@ -22,7 +22,7 @@ export function Dish({ recipe, size }: { recipe: Recipe; size: number }) {
   if (own)
     return (
       <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
-        <View style={{ position: 'absolute', width: size * 0.94, height: size * 0.94, borderRadius: size, backgroundColor: '#000', opacity: 0.35, transform: [{ translateY: size * 0.035 }], boxShadow: `0px ${size * 0.04}px ${size * 0.08}px rgba(0,0,0,0.9)` } as any} />
+        <View style={{ position: 'absolute', width: size * 0.94, height: size * 0.94 * (HERO_ASPECT[recipe.id] ?? 1), borderRadius: size, backgroundColor: '#000', opacity: 0.35, transform: [{ translateY: size * 0.035 }], boxShadow: `0px ${size * 0.04}px ${size * 0.08}px rgba(0,0,0,0.9)` } as any} />
         <Image source={own} style={{ width: size, height: size }} contentFit="contain" transition={200} />
       </View>
     );
@@ -42,7 +42,11 @@ export function Dish({ recipe, size }: { recipe: Recipe; size: number }) {
 
 const HERO_CUT: Record<string, number> = {
   pasta: require('../../assets/recipes/pasta/cut.png'),
+  syrnyky: require('../../assets/recipes/syrnyky/cut.png'),
+  tost: require('../../assets/recipes/tost/cut.png'),
 };
+// Height of each cut-out plate against its width (the photo plates are seen at a slight angle).
+const HERO_ASPECT: Record<string, number> = { pasta: 1, syrnyky: 0.91, tost: 0.93 };
 
 const LEVEL: Record<string, number> = { легко: 1, середньо: 3, складно: 5 };
 

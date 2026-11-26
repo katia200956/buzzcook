@@ -1,7 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { ReactNode } from 'react';
-import { Image } from 'expo-image';
-import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Pressable, ScrollView, Text, useWindowDimensions, View } from 'react-native';
 import { CoverArt } from '../../../components/Cover';
 import { SwipeCard } from '../../../components/swipe/SwipeCard';
 import { swipeRecipe } from '../../../data/swipe';
@@ -11,14 +10,12 @@ import { useScale } from '../../../components/scale';
 import { useStore } from '../../../components/store';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PhotoFx } from '../../../components/PhotoFx';
-import { byId, heroPhoto, img, Recipe, recipes } from '../../../data';
+import { byId, heroPhoto, Recipe } from '../../../data';
 import { fmtQty, haveOf, INGREDIENTS, needsOf } from '../../../data/pantry';
 import { font, fontMedium, sage, useTheme } from '../../../theme';
 
-// Recipe as Apple Music's "Now Playing": the dish cover large on a dark page with its own blurred
-// photo behind, the name with a heart, a progress bar of the cooking steps, and transport controls:
-// ⏮ and ⏭ move to the neighbouring dishes of your feed, the big ▶ starts or continues cooking.
-// Below, like the lyrics and queue: calories, cost, ingredients (with what is at home), time and tools.
+// Recipe: the dish cover large, the name with a heart, then calories, cost, ingredients (with what is
+// at home), time and tools, and one "готувати" button. Colours follow the app theme.
 export default function RecipeScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const r = byId(id);
@@ -34,26 +31,19 @@ function NowPlaying({ r }: { r: Recipe }) {
   const k = useScale();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
-  const { saved, toggleSaved, done, premium, fridge, rank } = useStore();
-  const white = '#FFFFFF';
-  const soft = 'rgba(255,255,255,0.6)';
-  const line = 'rgba(255,255,255,0.14)';
+  const t = useTheme();
+  const { saved, toggleSaved, done, premium, fridge } = useStore();
+  const white = t.text;
+  const soft = t.textSoft;
+  const line = t.mode === 'dark' ? 'rgba(255,255,255,0.14)' : 'rgba(0,0,0,0.1)';
   const txt = { fontFamily: font, fontSize: 19 * k, lineHeight: 23 * k, color: white };
   const head = { fontFamily: fontMedium, fontSize: 15 * k, letterSpacing: 1.2 * k, color: soft, marginTop: 22 * k, marginBottom: 6 * k };
   const steps = r.steps?.length ?? 0;
   const canCook = steps > 0;
   const progress = Math.min(done[r.id] ?? 0, steps);
   const isSaved = saved.includes(r.id);
-  const feed = rank(recipes).map((p) => p.r.id);
-  const at = feed.indexOf(r.id);
-  const go = (d: number) => {
-    if (!feed.length) return;
-    const next = feed[(Math.max(at, 0) + d + feed.length) % feed.length];
-    router.replace(`/recipe/${next}`);
-  };
   const back = () => (router.canGoBack() ? router.back() : router.navigate('/'));
   const art = Math.min(width - 56 * k, 360 * k);
-  const left = canCook ? Math.round((r.total * (steps - progress)) / steps) : r.total;
   // What the fridge already covers, per ingredient line (the needs list follows the recipe's order).
   const home = needsOf(r.id).map(([key, n]) => {
     const have = haveOf(fridge, key);
@@ -61,18 +51,15 @@ function NowPlaying({ r }: { r: Recipe }) {
     return { full: unit === 'є' ? have > 0 : have >= n - 0.01, some: have > 0 && unit !== 'є' ? fmtQty(have, unit) : null };
   });
   const atHome = home.filter((x) => x.full).length;
-  const photo = img(r.img);
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#0B0B0B' }}>
-      {photo && <Image source={photo} style={StyleSheet.absoluteFill} contentFit="cover" blurRadius={60} />}
-      <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(11,11,11,0.72)' }]} />
+    <View style={{ flex: 1, backgroundColor: t.bg[0] }}>
       <ScrollView contentContainerStyle={{ paddingTop: insets.top + 6 * k, paddingHorizontal: 28 * k, paddingBottom: 240 * k }} showsVerticalScrollIndicator={false}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Pressable onPress={back} hitSlop={10} accessibilityRole="button" accessibilityLabel="Згорнути">
-            <Text style={{ fontFamily: fontMedium, fontSize: 30 * k, color: white }}>⌄</Text>
+          <Pressable onPress={back} hitSlop={8} accessibilityRole="button" accessibilityLabel="Назад"
+            style={{ width: 44 * k, height: 44 * k, borderRadius: 100, borderWidth: 1, borderColor: line, alignItems: 'center', justifyContent: 'center' }}>
+            <Text style={{ fontFamily: fontMedium, fontSize: 30 * k, lineHeight: 32 * k, color: white, marginTop: -3 * k }}>←</Text>
           </Pressable>
-          <View style={{ width: 36 * k, height: 5 * k, borderRadius: 3, backgroundColor: 'rgba(255,255,255,0.35)' }} />
           <Text style={{ fontFamily: font, fontSize: 17 * k, color: soft, minWidth: 30 * k, textAlign: 'right' }}>{r.cat.toLowerCase()}</Text>
         </View>
 
@@ -88,41 +75,10 @@ function NowPlaying({ r }: { r: Recipe }) {
             </Text>
           </View>
           <Pressable onPress={() => toggleSaved(r.id)} hitSlop={10} accessibilityRole="button" accessibilityLabel={isSaved ? 'Прибрати зі збережених' : 'Зберегти рецепт'}
-            style={{ width: 36 * k, height: 36 * k, borderRadius: 100, backgroundColor: 'rgba(255,255,255,0.14)', alignItems: 'center', justifyContent: 'center' }}>
+            style={{ width: 36 * k, height: 36 * k, borderRadius: 100, borderWidth: 1, borderColor: line, alignItems: 'center', justifyContent: 'center' }}>
             <Text style={{ fontSize: 18 * k, color: white }}>{isSaved ? '♥' : '♡'}</Text>
           </Pressable>
         </View>
-
-        <View style={{ marginTop: 18 * k }}>
-          <View style={{ height: 6 * k, borderRadius: 3, backgroundColor: 'rgba(255,255,255,0.22)' }}>
-            <View style={{ width: `${canCook ? (progress / steps) * 100 : 0}%`, height: '100%', borderRadius: 3, backgroundColor: white }} />
-          </View>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 * k }}>
-            <Text style={{ fontFamily: font, fontSize: 15 * k, color: soft }}>{canCook ? `крок ${progress} з ${steps}` : 'покроковий режим скоро'}</Text>
-            <Text style={{ fontFamily: font, fontSize: 15 * k, color: soft }}>−{left} хв</Text>
-          </View>
-        </View>
-
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-evenly', marginTop: 14 * k }}>
-          <Pressable onPress={() => go(-1)} hitSlop={10} accessibilityRole="button" accessibilityLabel="Попередня страва" style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}>
-            <Text style={{ fontSize: 34 * k, color: white }}>{'⏮︎'}</Text>
-          </Pressable>
-          <Pressable
-            onPress={() => canCook && router.push(`/cook/${r.id}`)}
-            disabled={!canCook}
-            accessibilityRole="button"
-            accessibilityLabel={canCook ? (progress > 0 && progress < steps ? 'Продовжити готувати' : 'Почати готувати') : 'Покроковий режим готується'}
-            style={({ pressed }) => ({ width: 78 * k, height: 78 * k, borderRadius: 100, backgroundColor: white, alignItems: 'center', justifyContent: 'center', opacity: canCook ? 1 : 0.4, transform: [{ scale: pressed ? 0.94 : 1 }] })}
-          >
-            <Text style={{ fontSize: 34 * k, color: '#0B0B0B', marginLeft: 4 * k }}>▶︎</Text>
-          </Pressable>
-          <Pressable onPress={() => go(1)} hitSlop={10} accessibilityRole="button" accessibilityLabel="Наступна страва" style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}>
-            <Text style={{ fontSize: 34 * k, color: white }}>{'⏭︎'}</Text>
-          </Pressable>
-        </View>
-        <Text style={{ fontFamily: font, fontSize: 16 * k, color: soft, textAlign: 'center', marginTop: 6 * k }}>
-          {canCook ? (progress > 0 && progress < steps ? 'продовжити' : 'почати готувати') : ''}
-        </Text>
 
         <Text style={head}>НА ПОРЦІЮ</Text>
         {premium ? (
@@ -133,7 +89,7 @@ function NowPlaying({ r }: { r: Recipe }) {
               ['вуглев.', r.c],
               ['жири', r.f],
             ].map(([label, g]) => (
-              <View key={label} style={{ flex: 1, borderRadius: 12 * k, paddingVertical: 8 * k, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.1)' }}>
+              <View key={label} style={{ flex: 1, borderRadius: 12 * k, paddingVertical: 8 * k, alignItems: 'center', backgroundColor: t.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }}>
                 <Text style={[txt, { fontFamily: fontMedium, fontSize: 22 * k, lineHeight: 24 * k }]}>{g}</Text>
                 <Text style={{ fontFamily: font, fontSize: 14 * k, color: soft }}>{label}</Text>
               </View>
@@ -179,6 +135,20 @@ function NowPlaying({ r }: { r: Recipe }) {
           </>
         )}
       </ScrollView>
+
+      <Pressable
+        onPress={() => canCook && router.push(`/cook/${r.id}`)}
+        disabled={!canCook}
+        accessibilityRole="button"
+        accessibilityLabel={canCook ? 'Почати готувати' : 'Покроковий режим готується'}
+        style={({ pressed }) => ({ position: 'absolute', alignSelf: 'center', bottom: 104 * k, opacity: canCook ? 1 : 0.5, transform: [{ scale: pressed ? 0.96 : 1 }] })}
+      >
+        <View style={{ minWidth: 200 * k, height: 54 * k, paddingHorizontal: 26 * k, borderRadius: 100, alignItems: 'center', justifyContent: 'center', backgroundColor: sage, borderWidth: 1, borderColor: 'rgba(255,255,255,0.25)', boxShadow: '0px 10px 24px rgba(0,0,0,0.25)' }}>
+          <Text style={{ fontFamily: fontMedium, fontSize: 32 * k, lineHeight: 38 * k, color: '#FFFFFF' }}>
+            {canCook ? (progress > 0 && progress < steps ? 'далі' : 'готувати') : 'скоро'}
+          </Text>
+        </View>
+      </Pressable>
     </View>
   );
 }

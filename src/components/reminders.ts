@@ -107,7 +107,7 @@ export function useReminders() {
           if (missing.length === 0) continue;
           await Notifications.scheduleNotificationAsync({
             identifier: `${TAG}-shop-${dayKey(d)}`,
-            content: { ...shopText(missing), data: { url: '/cart' } },
+            content: { ...shopText(missing), data: { url: '/process' } },
             trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: shopAt },
           });
         }

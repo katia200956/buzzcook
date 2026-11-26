@@ -27,8 +27,8 @@ export function Menu({ open, onClose }: { open: boolean; onClose: () => void }) 
   const items: [string, '/' | '/plan' | '/process' | '/cart' | '/profile'][] = [
     ['стрічка страв', '/'],
     ['план тижня', '/plan'],
-    ['етапи готовки', '/process'],
-    ['холодильник і покупки', '/cart'],
+    ['список покупок', '/process'],
+    ['холодильник', '/cart'],
     ['профіль', '/profile'],
   ];
 

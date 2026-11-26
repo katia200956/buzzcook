@@ -6,17 +6,16 @@ import { Animated, Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { font } from '../theme';
 import { Glass } from './Glass';
-import { MiniPlayer } from './MiniPlayer';
 import { useScale } from './scale';
 
 const icons: Record<string, number> = {
   index: require('../../assets/figma/home.svg'),
   plan: require('../../assets/icons/table.svg'),
-  process: require('../../assets/figma/clipboard.svg'),
+  process: require('../../assets/figma/cart.svg'),
   cart: require('../../assets/icons/fridge.svg'),
   profile: require('../../assets/figma/user.svg'),
 };
-const labels: Record<string, string> = { index: 'головна', plan: 'план', process: 'етапи', cart: 'холодильник', profile: 'профіль' };
+const labels: Record<string, string> = { index: 'головна', plan: 'план', process: 'покупки', cart: 'холодильник', profile: 'профіль' };
 const MAIN = ['index', 'plan', 'process', 'cart'];
 
 type TabBarProps = Parameters<NonNullable<ComponentProps<typeof Tabs>['tabBar']>>[0];
@@ -51,10 +50,6 @@ export function TabBar({ state, emitter, navigateToTab }: TabBarProps) {
       pointerEvents="box-none"
       style={{ position: 'absolute', left: 0, right: 0, bottom: Math.max(insets.bottom - 4 * k, 18 * k), alignItems: 'center' }}
     >
-      {/* Apple Music: the mini player floats right above the tabs, as wide as the whole bar. */}
-      <View style={{ marginBottom: 8 * k }}>
-        <MiniPlayer width={barW + 72 * k} />
-      </View>
       <View role="tablist" style={{ flexDirection: 'row', alignItems: 'center', gap: 10 * k }}>
         <Glass ink radius={100} style={{ width: barW, height: 62 * k, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 6 * k }}>
           {MAIN.includes(active) && (

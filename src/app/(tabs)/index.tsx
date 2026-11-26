@@ -1,9 +1,8 @@
-import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { ReactNode, useState } from 'react';
-import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { SavedBadge } from '../../components/Cost';
+import { Header } from '../../components/Header';
 import { CoverArt, CoverTile } from '../../components/Cover';
 import { Menu } from '../../components/Menu';
 import { Screen } from '../../components/Screen';
@@ -28,7 +27,7 @@ export default function Home() {
   const insets = useSafeAreaInsets();
   const [menu, setMenu] = useState(false);
   const [q, setQ] = useState('');
-  const { rank, fridge, saved, premium, showPaywall } = useStore();
+  const { rank, fridge, saved } = useStore();
 
   const ranked = rank(recipes);
   const n = q.trim().toLowerCase();
@@ -57,37 +56,7 @@ export default function Home() {
 
   return (
     <Screen>
-      <ScrollView contentContainerStyle={{ paddingTop: insets.top + 14 * k, paddingBottom: 230 * k }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-        <View style={{ paddingHorizontal: side, flexDirection: 'row', alignItems: 'center', gap: 10 * k }}>
-          <Text style={{ flex: 1, fontFamily: fontMedium, fontSize: 44 * k, lineHeight: 48 * k, color: t.text }}>головна</Text>
-          <Round label="Щоденник калорій" onPress={() => (premium ? router.push('/diary') : showPaywall(true))}>
-            <Text style={{ fontFamily: fontMedium, fontSize: 15 * k, color: '#FFFFFF' }}>ккал</Text>
-          </Round>
-          <Round label="Меню" onPress={() => setMenu(true)}>
-            <Image source={require('../../../assets/figma/menu.svg')} style={{ width: 26 * k, height: 26 * k }} />
-          </Round>
-          <Round label="Профіль" onPress={() => router.navigate('/profile')}>
-            <Image source={require('../../../assets/figma/user.svg')} style={{ width: 20 * k, height: 20 * k }} />
-          </Round>
-        </View>
-
-        <View style={{ marginHorizontal: side, marginTop: 12 * k, height: 40 * k, borderRadius: 12 * k, backgroundColor: t.mode === 'dark' ? '#1C1C1E' : '#EFEFEF', flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12 * k, gap: 8 * k }}>
-          <Text style={{ fontSize: 15 * k, color: t.textSoft }}>⌕</Text>
-          <TextInput
-            value={q}
-            onChangeText={setQ}
-            placeholder="страви, продукти, категорії"
-            placeholderTextColor={t.textSoft}
-            returnKeyType="search"
-            style={{ flex: 1, fontFamily: font, fontSize: 20 * k, color: t.text, paddingVertical: 0, outlineStyle: 'none' } as any}
-          />
-          {!!q && (
-            <Pressable onPress={() => setQ('')} hitSlop={8} accessibilityLabel="Очистити пошук">
-              <Text style={{ fontSize: 16 * k, color: t.textSoft }}>✕</Text>
-            </Pressable>
-          )}
-        </View>
-
+      <ScrollView contentContainerStyle={{ paddingTop: Math.max(insets.top + 6, 59 * k) + 96 * k, paddingBottom: 160 * k }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         {n ? (
           <View style={{ paddingHorizontal: side, marginTop: 14 * k }}>
             {found.map(({ r }) => (
@@ -105,7 +74,7 @@ export default function Home() {
           </View>
         ) : (
           <>
-            <Shelf title="найкраще для тебе" sub="за твоїм профілем і холодильником">
+            <Shelf title="найкраще для тебе" sub="за твоїм профілем і холодильником" band>
               {top.map(({ r, why }) => (
                 <Feature key={r.id} r={r} width={big} note={why ?? meta(r)} />
               ))}
@@ -149,34 +118,32 @@ export default function Home() {
           </>
         )}
       </ScrollView>
-      <SavedBadge top={insets.top + 132 * k} right={20 * k} />
+      <Header query={q} onQuery={setQ} onMenu={() => setMenu(true)} />
       <Menu open={menu} onClose={() => setMenu(false)} />
     </Screen>
   );
 }
 
-function Round({ label, onPress, children }: { label: string; onPress: () => void; children: ReactNode }) {
-  const k = useScale();
-  return (
-    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={label} style={({ pressed }) => ({ width: 40 * k, height: 40 * k, borderRadius: 100, backgroundColor: '#1C1C1E', alignItems: 'center', justifyContent: 'center', opacity: pressed ? 0.6 : 1 })}>
-      {children}
-    </Pressable>
-  );
-}
-
 // A titled shelf that scrolls sideways, like Apple Music's rows.
-function Shelf({ title, sub, children }: { title: string; sub?: string; children: ReactNode }) {
+// `band`: the shelf rides on a black strip across the whole screen width, so the dishes swipe along it.
+function Shelf({ title, sub, band, children }: { title: string; sub?: string; band?: boolean; children: ReactNode }) {
   const k = useScale();
   const t = useTheme();
   return (
-    <View style={{ marginTop: 26 * k }}>
+    <View style={{ marginTop: (band ? 10 : 26) * k }}>
       <View style={{ paddingHorizontal: 20 * k, marginBottom: 10 * k }}>
         <Text style={{ fontFamily: fontMedium, fontSize: 28 * k, lineHeight: 30 * k, color: t.text }}>
           {title} <Text style={{ color: t.textSoft }}>›</Text>
         </Text>
         {!!sub && <Text style={{ fontFamily: font, fontSize: 17 * k, lineHeight: 19 * k, color: t.textSoft }}>{sub}</Text>}
       </View>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20 * k, gap: 12 * k }} decelerationRate="fast">
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={band ? { backgroundColor: '#0B0B0B' } : undefined}
+        contentContainerStyle={{ paddingHorizontal: 20 * k, gap: 12 * k, paddingVertical: band ? 16 * k : 0 }}
+        decelerationRate="fast"
+      >
         {children}
       </ScrollView>
     </View>
@@ -186,10 +153,9 @@ function Shelf({ title, sub, children }: { title: string; sub?: string; children
 // The big top card: a wide cover with the reason above it, like the "Top Picks" row.
 function Feature({ r, width, note }: { r: Recipe; width: number; note: string }) {
   const k = useScale();
-  const t = useTheme();
   return (
     <Pressable onPress={() => router.push(`/recipe/${r.id}`)} accessibilityRole="button" accessibilityLabel={`${r.name}. ${note}`} style={({ pressed }) => ({ width, transform: [{ scale: pressed ? 0.98 : 1 }] })}>
-      <Text numberOfLines={1} style={{ fontFamily: font, fontSize: 15 * k, letterSpacing: 0.8 * k, color: t.textSoft, marginBottom: 4 * k }}>
+      <Text numberOfLines={1} style={{ fontFamily: font, fontSize: 15 * k, letterSpacing: 0.8 * k, color: 'rgba(255,255,255,0.6)', marginBottom: 4 * k }}>
         {note.toUpperCase()}
       </Text>
       <View style={{ borderRadius: 14 * k, overflow: 'hidden', backgroundColor: '#1C1C1E' }}>

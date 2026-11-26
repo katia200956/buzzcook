@@ -24,37 +24,11 @@ const plural = (n: number) => (n % 10 === 1 && n % 100 !== 11 ? 'продукт'
 const secOf = (x: FridgeItem): Section => (x.key ? INGREDIENTS[x.key].sec : 'інше');
 
 // "Холодильник" tab: what is at home, and the shopping list counted from the week plan minus the fridge.
+// "Холодильник" tab: what is at home. The shopping list has its own tab now.
 export default function Fridge() {
-  const k = useScale();
-  const t = useTheme();
-  const [tab, setTab] = useState<'fridge' | 'shop'>('fridge');
-  const txt = { fontFamily: font, fontSize: 20 * k, lineHeight: 24 * k, color: t.text };
-
   return (
     <Page>
-      <View style={{ flexDirection: 'row', gap: 8 * k, marginBottom: 18 * k }}>
-        {(
-          [
-            ['fridge', 'холодильник'],
-            ['shop', 'покупки'],
-          ] as const
-        ).map(([id, label]) => (
-          <Pressable
-            key={id}
-            onPress={() => {
-              buzz();
-              setTab(id);
-            }}
-            accessibilityRole="tab"
-            accessibilityState={{ selected: tab === id }}
-          >
-            <Glass radius={100} strong={tab === id} style={{ paddingHorizontal: 16 * k, height: 36 * k, justifyContent: 'center' }}>
-              <Text style={[txt, { opacity: tab === id ? 1 : 0.6 }, tab === id && { fontFamily: fontMedium }]}>{label}</Text>
-            </Glass>
-          </Pressable>
-        ))}
-      </View>
-      {tab === 'fridge' ? <FridgeList /> : <ShopList />}
+      <FridgeList />
     </Page>
   );
 }
@@ -304,7 +278,7 @@ function ItemSheet({ item, onClose }: { item: FridgeItem | 'new' | null; onClose
   );
 }
 
-function ShopList() {
+export function ShopList() {
   const k = useScale();
   const t = useTheme();
   const { shop, makeList, toggleShop, addShop, removeShop, premium, showPaywall } = useStore();

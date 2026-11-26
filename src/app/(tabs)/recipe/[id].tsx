@@ -1,6 +1,8 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { ReactNode, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
+import { SwipeCard } from '../../../components/swipe/SwipeCard';
+import { swipeRecipe } from '../../../data/swipe';
 import { Belt } from '../../../components/Belt';
 import { CostBlock, useCost } from '../../../components/Cost';
 import { Header } from '../../../components/Header';
@@ -26,6 +28,9 @@ export default function RecipeScreen() {
   const [menu, setMenu] = useState(false);
   const { saved, toggleSaved, done, premium, fridge } = useStore();
 
+  // Photo-swipe recipes (syrnyky, avocado toast) have their own card with the equipment choice.
+  const sw = swipeRecipe(id);
+  if (sw) return <SwipeCard r={sw} />;
   if (!r) return null;
   if (heroPhoto(r.id)) return <PhotoRecipe r={r} />;
   const txt = { fontFamily: font, fontSize: 19 * k, lineHeight: 23 * k, color: '#FFFFFF' };

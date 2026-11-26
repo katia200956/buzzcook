@@ -3,6 +3,8 @@ import { Redirect, router, useLocalSearchParams } from 'expo-router';
 import * as Speech from 'expo-speech';
 import { ComponentRef, useEffect, useRef, useState } from 'react';
 import { Animated, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SwipeCook } from '../../components/swipe/SwipeCook';
+import { Equip, swipeRecipe } from '../../data/swipe';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Glass } from '../../components/Glass';
 import { Plate } from '../../components/Plate';
@@ -25,9 +27,13 @@ import { font, fontMedium, ForceDark, useTheme } from '../../theme';
 // for the "етапи готовки" tab.
 // Cooking always runs on the black stage, whatever the app theme is.
 export default function CookScreen() {
+  const { id, mode } = useLocalSearchParams<{ id: string; mode?: string }>();
+  // Photo-swipe recipes: carousel cook mode for the equipment picked on the card.
+  const sw = swipeRecipe(id);
   const { ready, user, guest } = useStore();
   // Opened from a link before signing in: go through the sign-in screen like the tabs do.
   if (ready && !user && !guest) return <Redirect href="/login" />;
+  if (sw) return <SwipeCook r={sw} mode={sw.modes.some((m) => m.key === mode) ? (mode as Equip) : 'pan'} />;
   return (
     <ForceDark.Provider value>
       <Cook />

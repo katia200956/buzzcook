@@ -8,7 +8,7 @@ import { useScale } from '../../components/scale';
 import { Chip, NormCard } from '../../components/ProfileForm';
 import { SavingsCard } from '../../components/Savings';
 import { askReminders } from '../../components/reminders';
-import { uah } from '../../data/prices';
+import { PLACES, uah } from '../../data/prices';
 import { BUDGETS, TIMES } from '../../data/weekplan';
 import { ThemeMode, useStore } from '../../components/store';
 import { ALLERGIES, DIETS } from '../../data/profile';
@@ -47,6 +47,12 @@ export default function Profile() {
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 * k, marginTop: 4 * k }}>
         {TIMES.map(([m, label]) => (
           <Chip key={m} on={profile.maxTime === m} label={label} onPress={() => setProfile({ maxTime: m })} />
+        ))}
+      </View>
+      <Text style={[txt, { fontSize: 18 * k, color: t.textSoft, marginTop: 10 * k }]}>коли не готую, зазвичай їм</Text>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 * k, marginTop: 4 * k }}>
+        {PLACES.map((p) => (
+          <Chip key={p.id} on={profile.eatOut === p.id} label={p.label} onPress={() => setProfile({ eatOut: p.id })} />
         ))}
       </View>
       <View style={{ flexDirection: 'row', marginTop: 10 * k }}>

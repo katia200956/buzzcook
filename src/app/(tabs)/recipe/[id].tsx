@@ -2,6 +2,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { ReactNode, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { Belt } from '../../../components/Belt';
+import { CostBlock, useCost } from '../../../components/Cost';
 import { Header } from '../../../components/Header';
 import { Menu } from '../../../components/Menu';
 import { Plaque } from '../../../components/Plaque';
@@ -48,7 +49,8 @@ export default function RecipeScreen() {
       </View>
 
       {/* v2: the info column sits on dark plaques with white text, a little wider than before. */}
-      <View style={{ position: 'absolute', left: 246 * k, top: 140 * k, width: 144 * k, bottom: 170 * k }}>
+      {/* Starts a little lower than the plate so the savings badge under the menu button stays clear. */}
+      <View style={{ position: 'absolute', left: 246 * k, top: 160 * k, width: 144 * k, bottom: 170 * k }}>
         <Plaque radius={18 * k} style={{ paddingHorizontal: 14 * k, paddingVertical: 10 * k }}>
           <Text style={{ fontFamily: fontMedium, fontSize: 24 * k, lineHeight: 25 * k, color: '#FFFFFF' }}>{r.name}</Text>
           <Text style={{ fontFamily: font, fontSize: 16 * k, color: 'rgba(255,255,255,0.65)', marginTop: 4 * k }}>
@@ -84,6 +86,11 @@ export default function RecipeScreen() {
                 <Text style={{ fontFamily: font, fontSize: 14 * k, lineHeight: 16 * k, color: 'rgba(255,255,255,0.6)' }}>доступно в premium</Text>
               </View>
             )}
+
+            {/* What this dish costs at home against eating out, and "свої ціни". */}
+            <View style={{ marginTop: 14 * k }}>
+              <CostBlock recipe={r.id} color="#FFFFFF" soft="rgba(255,255,255,0.6)" stacked />
+            </View>
 
             <Text style={head}>ІНГРЕДІЄНТИ{atHome ? `  ·  ВДОМА ${atHome} З ${r.ing.length}` : ''}</Text>
             {r.ing.map(([qty, name], i) => {
@@ -178,6 +185,7 @@ function PhotoRecipe({ r }: { r: Recipe }) {
   const progress = done[r.id] ?? 0;
   const isSaved = saved.includes(r.id);
   const back = () => (router.canGoBack() ? router.back() : router.navigate('/'));
+  const cost = useCost(r.id);
 
   const fact = (name: string, children: ReactNode) => (
     <View key={name} style={{ paddingVertical: 7 * k, borderBottomWidth: 1, borderBottomColor: line }}>
@@ -212,6 +220,10 @@ function PhotoRecipe({ r }: { r: Recipe }) {
             {fact('СКЛАДНІСТЬ', <>
               <Text style={value}>{r.diff.toLowerCase()}</Text>
             </>)}
+            {fact('ПОРЦІЯ ВДОМА', <>
+              <Text style={value}>{cost.home} грн</Text>
+              <Text style={[txt, { fontSize: 15 * k, lineHeight: 17 * k, color: sage }]}>{cost.place.at} {cost.out} грн</Text>
+            </>)}
             {fact('ПОРЦІЇ', <>
               <Text style={value}>{r.serv}</Text>
             </>)}
@@ -230,6 +242,8 @@ function PhotoRecipe({ r }: { r: Recipe }) {
 
         <View style={{ paddingHorizontal: 16 * k, marginTop: 14 * k, gap: 6 * k }}>
           <Text style={[txt, { color: soft }]}>{r.desc}</Text>
+          <Text style={[label, { marginTop: 12 * k }]}>СКІЛЬКИ ЦЕ КОШТУЄ</Text>
+          <CostBlock recipe={r.id} color={t.text} soft={soft} />
           {!!r.tools?.length && (
             <>
               <Text style={[label, { marginTop: 12 * k }]}>ОБЛАДНАННЯ</Text>

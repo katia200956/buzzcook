@@ -18,11 +18,40 @@ const PRICE: Record<string, number> = {
   buckwheat: 60, bulgur: 90, lentils: 110, beans: 80, lavash: 18, ricenoodles: 240,
 };
 
+// Where the person eats when they don't cook, and the prices they typed in themselves. The store
+// pushes these in on every change (applyPrices), so every sum below already uses them.
+export type Place = 'delivery' | 'cafe' | 'restaurant';
+export const PLACES: { id: Place; label: string; at: string; instead: string }[] = [
+  { id: 'delivery', label: 'доставка', at: 'у доставці', instead: 'замість доставки' },
+  { id: 'cafe', label: 'кафе', at: 'у кафе', instead: 'замість кафе' },
+  { id: 'restaurant', label: 'ресторан', at: 'у ресторані', instead: 'замість ресторану' },
+];
+export const placeOf = (p: Place) => PLACES.find((x) => x.id === p) ?? PLACES[0];
+
+let place: Place = 'delivery';
+let myIng: Record<string, number> = {};
+let myOut: Record<string, number> = {};
+export function applyPrices(p: Place, ing: Record<string, number>, out: Record<string, number>) {
+  place = p;
+  myIng = ing;
+  myOut = out;
+}
+export const currentPlace = () => placeOf(place);
+
+// Our suggested price for an ingredient (per kg, litre or piece), and the one actually used.
+export const ourPrice = (key: string) => PRICE[key] ?? 0;
+export const priceOf = (key: string) => myIng[key] ?? ourPrice(key);
+export const isMyPrice = (key: string) => myIng[key] !== undefined;
+export const priceUnit = (key: string) => {
+  const u = INGREDIENTS[key]?.unit;
+  return u === 'шт' ? 'грн/шт' : u === 'мл' ? 'грн/л' : 'грн/кг';
+};
+
 export const lineCost = (key: string, n: number) => {
   const ing = INGREDIENTS[key];
   if (!ing) return 0;
   if (ing.unit === 'є') return STAPLE;
-  const p = PRICE[key] ?? 0;
+  const p = priceOf(key);
   return ing.unit === 'шт' ? n * p : (n / 1000) * p;
 };
 
@@ -56,9 +85,19 @@ const MENU: Record<string, number> = {
   peppers: 180, ragout: 160, meatballs: 190, salmonpotato: 380, noodles: 210, chickpeasalad: 180,
 };
 
-export const deliveryPrice = (recipe: string) => (MENU[recipe] ?? 180) + DELIVERY_FEE;
+// One portion where the person usually eats. Delivery: menu price plus the fee share. Café: the
+// menu price plus a 10% tip. Restaurant: about 1.8× a mid-range menu, plus a 10% tip.
+export function ourOutPrice(recipe: string, p: Place = place) {
+  const menu = MENU[recipe] ?? 180;
+  if (p === 'cafe') return Math.round(menu * 1.1);
+  if (p === 'restaurant') return Math.round(menu * 1.8 * 1.1);
+  return menu + DELIVERY_FEE;
+}
+// The same, or the price the person typed in for this dish.
+export const outPrice = (recipe: string) => myOut[recipe] ?? ourOutPrice(recipe);
+export const isMyOut = (recipe: string) => myOut[recipe] !== undefined;
 
-// What one portion saves against ordering it; never negative.
-export const savedPerPortion = (recipe: string) => Math.max(0, deliveryPrice(recipe) - portionCost(recipe));
+// What one portion saves against eating out; never negative.
+export const savedPerPortion = (recipe: string) => Math.max(0, outPrice(recipe) - portionCost(recipe));
 
 export const uah = (n: number) => `${Math.round(n).toLocaleString('uk-UA')} грн`;

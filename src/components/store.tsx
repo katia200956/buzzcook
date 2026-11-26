@@ -5,7 +5,7 @@ import { dailyNorm, emptyProfile, Profile } from '../data/profile';
 import { Pick, rank } from '../data/recommend';
 import { buildList, FridgeItem, guessKey, haveOf, INGREDIENTS, mealsAhead, needOf, ShopItem, slotId, takeOut } from '../data/pantry';
 import type { Food } from '../data/foods';
-import { deliveryPrice, portionCost } from '../data/prices';
+import { applyPrices, outPrice, Place, portionCost } from '../data/prices';
 import { makeWeek, Week } from '../data/weekplan';
 
 export type ThemeMode = 'system' | 'light' | 'dark';
@@ -13,8 +13,9 @@ export type Provider = 'apple' | 'google' | 'email';
 export type Slot = { week: string; day: string; meal: string };
 // One line of the calorie diary. Calories and macros are stored with the entry, so a past day
 // keeps its numbers even if a recipe or product is changed later.
-// One dinner cooked at home instead of ordered: what it cost and what delivery would have cost.
-export type Saving = { at: number; recipe: string; portions: number; home: number; delivery: number };
+// One dinner cooked at home instead of eating out: what it cost and what it would have cost where
+// the person usually eats (the field is still called delivery so older saves keep working).
+export type Saving = { at: number; recipe: string; portions: number; home: number; delivery: number; place?: Place };
 
 export type Entry = {
   id: string;
@@ -52,6 +53,8 @@ type State = {
   skipped: Record<string, number>;
   bought: Record<string, number>;
   savings: Saving[];
+  myPrices: Record<string, number>; // ingredient prices the person typed in, per kg / litre / piece
+  myOut: Record<string, number>; // what one portion of a dish costs them out, typed in
   remind: boolean; // the 17:00 reminder and the Sunday summary
 };
 
@@ -92,16 +95,26 @@ type Store = State & {
   planWeek: () => Week; // the same, written into this week's plan with a fresh shopping list
   setRemind: (on: boolean) => void;
   savedSince: (from: number) => { saved: number; dinners: number };
+  setMyPrice: (key: string, price?: number) => void; // undefined goes back to our price
+  setMyOut: (recipe: string, price?: number) => void;
+  resetMyPrices: (recipe: string, keys: string[]) => void;
 };
 
 const Ctx = createContext<Store | null>(null);
 const KEY = 'buzzcook:v2';
-const initial: State = { saved: [], done: {}, themeMode: 'system', plans: {}, liked: [], premium: false, guest: false, diary: {}, goal: 2000, products: {}, fridge: [], shop: [], cooked: {}, profile: emptyProfile, onboarded: false, cookLog: [], skipped: {}, bought: {}, savings: [], remind: false };
+const initial: State = { saved: [], done: {}, themeMode: 'system', plans: {}, liked: [], premium: false, guest: false, diary: {}, goal: 2000, products: {}, fridge: [], shop: [], cooked: {}, profile: emptyProfile, onboarded: false, cookLog: [], skipped: {}, bought: {}, savings: [], myPrices: {}, myOut: {}, remind: false };
 
 const names: Record<Provider, string> = { apple: 'Apple ID', google: 'Google', email: 'e-mail' };
 const countBought = (bought: Record<string, number>, items: { key?: string }[]) => {
   const next = { ...bought };
   for (const x of items) if (x.key) next[x.key] = (next[x.key] ?? 0) + 1;
+  return next;
+};
+// Sets or (with no price) removes one entry of a price table.
+const without = (m: Record<string, number>, key: string, price?: number) => {
+  const next = { ...m };
+  if (price === undefined) delete next[key];
+  else next[key] = price;
   return next;
 };
 const newId = () => `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
@@ -175,6 +188,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (ready) AsyncStorage.setItem(KEY, JSON.stringify(state)).catch(() => {});
   }, [state, ready]);
+
+  // The price functions read where the person eats and their own prices from here, so every sum
+  // on screen (recipe, week plan, savings) follows them. Same values every time: safe to repeat.
+  applyPrices(state.profile.eatOut, state.myPrices, state.myOut);
 
   const store: Store = {
     ...state,
@@ -268,7 +285,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         const serv = byId(recipe)?.serv ?? 1;
         const slots = open.slice(0, serv >= 2 ? 2 : 1);
         const portions = Math.max(1, slots.length);
-        const saving: Saving = { at: Date.now(), recipe, portions, home: portionCost(recipe) * portions, delivery: deliveryPrice(recipe) * portions };
+        const saving: Saving = { at: Date.now(), recipe, portions, home: portionCost(recipe) * portions, delivery: outPrice(recipe) * portions, place: s.profile.eatOut };
         return {
           ...s,
           fridge: takeOut(s.fridge, recipe),
@@ -313,6 +330,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const list = state.savings.filter((x) => x.at >= from);
       return { saved: list.reduce((a, x) => a + Math.max(0, x.delivery - x.home), 0), dinners: list.reduce((a, x) => a + x.portions, 0) };
     },
+    setMyPrice: (key, price) => setState((s) => ({ ...s, myPrices: without(s.myPrices, key, price) })),
+    setMyOut: (recipe, price) => setState((s) => ({ ...s, myOut: without(s.myOut, recipe, price) })),
+    resetMyPrices: (recipe, keys) =>
+      setState((s) => ({
+        ...s,
+        myOut: without(s.myOut, recipe),
+        myPrices: Object.fromEntries(Object.entries(s.myPrices).filter(([key]) => !keys.includes(key))),
+      })),
   };
 
   return <Ctx.Provider value={store}>{children}</Ctx.Provider>;

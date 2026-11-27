@@ -46,9 +46,10 @@ const HERO_CUT: Record<string, number> = {
   tost: require('../../assets/recipes/tost/cut.png'),
   omlet: require('../../assets/recipes/omlet/cut.png'),
   oatmeal: require('../../assets/recipes/oatmeal/cut.png'),
+  salmonmango: require('../../assets/recipes/salmonmango/cut.png'),
 };
 // Height of each cut-out plate against its width (the photo plates are seen at a slight angle).
-const HERO_ASPECT: Record<string, number> = { pasta: 1, syrnyky: 0.92, tost: 0.93, omlet: 1, oatmeal: 0.98 };
+const HERO_ASPECT: Record<string, number> = { pasta: 1, syrnyky: 0.92, tost: 0.93, omlet: 1, oatmeal: 0.98, salmonmango: 0.97 };
 
 const LEVEL: Record<string, number> = { легко: 1, середньо: 3, складно: 5 };
 

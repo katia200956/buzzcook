@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useState, Fragment } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Equip, SwipeRecipe } from '../../data/swipe';
@@ -55,15 +55,19 @@ export function SwipeCard({ r }: { r: SwipeRecipe }) {
         <Text style={[body, { marginTop: 10 * k }]}>{r.lead}</Text>
 
         <Text style={label}>ЧИМ ГОТУЄШ</Text>
-        <View style={{ flexDirection: 'row', gap: 10 * k }}>
-          {r.modes.map((x) => {
+        {/* All ways of cooking in one strip, split by a slash: tap one to see its steps. */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', borderRadius: 16 * k, borderWidth: 1, borderColor: LINE, padding: 4 * k }}>
+          {r.modes.map((x, i) => {
             const on = x.key === mode;
             return (
-              <Pressable key={x.key} onPress={() => setMode(x.key)} accessibilityRole="button" accessibilityState={{ selected: on }}
-                style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 * k, paddingVertical: 10 * k, paddingHorizontal: 12 * k, borderRadius: 14 * k, borderWidth: 1, borderColor: on ? FG : LINE, backgroundColor: on ? FG : 'transparent' }}>
-                <EquipIcon kind={x.key} fill={on ? INK : MUTED} face={on ? FG : '#2a2a2b'} size={34 * k} />
-                <Text style={{ fontFamily: body700, fontSize: 14 * k, color: on ? INK : MUTED }}>{x.label}</Text>
-              </Pressable>
+              <Fragment key={x.key}>
+                {i > 0 && <Text style={{ fontFamily: body400, fontSize: 26 * k, color: MUTED, marginHorizontal: 4 * k }}>/</Text>}
+                <Pressable onPress={() => setMode(x.key)} accessibilityRole="button" accessibilityState={{ selected: on }}
+                  style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 * k, paddingVertical: 8 * k, paddingHorizontal: 8 * k, borderRadius: 12 * k, backgroundColor: on ? FG : 'transparent' }}>
+                  <EquipIcon kind={x.key} fill={on ? INK : MUTED} face={on ? FG : '#2a2a2b'} size={30 * k} />
+                  <Text style={{ fontFamily: body700, fontSize: 14 * k, color: on ? INK : MUTED }}>{x.label}</Text>
+                </Pressable>
+              </Fragment>
             );
           })}
         </View>

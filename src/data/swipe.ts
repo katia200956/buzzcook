@@ -223,7 +223,7 @@ const tost: SwipeRecipe = {
   frames: {
     bowl1: { src: require('../../assets/recipes/tost/bowl1.webp') },
     bowl2: { src: require('../../assets/recipes/tost/bowl2.webp') },
-    cut: { src: require('../../assets/recipes/tost/cut.webp') },
+    cut: { src: require('../../assets/recipes/tost/cut.png') },
     p0: { src: require('../../assets/recipes/tost/p0.webp'), heat: 0.25 },
     p1: { src: require('../../assets/recipes/tost/p1.webp'), heat: 0.85 },
     plate1: { src: require('../../assets/recipes/tost/plate1.png'), heat: 0.35 },

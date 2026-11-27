@@ -1,3 +1,4 @@
+import { mains } from './swipeMains';
 import { sweet } from './swipeSweet';
 // Generated from the approved web prototypes (artifacts) of the swipe recipes. Edit texts here.
 // Photos have a flat #222222 background, so the screen behind them must be exactly that grey.
@@ -1271,6 +1272,6 @@ const shortribs: SwipeRecipe = {
   ],
 };
 
-const all: Record<string, SwipeRecipe> = { syrnyky, tost, pasta, omlet, oatmeal, salmonmango, eggplanttofu, carrotrings, crepes, shortribs, ...sweet };
+const all: Record<string, SwipeRecipe> = { syrnyky, tost, pasta, omlet, oatmeal, salmonmango, eggplanttofu, carrotrings, crepes, shortribs, ...sweet, ...mains };
 export const swipeRecipe = (id?: string): SwipeRecipe | undefined => (id ? all[id] : undefined);
 export const swipeSteps = (r: SwipeRecipe, mode: Equip): SwipeStep[] => [...r.base, ...(r.byMode[mode] ?? []), ...r.end];

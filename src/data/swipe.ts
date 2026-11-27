@@ -807,7 +807,7 @@ const eggplanttofu: SwipeRecipe = {
   frames: {
     ing: { src: require('../../assets/recipes/eggplanttofu/ing.png') },
     tray: { src: require('../../assets/recipes/eggplanttofu/tray.png') },
-    oven: { src: require('../../assets/recipes/eggplanttofu/oven.png'), glow: true },
+    oven: { src: require('../../assets/recipes/eggplanttofu/oven.png') },
     roasted: { src: require('../../assets/recipes/eggplanttofu/roasted.png'), heat: 0.4 },
     tofu: { src: require('../../assets/recipes/eggplanttofu/tofu.png'), heat: 0.8 },
     aroma: { src: require('../../assets/recipes/eggplanttofu/aroma.png'), heat: 0.7 },
@@ -840,7 +840,6 @@ const eggplanttofu: SwipeRecipe = {
         d: "**Готово, коли** шкірка зморщилась, а баклажан повністю осів і м'який.",
         tip: "Поки баклажани печуться, встигнеш зробити начинку.",
         timer: 3000,
-        dur: 5000,
       },
       {
         f: 'roasted',
@@ -1106,7 +1105,7 @@ const crepes: SwipeRecipe = {
       {
         f: 'pan3',
         t: "Прогрій млинці в соусі",
-        p: "Склади кожен млинець вчетверо трикутником, виклади в соус і полий ним зверху. 1–2 хвилини.",
+        p: "Склади кожен млинець вчетверо трикутником і виклади в соус по колу, кінчиками до центру, щоб вийшло коло на всю сковорідку. Полий соусом зверху, 1–2 хвилини.",
         d: "**Готово, коли** млинці пропитались і блищать.",
         tip: "Не тримай довше: млинці стануть надто м'якими.",
         timer: 90,
@@ -1177,7 +1176,7 @@ const shortribs: SwipeRecipe = {
     sear: { src: require('../../assets/recipes/shortribs/sear.png'), heat: 0.9 },
     aroma: { src: require('../../assets/recipes/shortribs/aroma.png'), heat: 0.7 },
     braise: { src: require('../../assets/recipes/shortribs/braise.png'), heat: 0.5 },
-    oven: { src: require('../../assets/recipes/shortribs/oven.png'), glow: true },
+    oven: { src: require('../../assets/recipes/shortribs/oven.png') },
     rice: { src: require('../../assets/recipes/shortribs/rice.png'), heat: 0.4 },
     onion: { src: require('../../assets/recipes/shortribs/onion.png') },
     broth: { src: require('../../assets/recipes/shortribs/broth.png'), heat: 0.5 },
@@ -1226,7 +1225,6 @@ const shortribs: SwipeRecipe = {
         d: "**Готово, коли** кістка легко виходить, а м'ясо ще тримає форму.",
         tip: "Повільне томління розм'якшує сполучну тканину, і м'ясо стає ніжним.",
         timer: 10800,
-        dur: 5000,
       },
       {
         f: 'rice',

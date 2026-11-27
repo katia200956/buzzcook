@@ -25,7 +25,7 @@ const INK = '#1f1f20';
 export function SwipeCard({ r }: { r: SwipeRecipe }) {
   const k = useScale();
   const insets = useSafeAreaInsets();
-  const [mode, setMode] = useState<Equip>('pan');
+  const [mode, setMode] = useState<Equip>(r.modes[0].key);
   const [open, setOpen] = useState<number | null>(null);
   const m = r.modes.find((x) => x.key === mode)!;
   const back = () => (router.canGoBack() ? router.back() : router.navigate('/'));
@@ -70,7 +70,7 @@ export function SwipeCard({ r }: { r: SwipeRecipe }) {
         {r.ing.map((x) => (
           <View key={x.name} style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 * k, paddingVertical: 9 * k, borderBottomWidth: 1, borderBottomColor: LINE }}>
             <Text style={[body, { color: FG, flex: 1 }]}>{x.name}</Text>
-            <Text style={[body, { color: MUTED, textAlign: 'right', maxWidth: '50%' }]}>{typeof x.qty === 'string' ? x.qty : x.qty[mode] ?? x.qty.pan}</Text>
+            <Text style={[body, { color: MUTED, textAlign: 'right', maxWidth: '50%' }]}>{typeof x.qty === 'string' ? x.qty : x.qty[mode] ?? x.qty.pan ?? Object.values(x.qty)[0]}</Text>
           </View>
         ))}
 

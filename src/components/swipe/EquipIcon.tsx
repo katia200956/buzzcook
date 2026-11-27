@@ -15,6 +15,16 @@ export function EquipIcon({ kind, fill, face, size = 34 }: { kind: Equip; fill: 
       </View>
     );
   }
+  if (kind === 'pot') {
+    return (
+      <View style={{ width: size, height: size }}>
+        {/* small saucepan from the side: body, rim, long handle */}
+        <View style={{ position: 'absolute', left: 3 * u, top: 12 * u, width: 20 * u, height: 16 * u, borderBottomLeftRadius: 5 * u, borderBottomRightRadius: 5 * u, backgroundColor: face, borderWidth: 2.2 * u, borderColor: fill }} />
+        <View style={{ position: 'absolute', left: 1 * u, top: 10 * u, width: 24 * u, height: 3.4 * u, borderRadius: 2 * u, backgroundColor: fill }} />
+        <View style={{ position: 'absolute', left: 23 * u, top: 13 * u, width: 11 * u, height: 3.4 * u, borderRadius: 2 * u, backgroundColor: fill, transform: [{ rotate: '-12deg' }] }} />
+      </View>
+    );
+  }
   if (kind === 'toaster') {
     return (
       <View style={{ width: size, height: size }}>

@@ -1,6 +1,6 @@
 // Generated from the approved web prototypes (artifacts) of the swipe recipes. Edit texts here.
 // Photos have a flat #222222 background, so the screen behind them must be exactly that grey.
-export type Equip = 'pan' | 'oven' | 'toaster';
+export type Equip = 'pan' | 'oven' | 'toaster' | 'pot';
 export type SwipeFrame = { src: number; heat?: number; glow?: boolean };
 export type SwipeStep = { f: string; t: string; p: string; d: string; tip: string; timer?: number; dur?: number; jolt?: boolean };
 export type SwipeRecipe = {
@@ -558,6 +558,101 @@ const omlet: SwipeRecipe = {
   ],
 };
 
-const all: Record<string, SwipeRecipe> = { syrnyky, tost, pasta, omlet };
+// Oatmeal on milk with banana, walnuts and cinnamon, in a small saucepan. Served in a handmade
+// pink-and-teal glazed stoneware bowl: the first recipe in the new ceramic bowls.
+const oatmeal: SwipeRecipe = {
+  id: 'oatmeal',
+  name: "Вівсянка з бананом і горіхами",
+  hero: require('../../assets/recipes/oatmeal/bowl2.png'),
+  portion: "1 порція",
+  price: "≈30 ₴",
+  lead: "Кремова вівсянка на молоці за 10 хвилин. Секрет у дрібці солі і в тому, щоб не відходити від каструльки: каша густіє швидко.",
+  modes: [{ key: 'pot', label: 'Каструлька', time: '10 хв' }],
+  ing: [
+    { name: "Вівсяні пластівці (не швидкі)", qty: "60 г" },
+    { name: "Молоко", qty: "200 мл" },
+    { name: "Банан", qty: "1 шт" },
+    { name: "Волоські горіхи", qty: "15 г" },
+    { name: "Кориця мелена", qty: "щіпка" },
+    { name: "Сіль", qty: "дрібка" },
+  ],
+  warn: [
+    ["Каша пригоріла", "Вогонь був сильний або не помішував. Вари на слабкому вогні і помішуй кожні 30 секунд, особливо біля дна."],
+    ["Молоко втекло", "Молоко піднімається піною за секунди. Не відходь, коли воно гріється, і зменш вогонь, щойно по краях з'явились бульбашки."],
+    ["Каша рідка", "Вона густішає, поки стоїть. Дай їй 1–2 хвилини постояти. Якщо все одно рідко, поварі ще хвилину."],
+    ["Каша прісна", "Бракує солі. Дрібка солі робить молочну кашу солодшою, навіть без цукру."],
+  ],
+  frames: {
+    ing: { src: require('../../assets/recipes/oatmeal/ing.png') },
+    pot1: { src: require('../../assets/recipes/oatmeal/pot1.png'), heat: 0.5 },
+    pot2: { src: require('../../assets/recipes/oatmeal/pot2.png'), heat: 0.5 },
+    pot3: { src: require('../../assets/recipes/oatmeal/pot3.png'), heat: 0.4 },
+    board: { src: require('../../assets/recipes/oatmeal/board.png') },
+    bowl1: { src: require('../../assets/recipes/oatmeal/bowl1.png'), heat: 0.3 },
+    bowl2: { src: require('../../assets/recipes/oatmeal/bowl2.png'), heat: 0.2 },
+  },
+  base: [
+    {
+      f: 'ing',
+      t: "Підготуй продукти",
+      p: "Відміряй 60 г пластівців і 200 мл молока. Банан, горіхи й корицю постав поруч.",
+      d: "**Готово, коли** все під рукою: каша вариться швидко.",
+      tip: "Бери звичайні вівсяні пластівці, не «швидкі»: вони дають кремову кашу з легкими зернятками, а не клейстер.",
+    },
+  ],
+  byMode: {
+    pot: [
+      {
+        f: 'pot1',
+        t: "Нагрій молоко",
+        p: "Влий молоко в невелику каструльку, додай дрібку солі. Середній вогонь.",
+        d: "**Готово, коли** по краях з'явились дрібні бульбашки і пішла пара.",
+        tip: "Не доводь до бурхливого кипіння: молоко за секунду підніметься піною і втече.",
+        timer: 180,
+      },
+      {
+        f: 'pot2',
+        t: "Всип пластівці",
+        p: "Всип пластівці і одразу перемішай. Зменш вогонь до слабкого.",
+        d: "**Готово, коли** всі пластівці в молоці, без сухих грудочок.",
+        tip: "Всипай потроху і мішай: так пластівці не злипнуться в клубок.",
+        jolt: true,
+      },
+      {
+        f: 'pot3',
+        t: "Вари, помішуючи",
+        p: "5 хвилин на слабкому вогні, помішуй ложкою кожні 30 секунд.",
+        d: "**Готово, коли** каша кремова і повільно стікає з ложки.",
+        tip: "Зніми трохи раніше, ніж здається: за хвилину на тарілці каша ще загусне.",
+        timer: 300,
+      },
+    ],
+  },
+  end: [
+    {
+      f: 'board',
+      t: "Наріж банан і горіхи",
+      p: "Поки каша вариться: банан кружальцями, горіхи грубо ножем.",
+      d: "**Готово, коли** банан нарізаний рівними кружальцями.",
+      tip: "Горіхи смачніші, якщо підсушити їх 2 хвилини на сухій сковорідці. Можна й без цього.",
+    },
+    {
+      f: 'bowl1',
+      t: "Переклади в миску",
+      p: "Виклади кашу в миску і розрівняй ложкою.",
+      d: "**Готово, коли** каша лежить рівним шаром.",
+      tip: "Дай каші хвилину постояти: вона стане густішою і не розтечеться під бананом.",
+    },
+    {
+      f: 'bowl2',
+      t: "Банан, горіхи, кориця",
+      p: "Виклади банан віялом, поруч горіхи, і злегка посип корицею.",
+      d: "**Смачного!**",
+      tip: "Кориця і банан роблять кашу солодкою без цукру.",
+    },
+  ],
+};
+
+const all: Record<string, SwipeRecipe> = { syrnyky, tost, pasta, omlet, oatmeal };
 export const swipeRecipe = (id?: string): SwipeRecipe | undefined => (id ? all[id] : undefined);
 export const swipeSteps = (r: SwipeRecipe, mode: Equip): SwipeStep[] => [...r.base, ...(r.byMode[mode] ?? []), ...r.end];

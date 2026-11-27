@@ -33,7 +33,7 @@ export default function CookScreen() {
   const { ready, user, guest } = useStore();
   // Opened from a link before signing in: go through the sign-in screen like the tabs do.
   if (ready && !user && !guest) return <Redirect href="/login" />;
-  if (sw) return <SwipeCook r={sw} mode={sw.modes.some((m) => m.key === mode) ? (mode as Equip) : 'pan'} />;
+  if (sw) return <SwipeCook r={sw} mode={sw.modes.some((m) => m.key === mode) ? (mode as Equip) : sw.modes[0].key} />;
   return (
     <ForceDark.Provider value>
       <Cook />

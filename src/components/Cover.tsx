@@ -61,9 +61,13 @@ const HERO_CUT: Record<string, number> = {
   tuna: require('../../assets/recipes/tuna/cut.png'),
   pita: require('../../assets/recipes/pita/cut.png'),
   alfredo: require('../../assets/recipes/alfredo/cut.png'),
+  tomatopasta: require('../../assets/recipes/tomatopasta/cut.png'),
+  troutbake: require('../../assets/recipes/troutbake/cut.png'),
+  tatin: require('../../assets/recipes/tatin/cut.png'),
+  poppybuns: require('../../assets/recipes/poppybuns/cut.png'),
 };
 // Height of each cut-out plate against its width (the photo plates are seen at a slight angle).
-const HERO_ASPECT: Record<string, number> = { pasta: 1, syrnyky: 0.92, tost: 0.93, omlet: 1, oatmeal: 0.98, salmonmango: 0.97, eggplanttofu: 0.92, carrotrings: 0.93, crepes: 0.95, shortribs: 0.93, syrvanilla: 0.93, syrchoc: 0.92, syrlemon: 0.94, syrpist: 0.94, pankamer: 0.92, pankjapan: 0.93, udon: 0.93, tuna: 0.93, pita: 0.93, alfredo: 0.9 };
+const HERO_ASPECT: Record<string, number> = { pasta: 1, syrnyky: 0.92, tost: 0.93, omlet: 1, oatmeal: 0.98, salmonmango: 0.97, eggplanttofu: 0.92, carrotrings: 0.93, crepes: 0.95, shortribs: 0.93, syrvanilla: 0.93, syrchoc: 0.92, syrlemon: 0.94, syrpist: 0.94, pankamer: 0.92, pankjapan: 0.93, udon: 0.93, tuna: 0.93, pita: 0.93, alfredo: 0.9, tomatopasta: 0.93, troutbake: 0.93, tatin: 0.93, poppybuns: 0.93 };
 
 const LEVEL: Record<string, number> = { легко: 1, середньо: 3, складно: 5 };
 

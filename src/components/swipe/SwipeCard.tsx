@@ -25,9 +25,11 @@ const INK = '#1f1f20';
 export function SwipeCard({ r }: { r: SwipeRecipe }) {
   const k = useScale();
   const insets = useSafeAreaInsets();
-  const [mode, setMode] = useState<Equip>(r.modes[0].key);
+  const [picked, setMode] = useState<Equip>(r.modes[0].key);
   const [open, setOpen] = useState<number | null>(null);
-  const m = r.modes.find((x) => x.key === mode)!;
+  // The screen can be reused for another recipe; fall back to its first way of cooking.
+  const m = r.modes.find((x) => x.key === picked) ?? r.modes[0];
+  const mode = m.key;
   const back = () => (router.canGoBack() ? router.back() : router.navigate('/'));
   const body = { fontFamily: body400, fontSize: 15 * k, lineHeight: 21 * k, color: '#d6d6d4' };
   const label = { fontFamily: body700, fontSize: 11 * k, letterSpacing: 1.2 * k, color: MUTED, marginTop: 18 * k, marginBottom: 6 * k };

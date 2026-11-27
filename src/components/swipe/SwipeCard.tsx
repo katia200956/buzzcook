@@ -64,7 +64,12 @@ export function SwipeCard({ r }: { r: SwipeRecipe }) {
                 {i > 0 && <Text style={{ fontFamily: body400, fontSize: 26 * k, color: MUTED, marginHorizontal: 4 * k }}>/</Text>}
                 <Pressable onPress={() => setMode(x.key)} accessibilityRole="button" accessibilityState={{ selected: on }}
                   style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 * k, paddingVertical: 8 * k, paddingHorizontal: 8 * k, borderRadius: 12 * k, backgroundColor: on ? FG : 'transparent' }}>
-                  <EquipIcon kind={x.key} fill={on ? INK : MUTED} face={on ? FG : '#2a2a2b'} size={30 * k} />
+                  {(x.uses ?? [x.key]).map((u, j) => (
+                    <Fragment key={u}>
+                      {j > 0 && <Text style={{ fontFamily: body400, fontSize: 22 * k, color: on ? INK : MUTED }}>/</Text>}
+                      <EquipIcon kind={u} fill={on ? INK : MUTED} face={on ? FG : '#2a2a2b'} size={30 * k} />
+                    </Fragment>
+                  ))}
                   <Text style={{ fontFamily: body700, fontSize: 14 * k, color: on ? INK : MUTED }}>{x.label}</Text>
                 </Pressable>
               </Fragment>

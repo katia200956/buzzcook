@@ -5,7 +5,13 @@ import { Page } from '../../components/Page';
 import { Plate } from '../../components/Plate';
 import { Lock } from '../../components/Premium';
 import { useScale } from '../../components/scale';
+import { Chip, MealTimeFields, NormCard } from '../../components/ProfileForm';
+import { SavingsCard } from '../../components/Savings';
+import { askReminders } from '../../components/reminders';
+import { PLACES, uah } from '../../data/prices';
+import { BUDGETS, TIMES } from '../../data/weekplan';
 import { ThemeMode, useStore } from '../../components/store';
+import { ALLERGIES, DIETS } from '../../data/profile';
 import { byId } from '../../data';
 import { font, fontMedium, sage, useTheme } from '../../theme';
 
@@ -18,13 +24,50 @@ const themes: [ThemeMode, string][] = [
 export default function Profile() {
   const k = useScale();
   const t = useTheme();
-  const { saved, themeMode, setThemeMode, user, signOut, premium, showPaywall } = useStore();
+  const { saved, themeMode, setThemeMode, user, signOut, premium, showPaywall, profile, setProfile, remind, setRemind } = useStore();
   const txt = { fontFamily: font, fontSize: 20 * k, lineHeight: 24 * k, color: t.text };
   const list = saved.map(byId).filter((r) => !!r);
 
   return (
     <Page>
       <Text style={[txt, { fontFamily: fontMedium, fontSize: 28 * k, lineHeight: 32 * k }]}>профіль</Text>
+
+      <View style={{ marginTop: 16 * k }}>
+        <SavingsCard />
+      </View>
+
+      <Text style={[txt, { opacity: 0.6, marginTop: 20 * k, marginBottom: 8 * k }]}>вечері</Text>
+      <Text style={[txt, { fontSize: 18 * k, color: t.textSoft }]}>бюджет на тиждень</Text>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 * k, marginTop: 4 * k }}>
+        {BUDGETS.map((b) => (
+          <Chip key={b} on={profile.budget === b} label={uah(b)} onPress={() => setProfile({ budget: b })} />
+        ))}
+      </View>
+      <Text style={[txt, { fontSize: 18 * k, color: t.textSoft, marginTop: 10 * k }]}>час на вечерю</Text>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 * k, marginTop: 4 * k }}>
+        {TIMES.map(([m, label]) => (
+          <Chip key={m} on={profile.maxTime === m} label={label} onPress={() => setProfile({ maxTime: m })} />
+        ))}
+      </View>
+      <Text style={[txt, { fontSize: 18 * k, color: t.textSoft, marginTop: 10 * k }]}>коли не готую, зазвичай їм</Text>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 * k, marginTop: 4 * k }}>
+        {PLACES.map((p) => (
+          <Chip key={p.id} on={profile.eatOut === p.id} label={p.label} onPress={() => setProfile({ eatOut: p.id })} />
+        ))}
+      </View>
+
+      <Text style={[txt, { opacity: 0.6, marginTop: 20 * k, marginBottom: 8 * k }]}>нагадування</Text>
+      <View style={{ flexDirection: 'row' }}>
+        <Chip
+          on={remind}
+          label={remind ? 'увімкнено' : 'вимкнено'}
+          onPress={async () => setRemind(remind ? false : await askReminders().catch(() => false))}
+        />
+      </View>
+      <Text style={[txt, { fontSize: 17 * k, color: t.textSoft, marginTop: 6 * k }]}>
+        перед кожною їжею, що готувати; о 17:00, що купити на завтра; у неділю, скільки зекономлено.
+      </Text>
+      <MealTimeFields />
 
       <Text style={[txt, { opacity: 0.6, marginTop: 20 * k, marginBottom: 8 * k }]}>акаунт</Text>
       <Text style={txt}>{user ? `увійшла через ${user.name}` : 'ти ще не увійшла'}</Text>
@@ -41,6 +84,19 @@ export default function Profile() {
         </Glass>
       </Pressable>
 
+      <Text style={[txt, { opacity: 0.6, marginTop: 20 * k }]}>про тебе</Text>
+      <NormCard p={profile} />
+      {(profile.diets.length > 0 || profile.allergies.length > 0) && (
+        <Text style={[txt, { marginTop: 8 * k }]}>
+          {[...DIETS.filter(([d]) => profile.diets.includes(d)).map(([, l]) => l), ...ALLERGIES.filter(([a]) => profile.allergies.includes(a)).map(([, l]) => `без: ${l}`)].join(' · ')}
+        </Text>
+      )}
+      <Pressable onPress={() => router.push('/onboarding?edit=1')} accessibilityRole="button" style={{ alignSelf: 'flex-start', marginTop: 8 * k }}>
+        <Glass radius={100} style={{ paddingHorizontal: 16 * k, height: 34 * k, justifyContent: 'center' }}>
+          <Text style={txt}>змінити дані</Text>
+        </Glass>
+      </Pressable>
+
       <Text style={[txt, { opacity: 0.6, marginTop: 20 * k, marginBottom: 8 * k }]}>premium</Text>
       <Pressable onPress={() => showPaywall(true)} accessibilityRole="button" style={{ flexDirection: 'row', alignItems: 'center', gap: 10 * k }}>
         {premium ? (
@@ -48,7 +104,7 @@ export default function Profile() {
             <Text style={[txt, { color: '#FFFFFF' }]}>увімкнено</Text>
           </View>
         ) : (
-          <Lock size={16} color={t.text} />
+          <Lock still size={16} color={t.text} />
         )}
         <Text style={[txt, { flex: 1 }]}>калорії та аудіо кроків</Text>
       </Pressable>

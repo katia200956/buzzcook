@@ -3,9 +3,11 @@ import { TabBar } from '../../components/TabBar';
 import { useStore } from '../../components/store';
 
 export default function TabsLayout() {
-  const { ready, user, guest } = useStore();
+  const { ready, user, guest, onboarded } = useStore();
   // First launch: sign in (or choose "пізніше") before the app opens.
   if (ready && !user && !guest) return <Redirect href="/login" />;
+  // Then a few questions for the calorie norm and food rules (skippable).
+  if (ready && !onboarded) return <Redirect href="/onboarding" />;
 
   return (
     <Tabs
@@ -17,7 +19,8 @@ export default function TabsLayout() {
       <Tabs.Screen name="process" />
       <Tabs.Screen name="cart" />
       <Tabs.Screen name="profile" />
-      <Tabs.Screen name="recipe/[id]" options={{ href: null }} />
+      {/* Not a tab button: our own TabBar draws only the main tabs. SDK 58 makes href: null routes unreachable, so it stays a plain screen. */}
+      <Tabs.Screen name="recipe/[id]" />
     </Tabs>
   );
 }

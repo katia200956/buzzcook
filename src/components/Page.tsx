@@ -12,12 +12,12 @@ export function Page({ children }: { children: ReactNode }) {
   return (
     <Screen>
       <ScrollView
-        contentContainerStyle={{ paddingTop: 205 * k, paddingBottom: 150 * k, paddingLeft: 78 * k, paddingRight: 40 * k }}
+        contentContainerStyle={{ paddingTop: 166 * k, paddingBottom: 230 * k, paddingLeft: 20 * k, paddingRight: 20 * k }}
         showsVerticalScrollIndicator={false}
       >
         {children}
       </ScrollView>
-      <Header logo={false} onMenu={() => setMenu(true)} />
+      <Header onMenu={() => setMenu(true)} />
       <Menu open={menu} onClose={() => setMenu(false)} />
     </Screen>
   );

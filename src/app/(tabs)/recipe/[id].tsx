@@ -1,141 +1,270 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
-import { Belt } from '../../../components/Belt';
-import { Header } from '../../../components/Header';
-import { Menu } from '../../../components/Menu';
-import { Plaque } from '../../../components/Plaque';
-import { Plate } from '../../../components/Plate';
+import { ReactNode } from 'react';
+import { Pressable, ScrollView, Text, useWindowDimensions, View } from 'react-native';
+import { CoverArt } from '../../../components/Cover';
+import { SwipeCard } from '../../../components/swipe/SwipeCard';
+import { swipeRecipe } from '../../../data/swipe';
+import { CostBlock, useCost } from '../../../components/Cost';
 import { Lock } from '../../../components/Premium';
-import { Screen } from '../../../components/Screen';
 import { useScale } from '../../../components/scale';
 import { useStore } from '../../../components/store';
-import { byId } from '../../../data';
-import { font, fontMedium, sage } from '../../../theme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { PhotoFx } from '../../../components/PhotoFx';
+import { byId, heroPhoto, Recipe } from '../../../data';
+import { fmtQty, haveOf, INGREDIENTS, needsOf } from '../../../data/pantry';
+import { font, fontMedium, sage, useTheme } from '../../../theme';
 
-// Figma "recipe going": the chosen plate on the belt, a tall info card and START.
-// v2: calories and macros up top as tiles, clearer section labels, a solid START.
+// Recipe: the dish cover large, the name with a heart, then calories, cost, ingredients (with what is
+// at home), time and tools, and one "готувати" button. Colours follow the app theme.
 export default function RecipeScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const r = byId(id);
-  const k = useScale();
-  const [menu, setMenu] = useState(false);
-  const { saved, toggleSaved, done, premium } = useStore();
-
+  // Photo-swipe recipes (syrnyky, avocado toast) have their own card with the equipment choice.
+  const sw = swipeRecipe(id);
+  if (sw) return <SwipeCard r={sw} />;
   if (!r) return null;
-  const txt = { fontFamily: font, fontSize: 19 * k, lineHeight: 23 * k, color: '#FFFFFF' };
-  const head = { fontFamily: fontMedium, fontSize: 15 * k, letterSpacing: 1.2 * k, color: 'rgba(255,255,255,0.55)', marginTop: 16 * k, marginBottom: 4 * k };
-  const canCook = !!r.steps?.length;
-  const progress = done[r.id] ?? 0;
-  const back = () => (router.canGoBack() ? router.back() : router.navigate('/'));
+  if (heroPhoto(r.id)) return <PhotoRecipe r={r} />;
+  return <NowPlaying r={r} />;
+}
+
+function NowPlaying({ r }: { r: Recipe }) {
+  const k = useScale();
+  const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  const t = useTheme();
+  const { saved, toggleSaved, done, premium, fridge } = useStore();
+  const white = t.text;
+  const soft = t.textSoft;
+  const line = t.mode === 'dark' ? 'rgba(255,255,255,0.14)' : 'rgba(0,0,0,0.1)';
+  const txt = { fontFamily: font, fontSize: 19 * k, lineHeight: 23 * k, color: white };
+  const head = { fontFamily: fontMedium, fontSize: 15 * k, letterSpacing: 1.2 * k, color: soft, marginTop: 22 * k, marginBottom: 6 * k };
+  const steps = r.steps?.length ?? 0;
+  const canCook = steps > 0;
+  const progress = Math.min(done[r.id] ?? 0, steps);
   const isSaved = saved.includes(r.id);
+  const back = () => (router.canGoBack() ? router.back() : router.navigate('/'));
+  const art = Math.min(width - 56 * k, 360 * k);
+  // What the fridge already covers, per ingredient line (the needs list follows the recipe's order).
+  const home = needsOf(r.id).map(([key, n]) => {
+    const have = haveOf(fridge, key);
+    const unit = INGREDIENTS[key].unit;
+    return { full: unit === 'є' ? have > 0 : have >= n - 0.01, some: have > 0 && unit !== 'є' ? fmtQty(have, unit) : null };
+  });
+  const atHome = home.filter((x) => x.full).length;
 
   return (
-    <Screen>
-      <Belt />
-      <View style={{ position: 'absolute', left: 31 * k, top: 140 * k }}>
-        <Plate recipe={r} size={199 * k} />
-      </View>
+    <View style={{ flex: 1, backgroundColor: t.bg[0] }}>
+      <ScrollView contentContainerStyle={{ paddingTop: insets.top + 6 * k, paddingHorizontal: 28 * k, paddingBottom: 240 * k }} showsVerticalScrollIndicator={false}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Pressable onPress={back} hitSlop={8} accessibilityRole="button" accessibilityLabel="Назад"
+            style={{ width: 44 * k, height: 44 * k, borderRadius: 100, borderWidth: 1, borderColor: line, alignItems: 'center', justifyContent: 'center' }}>
+            <Text style={{ fontFamily: fontMedium, fontSize: 30 * k, lineHeight: 32 * k, color: white, marginTop: -3 * k }}>←</Text>
+          </Pressable>
+          <Text style={{ fontFamily: font, fontSize: 17 * k, color: soft, minWidth: 30 * k, textAlign: 'right' }}>{r.cat.toLowerCase()}</Text>
+        </View>
 
-      {/* v2: the info column sits on dark plaques with white text, a little wider than before. */}
-      <View style={{ position: 'absolute', left: 246 * k, top: 140 * k, width: 144 * k, bottom: 170 * k }}>
-        <Plaque radius={18 * k} style={{ paddingHorizontal: 14 * k, paddingVertical: 10 * k }}>
-          <Text style={{ fontFamily: fontMedium, fontSize: 24 * k, lineHeight: 25 * k, color: '#FFFFFF' }}>{r.name}</Text>
-          <Text style={{ fontFamily: font, fontSize: 16 * k, color: 'rgba(255,255,255,0.65)', marginTop: 4 * k }}>
-            {r.total} хв · {r.diff.toLowerCase()}
-          </Text>
-        </Plaque>
+        <View style={{ alignItems: 'center', marginTop: 18 * k, boxShadow: '0px 18px 40px rgba(0,0,0,0.55)' } as any}>
+          <CoverArt recipe={r} size={art} radius={12 * k} />
+        </View>
 
-        <Plaque radius={18 * k} style={{ marginTop: 10 * k, flex: 1 }}>
-          <ScrollView contentContainerStyle={{ paddingHorizontal: 14 * k, paddingTop: 12 * k, paddingBottom: 18 * k }} showsVerticalScrollIndicator={false}>
-            {/* Calories and macros as small tiles, so the numbers read at a glance. Premium only. */}
-            {premium ? (
-              <>
-                <Text style={[txt, { fontFamily: fontMedium, fontSize: 30 * k, lineHeight: 32 * k }]}>
-                  {r.kcal}
-                  <Text style={{ fontFamily: font, fontSize: 17 * k, color: 'rgba(255,255,255,0.65)' }}> ккал</Text>
-                </Text>
-                <View style={{ flexDirection: 'row', gap: 5 * k, marginTop: 8 * k }}>
-                  {[
-                    ['білки', r.p],
-                    ['вуглев.', r.c],
-                    ['жири', r.f],
-                  ].map(([label, g]) => (
-                    <View key={label} style={{ flex: 1, borderRadius: 10 * k, paddingVertical: 5 * k, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.1)' }}>
-                      <Text style={[txt, { fontFamily: fontMedium, fontSize: 18 * k, lineHeight: 20 * k }]}>{g}</Text>
-                      <Text style={{ fontFamily: font, fontSize: 13 * k, color: 'rgba(255,255,255,0.6)' }}>{label}</Text>
-                    </View>
-                  ))}
-                </View>
-              </>
-            ) : (
-              <View style={{ borderRadius: 12 * k, padding: 10 * k, backgroundColor: 'rgba(255,255,255,0.08)', gap: 4 * k }}>
-                <Lock label="калорії і бжу" size={15} color="#FFFFFF" />
-                <Text style={{ fontFamily: font, fontSize: 14 * k, lineHeight: 16 * k, color: 'rgba(255,255,255,0.6)' }}>доступно в premium</Text>
-              </View>
-            )}
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 24 * k, gap: 12 * k }}>
+          <View style={{ flex: 1 }}>
+            <Text numberOfLines={2} style={{ fontFamily: fontMedium, fontSize: 30 * k, lineHeight: 32 * k, color: white }}>{r.name}</Text>
+            <Text style={{ fontFamily: font, fontSize: 19 * k, color: soft }}>
+              {r.total} хв · {r.diff.toLowerCase()} · {r.serv} порц.
+            </Text>
+          </View>
+          <Pressable onPress={() => toggleSaved(r.id)} hitSlop={10} accessibilityRole="button" accessibilityLabel={isSaved ? 'Прибрати зі збережених' : 'Зберегти рецепт'}
+            style={{ width: 36 * k, height: 36 * k, borderRadius: 100, borderWidth: 1, borderColor: line, alignItems: 'center', justifyContent: 'center' }}>
+            <Text style={{ fontSize: 18 * k, color: white }}>{isSaved ? '♥' : '♡'}</Text>
+          </Pressable>
+        </View>
 
-            <Text style={head}>ІНГРЕДІЄНТИ</Text>
-            {r.ing.map(([qty, name], i) => (
-              <View key={i} style={{ flexDirection: 'row', gap: 6 * k, marginBottom: 3 * k }}>
-                <View style={{ width: 4 * k, height: 4 * k, borderRadius: 2 * k, marginTop: 9 * k, backgroundColor: sage, transform: [{ scale: 1.4 }] }} />
-                <Text style={[txt, { flex: 1 }]}>
-                  {qty ? <Text style={{ fontFamily: fontMedium }}>{qty} </Text> : null}
-                  {name}
-                </Text>
+        <Text style={head}>НА ПОРЦІЮ</Text>
+        {premium ? (
+          <View style={{ flexDirection: 'row', gap: 6 * k }}>
+            {[
+              ['ккал', r.kcal],
+              ['білки', r.p],
+              ['вуглев.', r.c],
+              ['жири', r.f],
+            ].map(([label, g]) => (
+              <View key={label} style={{ flex: 1, borderRadius: 12 * k, paddingVertical: 8 * k, alignItems: 'center', backgroundColor: t.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }}>
+                <Text style={[txt, { fontFamily: fontMedium, fontSize: 22 * k, lineHeight: 24 * k }]}>{g}</Text>
+                <Text style={{ fontFamily: font, fontSize: 14 * k, color: soft }}>{label}</Text>
               </View>
             ))}
-            <Text style={head}>ЧАС</Text>
-            <Text style={txt}>
-              {r.prep} хв підготовка{'\n'}
-              {r.cook} хв готування
-            </Text>
-            {!!r.tools?.length && (
-              <>
-                <Text style={head}>ІНСТРУМЕНТИ</Text>
-                <Text style={txt}>{r.tools.join(', ')}</Text>
-              </>
-            )}
-            <Pressable
-              onPress={() => toggleSaved(r.id)}
-              accessibilityLabel={isSaved ? 'Прибрати зі збережених' : 'Зберегти рецепт'}
-              style={{ marginTop: 16 * k, alignSelf: 'flex-start', borderRadius: 100, paddingHorizontal: 12 * k, paddingVertical: 4 * k, borderWidth: 1, borderColor: 'rgba(255,255,255,0.35)', backgroundColor: isSaved ? 'rgba(255,255,255,0.15)' : 'transparent' }}
-            >
-              <Text style={txt}>{isSaved ? '♥ збережено' : '♡ зберегти'}</Text>
-            </Pressable>
-          </ScrollView>
-        </Plaque>
-      </View>
+          </View>
+        ) : (
+          <Lock label="калорії і бжу в premium" size={15} color={white} />
+        )}
 
-      {/* v2: START is a solid sage pill, the one clear action on the screen. */}
+        <View style={{ marginTop: 18 * k }}>
+          <CostBlock recipe={r.id} color={white} soft={soft} />
+        </View>
+
+        <Text style={head}>ІНГРЕДІЄНТИ{atHome ? `  ·  ВДОМА ${atHome} З ${r.ing.length}` : ''}</Text>
+        {r.ing.map(([qty, name], i) => {
+          const h = home[i];
+          return (
+            <View key={i} style={{ flexDirection: 'row', gap: 10 * k, paddingVertical: 7 * k, borderBottomWidth: 1, borderBottomColor: line }} accessibilityLabel={h?.full ? `${qty} ${name}, є вдома` : undefined}>
+              <Text style={[txt, { width: 16 * k, color: h?.full ? white : soft }]}>{h?.full ? '✓' : '·'}</Text>
+              <Text style={[txt, { flex: 1 }, h?.full && { opacity: 0.6 }]}>
+                {name}
+                {!h?.full && h?.some ? <Text style={{ color: soft }}> · вдома {h.some}</Text> : null}
+              </Text>
+              <Text style={[txt, { fontFamily: fontMedium }]}>{qty}</Text>
+            </View>
+          );
+        })}
+
+        <Text style={head}>ЧАС</Text>
+        <Text style={txt}>
+          {r.prep} хв підготовка · {r.cook} хв готування
+        </Text>
+        {!!r.tools?.length && (
+          <>
+            <Text style={head}>ІНСТРУМЕНТИ</Text>
+            <Text style={txt}>{r.tools.join(', ')}</Text>
+          </>
+        )}
+        {!!r.desc && (
+          <>
+            <Text style={head}>ПРО СТРАВУ</Text>
+            <Text style={[txt, { color: soft }]}>{r.desc}</Text>
+          </>
+        )}
+      </ScrollView>
+
       <Pressable
         onPress={() => canCook && router.push(`/cook/${r.id}`)}
         disabled={!canCook}
+        accessibilityRole="button"
         accessibilityLabel={canCook ? 'Почати готувати' : 'Покроковий режим готується'}
-        style={({ pressed }) => ({ position: 'absolute', left: 50 * k, bottom: 102 * k, opacity: canCook ? 1 : 0.5, transform: [{ scale: pressed ? 0.96 : 1 }] })}
+        style={({ pressed }) => ({ position: 'absolute', alignSelf: 'center', bottom: 104 * k, opacity: canCook ? 1 : 0.5, transform: [{ scale: pressed ? 0.96 : 1 }] })}
       >
-        <View
-          style={{
-            minWidth: 160 * k,
-            height: 56 * k,
-            paddingHorizontal: 24 * k,
-            borderRadius: 100,
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: canCook ? sage : 'rgba(24,24,27,0.7)',
-            borderWidth: 1,
-            borderColor: 'rgba(255,255,255,0.3)',
-            boxShadow: '0px 10px 24px rgba(0,0,0,0.4)',
-          }}
-        >
-          <Text style={{ fontFamily: fontMedium, fontSize: 38 * k, lineHeight: 46 * k, color: '#FFFFFF' }}>
-            {canCook ? (progress > 0 && progress < r.steps!.length ? 'далі' : 'старт') : 'скоро'}
+        <View style={{ minWidth: 200 * k, height: 54 * k, paddingHorizontal: 26 * k, borderRadius: 100, alignItems: 'center', justifyContent: 'center', backgroundColor: sage, borderWidth: 1, borderColor: 'rgba(255,255,255,0.25)', boxShadow: '0px 10px 24px rgba(0,0,0,0.25)' }}>
+          <Text style={{ fontFamily: fontMedium, fontSize: 32 * k, lineHeight: 38 * k, color: '#FFFFFF' }}>
+            {canCook ? (progress > 0 && progress < steps ? 'далі' : 'готувати') : 'скоро'}
           </Text>
         </View>
       </Pressable>
+    </View>
+  );
+}
 
-      <Header logo={false} onLogo={back} onMenu={() => setMenu(true)} />
-      <Menu open={menu} onClose={() => setMenu(false)} />
-    </Screen>
+// Photo recipes (syrnyky first): no belt and no gradient. The dish photo has no background, so it
+// sits straight on the app's own white or black. Back arrow and the dish name on top, the living
+// photo on the left, the facts on the right, ingredients below, and one "готувати" button.
+function PhotoRecipe({ r }: { r: Recipe }) {
+  const k = useScale();
+  const t = useTheme();
+  const insets = useSafeAreaInsets();
+  const { saved, toggleSaved, done, premium } = useStore();
+  const hero = heroPhoto(r.id)!;
+  const dark = t.mode === 'dark';
+  const bg = dark ? '#000000' : '#FFFFFF';
+  const soft = dark ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.5)';
+  const line = dark ? 'rgba(255,255,255,0.14)' : 'rgba(0,0,0,0.1)';
+  const txt = { fontFamily: font, fontSize: 19 * k, lineHeight: 22 * k, color: t.text };
+  const label = { fontFamily: fontMedium, fontSize: 13 * k, letterSpacing: 1.2 * k, color: soft };
+  const value = { fontFamily: fontMedium, fontSize: 24 * k, lineHeight: 26 * k, color: t.text };
+  const steps = r.steps?.length ?? 0;
+  const progress = done[r.id] ?? 0;
+  const isSaved = saved.includes(r.id);
+  const back = () => (router.canGoBack() ? router.back() : router.navigate('/'));
+  const cost = useCost(r.id);
+
+  const fact = (name: string, children: ReactNode) => (
+    <View key={name} style={{ paddingVertical: 7 * k, borderBottomWidth: 1, borderBottomColor: line }}>
+      <Text style={label}>{name}</Text>
+      {children}
+    </View>
+  );
+
+  return (
+    <View style={{ flex: 1, backgroundColor: bg }}>
+      <View style={{ paddingTop: insets.top + 8 * k, paddingHorizontal: 16 * k, flexDirection: 'row', alignItems: 'center', gap: 12 * k }}>
+        <Pressable onPress={back} accessibilityLabel="Назад" hitSlop={8}
+          style={{ width: 44 * k, height: 44 * k, borderRadius: 100, borderWidth: 1, borderColor: line, alignItems: 'center', justifyContent: 'center' }}>
+          <Text style={{ fontFamily: fontMedium, fontSize: 30 * k, lineHeight: 32 * k, color: t.text, marginTop: -3 * k }}>←</Text>
+        </Pressable>
+        <Text numberOfLines={2} style={{ flex: 1, fontFamily: fontMedium, fontSize: 26 * k, lineHeight: 27 * k, color: t.text }}>{r.name}</Text>
+        <Pressable onPress={() => toggleSaved(r.id)} hitSlop={8} accessibilityLabel={isSaved ? 'Прибрати зі збережених' : 'Зберегти рецепт'}>
+          <Text style={{ fontFamily: font, fontSize: 30 * k, color: t.text }}>{isSaved ? '♥' : '♡'}</Text>
+        </Pressable>
+      </View>
+
+      <ScrollView contentContainerStyle={{ paddingBottom: 200 * k }} showsVerticalScrollIndicator={false}>
+        <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginTop: 14 * k }}>
+          <View style={{ marginLeft: -22 * k, marginTop: 6 * k }}>
+            <PhotoFx step={hero} width={224 * k} />
+          </View>
+          <View style={{ flex: 1, paddingLeft: 10 * k, paddingRight: 16 * k }}>
+            {fact('ЧАС', <>
+              <Text style={value}>{r.total} хв</Text>
+              <Text style={[txt, { fontSize: 15 * k, lineHeight: 17 * k, color: soft }]}>{r.prep} підготовка · {r.cook} смаження</Text>
+            </>)}
+            {fact('СКЛАДНІСТЬ', <>
+              <Text style={value}>{r.diff.toLowerCase()}</Text>
+            </>)}
+            {fact('ПОРЦІЯ ВДОМА', <>
+              <Text style={value}>{cost.home} грн</Text>
+              <Text style={[txt, { fontSize: 15 * k, lineHeight: 17 * k, color: soft }]}>{cost.place.at} {cost.out} грн</Text>
+            </>)}
+            {fact('ПОРЦІЇ', <>
+              <Text style={value}>{r.serv}</Text>
+            </>)}
+            {fact('НА ПОРЦІЮ', <>
+              {premium ? (
+                <>
+                  <Text style={value}>{r.kcal} ккал</Text>
+                  <Text style={[txt, { fontSize: 15 * k, lineHeight: 17 * k, color: soft }]}>б {r.p} · ж {r.f} · в {r.c}</Text>
+                </>
+              ) : (
+                <Lock label="калорії і бжу" size={14} color={soft} />
+              )}
+            </>)}
+          </View>
+        </View>
+
+        <View style={{ paddingHorizontal: 16 * k, marginTop: 14 * k, gap: 6 * k }}>
+          <Text style={[txt, { color: soft }]}>{r.desc}</Text>
+          <Text style={[label, { marginTop: 12 * k }]}>СКІЛЬКИ ЦЕ КОШТУЄ</Text>
+          <CostBlock recipe={r.id} color={t.text} soft={soft} />
+          {!!r.tools?.length && (
+            <>
+              <Text style={[label, { marginTop: 12 * k }]}>ОБЛАДНАННЯ</Text>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 * k }}>
+                {r.tools.map((x) => (
+                  <View key={x} style={{ borderRadius: 100, borderWidth: 1, borderColor: line, paddingHorizontal: 12 * k, paddingVertical: 3 * k }}>
+                    <Text style={txt}>{x}</Text>
+                  </View>
+                ))}
+              </View>
+            </>
+          )}
+          <Text style={[label, { marginTop: 12 * k }]}>ІНГРЕДІЄНТИ</Text>
+          {r.ing.map(([qty, name], i) => (
+            <View key={i} style={{ flexDirection: 'row', paddingVertical: 6 * k, borderBottomWidth: 1, borderBottomColor: line }}>
+              <Text style={[txt, { width: 90 * k, fontFamily: fontMedium }]}>{qty}</Text>
+              <Text style={[txt, { flex: 1 }]}>{name}</Text>
+            </View>
+          ))}
+        </View>
+      </ScrollView>
+
+      <Pressable
+        onPress={() => steps && router.push(`/cook/${r.id}`)}
+        accessibilityLabel="Почати готувати"
+        style={({ pressed }) => ({ position: 'absolute', alignSelf: 'center', bottom: 104 * k, transform: [{ scale: pressed ? 0.96 : 1 }] })}
+      >
+        <View style={{ minWidth: 200 * k, height: 54 * k, paddingHorizontal: 26 * k, borderRadius: 100, alignItems: 'center', justifyContent: 'center', backgroundColor: sage, boxShadow: '0px 10px 24px rgba(0,0,0,0.25)' }}>
+          <Text style={{ fontFamily: fontMedium, fontSize: 32 * k, lineHeight: 38 * k, color: '#FFFFFF' }}>
+            {progress > 0 && progress < steps ? 'далі' : 'готувати'}
+          </Text>
+        </View>
+      </Pressable>
+    </View>
   );
 }

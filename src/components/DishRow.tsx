@@ -15,7 +15,7 @@ const LEVELS: Record<string, number> = { легко: 1, середньо: 2, с�
 // One dish: the plate rides the belt on the left and a frosted nameplate sits to its right,
 // where the Figma frame has its cards (Apple-style dark material: blur, hairline rim, soft
 // shadow). Shows the name, minutes, difficulty and calories.
-export function DishRow({ recipe }: { recipe: Recipe }) {
+export function DishRow({ recipe, note }: { recipe: Recipe; note?: string }) {
   const k = useScale();
   const level = LEVELS[recipe.diff.toLowerCase()] ?? 1;
   const { premium } = useStore();
@@ -59,6 +59,12 @@ export function DishRow({ recipe }: { recipe: Recipe }) {
           <View style={{ marginTop: 4 * k }}>
             {premium ? <Text style={[s.kcal, { fontSize: 16 * k }]}>{recipe.kcal} ккал</Text> : <Lock label="ккал" size={13} color="rgba(255,255,255,0.6)" />}
           </View>
+          {/* Why this dish is up here: what the person buys, cooks, has at home. */}
+          {note && (
+            <Text style={[s.note, { fontSize: 15 * k, lineHeight: 16 * k, marginTop: 4 * k }]} numberOfLines={2}>
+              {note}
+            </Text>
+          )}
         </View>
       </Plaque>
     </Pressable>
@@ -71,6 +77,7 @@ const s = StyleSheet.create({
   chip: { flexDirection: 'row', alignItems: 'center' },
   metaT: { fontFamily: font, color: 'rgba(255,255,255,0.85)' },
   kcal: { fontFamily: font, color: 'rgba(255,255,255,0.6)' },
+  note: { fontFamily: font, color: '#B9CC98' },
   dot: { borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.4)' },
   clock: { borderWidth: 1.4, borderColor: 'rgba(255,255,255,0.72)' },
   hand: { position: 'absolute', width: 1.4, backgroundColor: 'rgba(255,255,255,0.72)' },

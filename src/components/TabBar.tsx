@@ -11,11 +11,11 @@ import { useScale } from './scale';
 const icons: Record<string, number> = {
   index: require('../../assets/figma/home.svg'),
   plan: require('../../assets/icons/table.svg'),
-  process: require('../../assets/figma/clipboard.svg'),
-  cart: require('../../assets/figma/cart.svg'),
+  process: require('../../assets/figma/cart.svg'),
+  cart: require('../../assets/icons/fridge.svg'),
   profile: require('../../assets/figma/user.svg'),
 };
-const labels: Record<string, string> = { index: 'стрічка', plan: 'план', process: 'етапи', cart: 'покупки', profile: 'профіль' };
+const labels: Record<string, string> = { index: 'головна', plan: 'план', process: 'покупки', cart: 'холодильник', profile: 'профіль' };
 const MAIN = ['index', 'plan', 'process', 'cart'];
 
 type TabBarProps = Parameters<NonNullable<ComponentProps<typeof Tabs>['tabBar']>>[0];
@@ -23,7 +23,7 @@ type TabBarProps = Parameters<NonNullable<ComponentProps<typeof Tabs>['tabBar']>
 // Tab bar in the Apple Music layout that the Figma bar already hints at: a glass capsule
 // with the main tabs (icon over label, a soft pill slides under the active one) and a
 // separate round glass button for the profile, like Apple Music's search bubble.
-export function TabBar({ state, navigation }: TabBarProps) {
+export function TabBar({ state, emitter, navigateToTab }: TabBarProps) {
   const k = useScale();
   const insets = useSafeAreaInsets();
   const focused = state.routes[state.index]?.name;
@@ -40,8 +40,8 @@ export function TabBar({ state, navigation }: TabBarProps) {
 
   const press = (name: string) => {
     const route = routeOf(name);
-    const e = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
-    if (!e.defaultPrevented && focused !== name) navigation.navigate(name);
+    const e = emitter.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
+    if (!e.defaultPrevented && focused !== name) navigateToTab(route.key);
   };
   const tint = '#FFFFFF';
 
@@ -50,8 +50,8 @@ export function TabBar({ state, navigation }: TabBarProps) {
       pointerEvents="box-none"
       style={{ position: 'absolute', left: 0, right: 0, bottom: Math.max(insets.bottom - 4 * k, 18 * k), alignItems: 'center' }}
     >
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 * k }}>
-        <Glass radius={100} style={{ width: barW, height: 62 * k, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 6 * k }}>
+      <View role="tablist" style={{ flexDirection: 'row', alignItems: 'center', gap: 10 * k }}>
+        <Glass ink radius={100} style={{ width: barW, height: 62 * k, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 6 * k }}>
           {MAIN.includes(active) && (
             <Animated.View
               pointerEvents="none"
@@ -88,7 +88,7 @@ export function TabBar({ state, navigation }: TabBarProps) {
         </Glass>
 
         <Pressable accessibilityRole="tab" accessibilityState={{ selected: active === 'profile' }} accessibilityLabel={labels.profile} onPress={() => press('profile')}>
-          <Glass radius={100} strong={active === 'profile'} style={{ width: 62 * k, height: 62 * k, alignItems: 'center', justifyContent: 'center' }}>
+          <Glass ink radius={100} strong={active === 'profile'} style={{ width: 62 * k, height: 62 * k, alignItems: 'center', justifyContent: 'center' }}>
             <Image source={icons.profile} style={{ width: 24 * k, height: 24 * k, opacity: active === 'profile' ? 1 : 0.55 }} />
           </Glass>
         </Pressable>

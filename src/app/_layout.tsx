@@ -43,6 +43,7 @@ function Root() {
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="cook/[id]" options={{ presentation: 'fullScreenModal', animation: 'slide_from_bottom' }} />
         <Stack.Screen name="diary" />
+        <Stack.Screen name="map" />
         <Stack.Screen name="login" options={{ animation: 'fade', gestureEnabled: false }} />
         <Stack.Screen name="onboarding" options={{ animation: 'fade' }} />
       </Stack>

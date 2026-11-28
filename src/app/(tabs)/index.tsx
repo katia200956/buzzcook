@@ -86,6 +86,10 @@ export default function Home() {
                 ))}
               </Shelf>
             )}
+            <Pressable onPress={() => router.push('/map')} accessibilityRole="button" style={({ pressed }) => ({ marginTop: 26 * k, marginHorizontal: 20 * k, padding: 16 * k, borderRadius: 14 * k, backgroundColor: shelf, opacity: pressed ? 0.7 : 1 })}>
+              <Text style={{ fontFamily: fontMedium, fontSize: 24 * k, lineHeight: 26 * k, color: '#FFFFFF' }}>карта поруч ›</Text>
+              <Text style={{ fontFamily: font, fontSize: 16 * k, color: 'rgba(255,255,255,0.6)' }}>1300 закладів Києва й Львова з меню і цінами, плюс АТБ, Varus, METRO</Text>
+            </Pressable>
             {!!fromHome.length && (
               <Shelf title="з того, що вдома" sub="більшість продуктів уже є">
                 {fromHome.map(({ r, have, all }) => (

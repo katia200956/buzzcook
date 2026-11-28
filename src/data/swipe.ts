@@ -1,3 +1,4 @@
+import { ovens } from './swipeOven';
 import { bakes } from './swipeBake';
 import { mains } from './swipeMains';
 import { sweet } from './swipeSweet';
@@ -1273,6 +1274,6 @@ const shortribs: SwipeRecipe = {
   ],
 };
 
-const all: Record<string, SwipeRecipe> = { syrnyky, tost, pasta, omlet, oatmeal, salmonmango, eggplanttofu, carrotrings, crepes, shortribs, ...sweet, ...mains, ...bakes };
+const all: Record<string, SwipeRecipe> = { syrnyky, tost, pasta, omlet, oatmeal, salmonmango, eggplanttofu, carrotrings, crepes, shortribs, ...sweet, ...mains, ...bakes, ...ovens };
 export const swipeRecipe = (id?: string): SwipeRecipe | undefined => (id ? all[id] : undefined);
 export const swipeSteps = (r: SwipeRecipe, mode: Equip): SwipeStep[] => [...r.base, ...(r.byMode[mode] ?? []), ...r.end];

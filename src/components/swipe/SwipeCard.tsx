@@ -1,4 +1,5 @@
 import { Image } from 'expo-image';
+import { TOOLS } from '../../data/tools';
 import { router } from 'expo-router';
 import { useState, Fragment } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
@@ -84,6 +85,17 @@ export function SwipeCard({ r }: { r: SwipeRecipe }) {
             <Text style={[body, { color: MUTED, textAlign: 'right', maxWidth: '50%' }]}>{typeof x.qty === 'string' ? x.qty : x.qty[mode] ?? x.qty.pan ?? Object.values(x.qty)[0]}</Text>
           </View>
         ))}
+
+        {!!TOOLS[r.id]?.length && (
+          <>
+            <Text style={label}>ОБЛАДНАННЯ</Text>
+            {TOOLS[r.id].map((x) => (
+              <View key={x} style={{ paddingVertical: 9 * k, borderBottomWidth: 1, borderBottomColor: LINE }}>
+                <Text style={[body, { color: FG }]}>{x}</Text>
+              </View>
+            ))}
+          </>
+        )}
 
         <Text style={label}>ЩО МОЖЕ ПІТИ НЕ ТАК</Text>
         {r.warn.map(([q, a], i) => (
